@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { PROJECTS as ALL_PROJECTS } from "./[slug]/projectsData";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,98 +22,16 @@ interface Project {
 
 const CATEGORIES = [
   "Tutti",
-  "Categoria Uno",
-  "Categoria Due",
-  "Categoria Tre",
-  "Categoria Quattro",
+  ...Array.from(new Set(ALL_PROJECTS.map((p) => p.category))),
 ];
 
-const PROJECTS: Project[] = [
-  {
-    client: "NOME DEL CLIENTE",
-    tags: ["BRAND IDENTITY", "COMUNICAZIONE", "WEB DEVELOPMENT"],
-    image: "/images/projects/Rectangle 24.png",
-    category: "Categoria Uno",
-    slug: "progetto-uno",
-  },
-  {
-    client: "NOME DEL CLIENTE",
-    tags: ["BRAND IDENTITY", "COMUNICAZIONE", "WEB DEVELOPMENT"],
-    image: "/images/projects/Rectangle 27.png",
-    category: "Categoria Due",
-    slug: "progetto-due",
-  },
-  {
-    client: "NOME DEL CLIENTE",
-    tags: ["BRAND IDENTITY", "COMUNICAZIONE", "WEB DEVELOPMENT"],
-    image: "/images/projects/Rectangle 24.png",
-    category: "Categoria Uno",
-    slug: "progetto-tre",
-  },
-  {
-    client: "NOME DEL CLIENTE",
-    tags: ["BRAND IDENTITY", "COMUNICAZIONE", "WEB DEVELOPMENT"],
-    image: "/images/projects/Rectangle 27.png",
-    category: "Categoria Tre",
-    slug: "progetto-uno",
-  },
-  {
-    client: "NOME DEL CLIENTE",
-    tags: ["BRAND IDENTITY", "COMUNICAZIONE"],
-    image: "/images/projects/Rectangle 24.png",
-    category: "Categoria Due",
-    slug: "progetto-due",
-  },
-  {
-    client: "NOME DEL CLIENTE",
-    tags: ["BRAND IDENTITY", "COMUNICAZIONE"],
-    image: "/images/projects/Rectangle 27.png",
-    category: "Categoria Quattro",
-    slug: "progetto-tre",
-  },
-  {
-    client: "NOME DEL CLIENTE",
-    tags: ["BRAND IDENTITY", "COMUNICAZIONE", "WEB DEVELOPMENT"],
-    image: "/images/projects/Rectangle 24.png",
-    category: "Categoria Tre",
-    slug: "progetto-uno",
-  },
-  {
-    client: "NOME DEL CLIENTE",
-    tags: ["BRAND IDENTITY", "COMUNICAZIONE", "WEB DEVELOPMENT"],
-    image: "/images/projects/Rectangle 27.png",
-    category: "Categoria Quattro",
-    slug: "progetto-due",
-  },
-  {
-    client: "NOME DEL CLIENTE",
-    tags: ["COMUNICAZIONE", "WEB DEVELOPMENT"],
-    image: "/images/projects/Rectangle 24.png",
-    category: "Categoria Uno",
-    slug: "progetto-tre",
-  },
-  {
-    client: "NOME DEL CLIENTE",
-    tags: ["BRAND IDENTITY", "COMUNICAZIONE"],
-    image: "/images/projects/Rectangle 27.png",
-    category: "Categoria Due",
-    slug: "progetto-uno",
-  },
-  {
-    client: "NOME DEL CLIENTE",
-    tags: ["BRAND IDENTITY", "WEB DEVELOPMENT"],
-    image: "/images/projects/Rectangle 24.png",
-    category: "Categoria Tre",
-    slug: "progetto-due",
-  },
-  {
-    client: "NOME DEL CLIENTE",
-    tags: ["BRAND IDENTITY", "COMUNICAZIONE", "WEB DEVELOPMENT"],
-    image: "/images/projects/Rectangle 27.png",
-    category: "Categoria Quattro",
-    slug: "progetto-tre",
-  },
-];
+const PROJECTS: Project[] = ALL_PROJECTS.map((p) => ({
+  client: p.client,
+  tags: p.tags,
+  image: p.thumbnail,
+  category: p.category,
+  slug: p.slug,
+}));
 
 /* ── Rolling text effect on hover ── */
 function RollingText({ text }: { text: string }) {

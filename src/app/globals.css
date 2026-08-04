@@ -249,6 +249,44 @@ body {
   scrollbar-width: none;
 }
 
+/* ---- Form option hover ---- */
+.form-option {
+  border: 2px solid var(--color-yellow);
+  border-radius: 5px;
+}
+.form-option:not(.form-option--active):hover {
+  background-color: var(--color-yellow);
+}
+.form-option--active {
+  background-color: var(--color-yellow);
+}
+
+/* ---- Request page content column ---- */
+/* Figma: 774px wide, 162px from right on 1440px base */
+@media (min-width: 768px) {
+  .request-col {
+    width: 57.6%;
+    margin-left: auto;
+    margin-right: 8.5%;
+  }
+  .request-form {
+    gap: 150px !important;
+  }
+  .request-form .request-submit {
+    margin-top: -16px !important;
+  }
+  .request-intro-section {
+    padding-top: 110px !important;
+    padding-bottom: 110px !important;
+  }
+  .request-form-section {
+    padding-bottom: 230px !important;
+  }
+  .request-carousel-section {
+    padding-bottom: 200px !important;
+  }
+}
+
 /* ---- Hamburger ---- */
 .hamburger-line {
   transition:

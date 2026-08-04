@@ -5,9 +5,10 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { PROJECTS } from "./projectsData";
+import { PROJECTS, isVideo } from "./projectsData";
 import type { ProjectDetail } from "./projectsData";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -20,38 +21,12 @@ interface SimilarProject {
   slug: string;
 }
 
-export const SIMILAR_PROJECTS: SimilarProject[] = [
-  {
-    category: "CRM",
-    name: "ZENTRO",
-    image: "/images/our-brand/zentro.png",
-    slug: "progetto-uno",
-  },
-  {
-    category: "TIPOLOGIA LAVORO",
-    name: "NOME DEL CLIENTE",
-    image: "/images/projects/Rectangle 24.png",
-    slug: "progetto-due",
-  },
-  {
-    category: "TIPOLOGIA LAVORO",
-    name: "NOME DEL CLIENTE",
-    image: "/images/projects/Rectangle 27.png",
-    slug: "progetto-tre",
-  },
-  {
-    category: "CRM",
-    name: "ZENTRO",
-    image: "/images/projects/Rectangle 24.png",
-    slug: "progetto-uno",
-  },
-  {
-    category: "TIPOLOGIA LAVORO",
-    name: "NOME DEL CLIENTE",
-    image: "/images/projects/Rectangle 27.png",
-    slug: "progetto-due",
-  },
-];
+export const SIMILAR_PROJECTS: SimilarProject[] = PROJECTS.map((p) => ({
+  category: p.tags[0] || p.category,
+  name: p.client,
+  image: p.thumbnail,
+  slug: p.slug,
+}));
 
 /* ── Drag cursor ── */
 function DragCursor() {
@@ -149,6 +124,7 @@ function SimilarCarousel() {
     velocity: 0,
     lastTime: 0,
     rafId: 0,
+    hasDragged: false,
   });
 
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -163,6 +139,7 @@ function SimilarCarousel() {
     dragState.current.scrollLeft = track.scrollLeft;
     dragState.current.velocity = 0;
     dragState.current.lastTime = Date.now();
+    dragState.current.hasDragged = false;
     track.setPointerCapture(e.pointerId);
   };
 
@@ -171,6 +148,11 @@ function SimilarCarousel() {
     const now = Date.now();
     const dt = now - dragState.current.lastTime;
     const dx = e.clientX - dragState.current.prevX;
+    const totalDx = Math.abs(e.clientX - dragState.current.startX);
+
+    if (totalDx > 5) {
+      dragState.current.hasDragged = true;
+    }
 
     trackRef.current.scrollLeft =
       dragState.current.scrollLeft - (e.clientX - dragState.current.startX);
@@ -293,7 +275,15 @@ function SimilarCarousel() {
                   color: "var(--color-black)",
                 }}
               >
-                {project.name}
+                <Link
+                  href={`/portfolio/${project.slug}`}
+                  style={{ cursor: "pointer" }}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onMouseEnter={handleCursorHide}
+                  onMouseLeave={handleCursorShow}
+                >
+                  {project.name}
+                </Link>
               </h3>
             </article>
           ))}
@@ -351,7 +341,7 @@ export default function ProjectDetailClient() {
           scrollTrigger: {
             trigger: img,
             start: "top 90%",
-            toggleActions: "play none none reverse",
+            toggleActions: "play none none none",
           },
         });
       });
@@ -443,18 +433,29 @@ export default function ProjectDetailClient() {
             className="container-content pb-24 md:pb-40 flex flex-col"
             style={{ gap: "24px" }}
           >
-            {project.images.map((src, i) => (
+            {project.media.map((src, i) => (
               <div
                 key={i}
-                className="detail-image w-full overflow-hidden"
+                className="detail-image w-full overflow-hidden bg-white"
                 style={{ borderRadius: "10px" }}
               >
-                <img
-                  src={src}
-                  alt={`${project.client} - immagine ${i + 1}`}
-                  className="w-full h-auto object-cover"
-                  style={{ aspectRatio: "16 / 9" }}
-                />
+                {isVideo(src) ? (
+                  <video
+                    src={src}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-auto"
+                    style={{ maxHeight: "85vh", objectFit: "contain" }}
+                  />
+                ) : (
+                  <img
+                    src={src}
+                    alt={`${project.client} - immagine ${i + 1}`}
+                    className="w-full h-auto"
+                  />
+                )}
               </div>
             ))}
           </div>

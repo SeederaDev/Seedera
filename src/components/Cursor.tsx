@@ -55,6 +55,8 @@ export default function Cursor() {
     window.addEventListener("project-cursor-hide", show);
     window.addEventListener("own-project-cursor-show", hide);
     window.addEventListener("own-project-cursor-hide", show);
+    window.addEventListener("similar-cursor-show", hide);
+    window.addEventListener("similar-cursor-hide", show);
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
@@ -63,6 +65,8 @@ export default function Cursor() {
       window.removeEventListener("project-cursor-hide", show);
       window.removeEventListener("own-project-cursor-show", hide);
       window.removeEventListener("own-project-cursor-hide", show);
+      window.removeEventListener("similar-cursor-show", hide);
+      window.removeEventListener("similar-cursor-hide", show);
     };
   }, [updateVisibility]);
 

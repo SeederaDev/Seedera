@@ -2,6 +2,7 @@
 
 import { ReactLenis } from "lenis/react";
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -9,6 +10,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export function LenisProvider({ children }: { children: React.ReactNode }) {
   const lenisRef = useRef<any>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     function update(time: number) {
@@ -26,6 +28,16 @@ export function LenisProvider({ children }: { children: React.ReactNode }) {
       gsap.ticker.remove(update);
     };
   }, []);
+
+  // Scroll to top on route change
+  useEffect(() => {
+    const lenis = lenisRef.current?.lenis;
+    if (lenis) {
+      lenis.scrollTo(0, { immediate: true });
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname]);
 
   return (
     <ReactLenis

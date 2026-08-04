@@ -5,6 +5,7 @@ import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { PROJECTS } from "@/app/portfolio/[slug]/projectsData";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,44 +17,12 @@ interface Project {
   slug: string;
 }
 
-const PROJECTS: Project[] = [
-  {
-    client: "NOME DEL CLIENTE",
-    tags: ["BRAND IDENTITY", "COMUNICAZIONE"],
-    image: "/images/projects/Rectangle 24.png",
-    slug: "progetto-uno",
-  },
-  {
-    client: "NOME DEL CLIENTE",
-    tags: ["BRAND IDENTITY", "COMUNICAZIONE", "WEB DEVELOPMENT"],
-    image: "/images/projects/Rectangle 27.png",
-    slug: "progetto-due",
-  },
-  {
-    client: "NOME DEL CLIENTE",
-    tags: ["BRAND IDENTITY", "COMUNICAZIONE", "WEB DEVELOPMENT"],
-    image: "/images/projects/Rectangle 24.png",
-    slug: "progetto-tre",
-  },
-  {
-    client: "NOME DEL CLIENTE",
-    tags: ["BRAND IDENTITY", "COMUNICAZIONE"],
-    image: "/images/projects/Rectangle 27.png",
-    slug: "progetto-uno",
-  },
-  {
-    client: "NOME DEL CLIENTE",
-    tags: ["COMUNICAZIONE", "WEB DEVELOPMENT"],
-    image: "/images/projects/Rectangle 24.png",
-    slug: "progetto-due",
-  },
-  {
-    client: "NOME DEL CLIENTE",
-    tags: ["BRAND IDENTITY", "COMUNICAZIONE"],
-    image: "/images/projects/Rectangle 27.png",
-    slug: "progetto-tre",
-  },
-];
+const HOMEPAGE_PROJECTS: Project[] = PROJECTS.map((p) => ({
+  client: p.client,
+  tags: p.tags,
+  image: p.thumbnail,
+  slug: p.slug,
+}));
 
 const INTRO_TEXT =
   "Lorem ipsum dolor sit consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus sociis natoque penatibus et m";
@@ -376,7 +345,7 @@ export default function Projects() {
       {/* Projects grid – staggered 2 columns */}
       <div className="container-content pb-24 md:pb-40">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[25px] ">
-          {PROJECTS.map((project, i) => (
+          {HOMEPAGE_PROJECTS.map((project, i) => (
             <ProjectCard key={i} project={project} index={i} />
           ))}
         </div>

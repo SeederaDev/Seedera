@@ -2,17 +2,24 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useLenis } from "lenis/react";
 import gsap from "gsap";
 
 const NAV_ITEMS = [
-  { label: "Chi siamo", href: "#about" },
-  { label: "Servizi", href: "#services" },
-  { label: "Portfolio", href: "#portfolio" },
-  { label: "Progetti", href: "#projects" },
-  { label: "Target", href: "#target" },
-  { label: "Contattaci", href: "#contact" },
+  { label: "Chi siamo", href: "/#about" },
+  { label: "Servizi", href: "/#services" },
+  { label: "Portfolio", href: "/#portfolio" },
+  { label: "Progetti", href: "/#projects" },
+  { label: "Target", href: "/#target" },
+  { label: "Contattaci", href: "/#contact" },
+];
+
+const MENU_PAGES = [
+  { label: "Home", href: "/" },
+  { label: "Progetti", href: "/portfolio" },
+  { label: "Richiedi Preventivo", href: "/richiedi-preventivo" },
 ];
 
 /* ── Magnetic pill: subtly follows cursor on hover ── */
@@ -95,6 +102,8 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [clipOrigin, setClipOrigin] = useState("calc(100% - 40px) 28px");
   const lenis = useLenis();
+  const pathname = usePathname();
+  const router = useRouter();
   const hamburgerRef = useRef<HTMLButtonElement>(null);
 
   // Sync clip origin to actual hamburger position on mount + resize
@@ -118,17 +127,27 @@ export default function Navbar() {
       href: string,
       closeMenu = false,
     ) => {
-      e.preventDefault();
-      if (closeMenu) setIsOpen(false);
-      const target = document.querySelector(href);
-      if (target && lenis) {
-        lenis.scrollTo(target as HTMLElement, {
-          duration: 1.4,
-          easing: (t: number) => 1 - Math.pow(1 - t, 4),
-        });
+      const hash = href.includes("#") ? `#${href.split("#")[1]}` : null;
+
+      if (pathname === "/" && hash) {
+        // On home page: smooth scroll to the section
+        e.preventDefault();
+        if (closeMenu) setIsOpen(false);
+        const target = document.querySelector(hash);
+        if (target && lenis) {
+          lenis.scrollTo(target as HTMLElement, {
+            duration: 1.4,
+            easing: (t: number) => 1 - Math.pow(1 - t, 4),
+          });
+        }
+      } else if (hash) {
+        // On another page: navigate to home with hash
+        e.preventDefault();
+        if (closeMenu) setIsOpen(false);
+        router.push(href);
       }
     },
-    [lenis],
+    [lenis, pathname, router],
   );
 
   useEffect(() => {
@@ -251,11 +270,11 @@ export default function Navbar() {
         {/* Nav links – scrollable if screen is short */}
         <nav className="flex-1 min-h-0 overflow-y-auto container-content flex flex-col">
           <div className="my-auto">
-            {NAV_ITEMS.map((item, i) => (
+            {MENU_PAGES.map((item, i) => (
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={(e) => handleNavClick(e, item.href, true)}
+                onClick={() => setIsOpen(false)}
                 className="mobile-menu-link text-white font-bold tracking-tight hover:text-primary transition-colors duration-300 border-b border-white/10 flex"
                 style={{
                   transitionDelay: isOpen ? `${0.3 + i * 0.06}s` : "0s",
@@ -292,7 +311,7 @@ export default function Navbar() {
           style={{
             paddingBottom: "clamp(1rem, 3vh, 2rem)",
             transitionDelay: isOpen
-              ? `${0.3 + NAV_ITEMS.length * 0.06}s`
+              ? `${0.3 + MENU_PAGES.length * 0.06}s`
               : "0s",
           }}
         >

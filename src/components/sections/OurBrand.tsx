@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 
 /* ── Data ── */
@@ -8,6 +9,7 @@ interface OwnProject {
   category: string;
   name: string;
   image: string;
+  slug: string;
 }
 
 const OWN_PROJECTS: OwnProject[] = [
@@ -15,26 +17,31 @@ const OWN_PROJECTS: OwnProject[] = [
     category: "CRM",
     name: "ZENTRO",
     image: "/images/our-brand/zentro.png",
+    slug: "zentro",
   },
   {
-    category: "TIPOLOGIA LAVORO",
-    name: "NOME DEL CLIENTE",
-    image: "/images/projects/Rectangle 24.png",
+    category: "BRAND IDENTITY",
+    name: "BRASSICOLO",
+    image: "/images/projects/brassicolo/brass-1.jpg",
+    slug: "brassicolo",
   },
   {
-    category: "TIPOLOGIA LAVORO",
-    name: "NOME DEL CLIENTE",
-    image: "/images/projects/Rectangle 27.png",
+    category: "BRAND IDENTITY",
+    name: "IL TRUST IN ITALIA",
+    image: "/images/projects/il-trust-in-italia/trust1.jpg",
+    slug: "il-trust-in-italia",
   },
   {
-    category: "CRM",
-    name: "ZENTRO",
-    image: "/images/projects/Rectangle 24.png",
+    category: "BRAND IDENTITY",
+    name: "PERLE DELL'ELBA",
+    image: "/images/projects/perle-dell-elba/perle2.jpg",
+    slug: "perle-dell-elba",
   },
   {
-    category: "TIPOLOGIA LAVORO",
-    name: "NOME DEL CLIENTE",
-    image: "/images/projects/Rectangle 27.png",
+    category: "COMUNICAZIONE",
+    name: "PIANO CITY NAPOLI",
+    image: "/images/projects/piano-city-napoli/pcn1.jpg",
+    slug: "piano-city-napoli",
   },
 ];
 
@@ -269,7 +276,15 @@ export default function OurBrand() {
                   color: "var(--color-black)",
                 }}
               >
-                {project.name}
+                <Link
+                  href={`/portfolio/${project.slug}`}
+                  style={{ cursor: "pointer" }}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onMouseEnter={handleCursorHide}
+                  onMouseLeave={handleCursorShow}
+                >
+                  {project.name}
+                </Link>
               </h3>
             </article>
           ))}
