@@ -26,8 +26,10 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      # Next esporta /portfolio come portfolio.html: Apache serve le due cose
-      # come URL diverse, quindi la rewrite aggiunge .html quando il file esiste.
+      # Next esporta /portfolio sia come portfolio.html sia come cartella
+      # portfolio/ (le pagine progetto). Senza questa rewrite Apache tratta
+      # /portfolio come directory, non trova index.html e risponde 403.
+      # Niente condizione !-d: e' proprio il caso file+cartella omonimi.
       - name: Add .htaccess
         run: |
           cat > out/.htaccess <<'EOF'
@@ -35,7 +37,6 @@ jobs:
           RewriteEngine On
 
           RewriteCond %{REQUEST_FILENAME} !-f
-          RewriteCond %{REQUEST_FILENAME} !-d
           RewriteCond %{REQUEST_FILENAME}.html -f
           RewriteRule ^(.*)$ $1.html [L]
 
