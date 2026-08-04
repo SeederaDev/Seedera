@@ -1,0 +1,55 @@
+name: Build & deploy staging
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      # Next esporta /portfolio come portfolio.html: Apache serve le due cose
+      # come URL diverse, quindi la rewrite aggiunge .html quando il file esiste.
+      - name: Add .htaccess
+        run: |
+          cat > out/.htaccess <<'EOF'
+          Options -MultiViews
+          RewriteEngine On
+
+          RewriteCond %{REQUEST_FILENAME} !-f
+          RewriteCond %{REQUEST_FILENAME} !-d
+          RewriteCond %{REQUEST_FILENAME}.html -f
+          RewriteRule ^(.*)$ $1.html [L]
+
+          ErrorDocument 404 /404.html
+          EOF
+
+      - name: Push build to deploy branch
+        run: |
+          cd out
+          git init -q -b deploy
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Deploy ${GITHUB_SHA::7}"
+          git push -q --force \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" \
+            deploy
