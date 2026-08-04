@@ -33,7 +33,14 @@ jobs:
       - name: Add .htaccess
         run: |
           cat > out/.htaccess <<'EOF'
-          Options -MultiViews
+          Options -MultiViews -Indexes
+
+          # Senza questo mod_dir vede la cartella portfolio/ e redirige
+          # /portfolio a /portfolio/ prima che la rewrite possa agire.
+          # L'export non genera index.html nelle sottocartelle, quindi
+          # disattivarlo non toglie niente.
+          DirectorySlash Off
+
           RewriteEngine On
 
           RewriteCond %{REQUEST_FILENAME} !-f
