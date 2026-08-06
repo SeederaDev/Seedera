@@ -220,6 +220,25 @@ body {
   transform: translateY(-100%);
 }
 
+/* Variante per le card fase: il rolling parte dall'hover della card intera,
+   non del solo testo. Su card chiare la seconda riga resta nera. */
+.phase-card:hover .rolling-text-char,
+.member-card:hover .rolling-text-char {
+  transform: translateY(-100%);
+}
+
+.phase-card .rolling-text-row:last-child,
+.member-card .rolling-text-row:last-child {
+  color: var(--color-black) !important;
+}
+
+/* Il carosello mobile non deve mostrare la barra ma resta trascinabile */
+@media (hover: none) {
+  .phase-card .rolling-text-char {
+    transform: none;
+  }
+}
+
 /* ---- Physics canvas ---- */
 .physics-canvas {
   position: absolute;

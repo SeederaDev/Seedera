@@ -8,9 +8,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 const SLIDES = [
-  "Lorem ipsum dolor sit consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus sociis natoque penatibus et m",
-  "Crediamo che ogni brand abbia una storia unica da raccontare. Il nostro compito è darle voce attraverso design, tecnologia e strategia.",
-  "Dal concept alla delivery, lavoriamo fianco a fianco con i nostri clienti per costruire prodotti digitali che fanno la differenza.",
+  "Non costruiamo la soluzione che ci chiedono. Costruiamo la soluzione che serve.",
+  "La maggior parte dei partner inizia dal cosa. Noi iniziamo dal perché. Prima di accettare un progetto, diagnostichiamo il bisogno reale, che raramente coincide con la richiesta iniziale.",
+  "Non consegniamo file. Costruiamo capacità che restano nell'organizzazione dopo che usciamo. Non consigliamo dall'esterno: operiamo dall'interno, condividendo gli obiettivi.",
 ];
 
 const TOTAL = SLIDES.length;

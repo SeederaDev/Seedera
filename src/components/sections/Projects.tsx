@@ -25,7 +25,7 @@ const HOMEPAGE_PROJECTS: Project[] = PROJECTS.map((p) => ({
 }));
 
 const INTRO_TEXT =
-  "Lorem ipsum dolor sit consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus sociis natoque penatibus et m";
+  "Ogni progetto qui sotto è nato da una diagnosi, non da un brief. Quello che vedi è il risultato: quello che conta è il problema che c'era prima.";
 
 /* ── Rolling text effect on hover (CSS translateY approach) ── */
 function RollingText({ text }: { text: string }) {

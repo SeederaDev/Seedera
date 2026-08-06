@@ -13,24 +13,30 @@ const bdoGrotesk = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Seedera | Creative Digital Agency",
+  metadataBase: new URL("https://seedera.it"),
+  title: {
+    default: "Seedera | Product & Service Company",
+    template: "%s | Seedera",
+  },
   description:
-    "Seedera è un'agenzia creativa digitale specializzata in branding, web design, sviluppo e strategia digitale. Coltiviamo idee, facciamo crescere brand.",
+    "Rendiamo le imprese capaci di fare cose che prima non sapevano fare. Software su misura, second brain e AI, consulenza: prima il problema, poi il sistema.",
   keywords: [
-    "agenzia creativa",
-    "digital agency",
-    "branding",
-    "web design",
-    "sviluppo web",
-    "strategia digitale",
+    "execution partner",
+    "software su misura",
+    "second brain aziendale",
+    "agenti AI",
+    "product company",
+    "startup studio",
+    "co-investimento",
     "Seedera",
   ],
   openGraph: {
-    title: "Seedera | Creative Digital Agency",
+    title: "Seedera | Product & Service Company",
     description:
-      "Coltiviamo idee, facciamo crescere brand. Agenzia creativa digitale.",
+      "Execution Partner Cognitivo. Non eseguiamo brief: identifichiamo il problema vero e costruiamo il sistema che lo risolve.",
     type: "website",
     locale: "it_IT",
+    siteName: "Seedera",
   },
 };
 

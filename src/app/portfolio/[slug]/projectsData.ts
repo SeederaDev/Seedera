@@ -20,7 +20,7 @@ export const PROJECTS: ProjectDetail[] = [
     tags: ["CRM", "WEB DEVELOPMENT", "BRAND IDENTITY"],
     category: "Web Development",
     description:
-      "Lorem ipsum dolor sit consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus sociis natoque penatibus et m",
+      "Nato come sistema interno di esecuzione, Zentro è diventato un prodotto di mercato: un CRM project-centric che tiene insieme clienti, progetti, task, preventivi e fatturazione in un unico hub, invece di spargerli tra fogli, chat e gestionali scollegati. Piattaforma, identità e modello di business sono stati progettati insieme. Oggi è live, con utenti paganti attivi.",
     thumbnail: "/images/projects/zentro/zentro1.jpg",
     media: [
       "/images/projects/zentro/zentro1.jpg",
@@ -49,7 +49,7 @@ export const PROJECTS: ProjectDetail[] = [
     tags: ["BRAND IDENTITY", "COMUNICAZIONE"],
     category: "Brand Identity",
     description:
-      "Lorem ipsum dolor sit consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus sociis natoque penatibus et m",
+      "Un marketplace che mette i birrifici artigianali in relazione diretta con chi li sostiene: campagne di crowdfunding, vendita di prodotti singoli e raggruppati, pagamenti integrati e un'area riservata dove ogni birrificio gestisce ordini, clienti, sconti e recensioni. Il problema non era vendere birra online: era dare a produttori indipendenti un'infrastruttura commerciale che da soli non potevano permettersi.",
     thumbnail: "/images/projects/brassicolo/brass-1.jpg",
     media: [
       "/images/projects/brassicolo/brass-1.jpg",
@@ -81,7 +81,7 @@ export const PROJECTS: ProjectDetail[] = [
     tags: ["BRAND IDENTITY", "COMUNICAZIONE"],
     category: "Brand Identity",
     description:
-      "Lorem ipsum dolor sit consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus sociis natoque penatibus et m",
+      "Il portale di un'associazione professionale che deve fare cose molto diverse tra loro: pubblicare l'elenco soci, tenere aggiornato l'archivio di giurisprudenza, gestire eventi e formazione con iscrizioni e pagamenti, e far dialogare i soci con gli esperti. Abbiamo ricostruito il sistema attorno a questi flussi, integrando area riservata, e-commerce e gestione documentale in un impianto unico.",
     thumbnail: "/images/projects/il-trust-in-italia/trust1.jpg",
     media: [
       "/images/projects/il-trust-in-italia/trust1.jpg",
@@ -98,10 +98,10 @@ export const PROJECTS: ProjectDetail[] = [
   {
     slug: "perle-dell-elba",
     client: "PERLE DELL'ELBA",
-    tags: ["BRAND IDENTITY", "COMUNICAZIONE"],
-    category: "Brand Identity",
+    tags: ["COMUNICAZIONE", "MARKETING"],
+    category: "Comunicazione",
     description:
-      "Lorem ipsum dolor sit consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus sociis natoque penatibus et m",
+      "Consulenza strategica e gestione operativa del marketing per una realtà ricettiva dell'Isola d'Elba, dall'identità dei canali alla presenza commerciale, fino all'accompagnamento sui bandi. Un affiancamento continuativo, non una campagna una tantum.",
     thumbnail: "/images/projects/perle-dell-elba/perle2.jpg",
     media: [
       "/images/projects/perle-dell-elba/perle2.jpg",
@@ -116,7 +116,7 @@ export const PROJECTS: ProjectDetail[] = [
     tags: ["COMUNICAZIONE", "EVENT"],
     category: "Comunicazione",
     description:
-      "Lorem ipsum dolor sit consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus sociis natoque penatibus et m",
+      "Uno dei festival pianistici più amati d'Italia, dove il palco è la città intera. Comunicazione, immagine coordinata e supporto all'organizzazione dell'edizione 2026: centinaia di concerti diffusi da tenere insieme in un racconto unico e riconoscibile, dal programma alla singola locandina.",
     thumbnail: "/images/projects/piano-city-napoli/pcn1.jpg",
     media: [
       "/images/projects/piano-city-napoli/pcn1.jpg",

@@ -8,27 +8,42 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const INTRO_TEXT =
-  "Lorem ipsum dolor sit consectetuer adipiscing elit. Aenean um sociis natoque penatibus et magnis dis parturient montes, nascetur";
+const INTRO_TEXT = "Lavoriamo con chi costruisce cose belle.";
 
 const BRICKS = [
-  { label: "START UP", color: "#DB3A30", textColor: "#fff" },
-  { label: "TARGET", color: "#E8E8E8", textColor: "#000" },
-  { label: "ARTISTI", color: "#6396FF", textColor: "#fff" },
-  { label: "PMI", color: "#62CB95", textColor: "#000" },
-  { label: "P.A.", color: "#DB3A30", textColor: "#fff" },
-  { label: "TARGET", color: "#F3ADC5", textColor: "#000" },
-  { label: "GRANDI IMPRESE", color: "#CDFD51", textColor: "#000" },
-  { label: "ASSOCIAZIONI", color: "#62CB95", textColor: "#000" },
-  { label: "TARGET", color: "#E8E8E8", textColor: "#000" },
-  { label: "TARGET", color: "#CDFD51", textColor: "#000" },
-  { label: "TARGET", color: "#DB3A30", textColor: "#fff" },
-  { label: "BRAND", color: "#6396FF", textColor: "#fff" },
+  { label: "PROBLEMA VERO", color: "#DB3A30", textColor: "#fff" },
+  { label: "DIAGNOSI", color: "#E8E8E8", textColor: "#000" },
+  { label: "PARTNER", color: "#6396FF", textColor: "#fff" },
+  { label: "SISTEMA", color: "#62CB95", textColor: "#000" },
+  { label: "IMPATTO", color: "#DB3A30", textColor: "#fff" },
+  { label: "CAPACITÀ", color: "#F3ADC5", textColor: "#000" },
+  { label: "RISCHIO CONDIVISO", color: "#CDFD51", textColor: "#000" },
+  { label: "FRANCHEZZA", color: "#62CB95", textColor: "#000" },
+  { label: "ESECUZIONE", color: "#E8E8E8", textColor: "#000" },
+  { label: "PERCHÉ", color: "#CDFD51", textColor: "#000" },
+  { label: "DIALOGO", color: "#DB3A30", textColor: "#fff" },
+  { label: "PRODOTTO", color: "#6396FF", textColor: "#fff" },
   { label: "STRATEGIA", color: "#F3ADC5", textColor: "#000" },
-  { label: "MARKETING", color: "#CDFD51", textColor: "#000" },
-  { label: "DESIGN", color: "#62CB95", textColor: "#000" },
-  { label: "EVENTI", color: "#DB3A30", textColor: "#fff" },
-  { label: "MEDIA", color: "#E8E8E8", textColor: "#000" },
+  { label: "AI", color: "#CDFD51", textColor: "#000" },
+  { label: "SECOND BRAIN", color: "#62CB95", textColor: "#000" },
+  { label: "SOFTWARE", color: "#DB3A30", textColor: "#fff" },
+  { label: "BRAND", color: "#E8E8E8", textColor: "#000" },
+];
+
+const FIT = [
+  "Ha un problema prima di avere una soluzione da eseguire",
+  "Vuole un partner che operi, non solo che consigli",
+  "Cerca un sistema, non un deliverable",
+  'Sa che "facciamo tutto" non è una risposta',
+  "È disposto a sentirsi dire che sta chiedendo la cosa sbagliata",
+];
+
+const NOT_FIT = [
+  "Confonde prezzo con valore",
+  "Vuole esecuzione passiva senza dialogo",
+  "Ha già tutte le risposte",
+  "Misura il valore in output, non in impatto",
+  "Cerca l'agenzia, non il partner",
 ];
 
 const DROP_MIN = 80;
@@ -414,7 +429,7 @@ export default function TargetPhysics() {
                 fontSize: "15px",
               }}
             >
-              Target
+              {"// Per chi siamo"}
             </span>
           </div>
           <div className="target-intro-text max-w-3xl">
@@ -433,6 +448,55 @@ export default function TargetPhysics() {
                 </span>
               ))}
             </h2>
+          </div>
+        </div>
+
+        {/* ── Fit / not-fit lists ── */}
+        <div className="mt-16 md:mt-24 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+          <div className="flex flex-col gap-5 rounded-[10px] border border-black/15 bg-white p-6 md:p-8">
+            <h3
+              className="font-medium uppercase leading-none text-black"
+              style={{ fontSize: "var(--font-h5)" }}
+            >
+              La scelta giusta per chi
+            </h3>
+            <ul className="flex flex-col gap-4">
+              {FIT.map((item) => (
+                <li key={item} className="flex gap-3 items-start text-black/80">
+                  <span
+                    aria-hidden="true"
+                    className="shrink-0 font-medium"
+                    style={{ color: "var(--color-green)" }}
+                  >
+                    →
+                  </span>
+                  <span className="leading-relaxed">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="flex flex-col gap-5 rounded-[10px] border border-black/15 bg-white p-6 md:p-8">
+            <h3
+              className="font-medium uppercase leading-none text-black"
+              style={{ fontSize: "var(--font-h5)" }}
+            >
+              Non siamo la scelta giusta per chi
+            </h3>
+            <ul className="flex flex-col gap-4">
+              {NOT_FIT.map((item) => (
+                <li key={item} className="flex gap-3 items-start text-black/60">
+                  <span
+                    aria-hidden="true"
+                    className="shrink-0 font-medium"
+                    style={{ color: "var(--color-red)" }}
+                  >
+                    ×
+                  </span>
+                  <span className="leading-relaxed">{item}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>

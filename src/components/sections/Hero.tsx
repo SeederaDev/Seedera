@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -120,6 +121,8 @@ export default function Hero() {
   const containerRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const subRef = useRef<HTMLParagraphElement>(null);
+  const eyebrowRef = useRef<HTMLSpanElement>(null);
+  const copyRef = useRef<HTMLDivElement>(null);
   const magneticEnabled = useRef(false);
 
   useHeroMagnetic(headlineRef, magneticEnabled);
@@ -132,7 +135,12 @@ export default function Hero() {
 
       const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
 
-      tl.to(lines, {
+      tl.from(eyebrowRef.current, {
+        y: 16,
+        opacity: 0,
+        duration: 0.6,
+        ease: "power2.out",
+      }).to(lines, {
         y: "0%",
         duration: 1.2,
         stagger: 0.1,
@@ -140,16 +148,27 @@ export default function Hero() {
           // Enable magnetic effect only after text is fully revealed
           magneticEnabled.current = true;
         },
-      }).from(
-        subRef.current,
-        {
-          y: 20,
-          opacity: 0,
-          duration: 0.8,
-          ease: "power2.out",
-        },
-        "-=0.5",
-      );
+      })
+        .from(
+          copyRef.current,
+          {
+            y: 24,
+            opacity: 0,
+            duration: 0.8,
+            ease: "power2.out",
+          },
+          "-=0.6",
+        )
+        .from(
+          subRef.current,
+          {
+            y: 20,
+            opacity: 0,
+            duration: 0.8,
+            ease: "power2.out",
+          },
+          "-=0.5",
+        );
     },
     { scope: containerRef },
   );
@@ -164,14 +183,35 @@ export default function Hero() {
     >
       {/* Bottom-anchored content */}
       <div className="container-content relative z-10 pb-16 md:pb-20">
+        <span
+          ref={eyebrowRef}
+          className="inline-flex items-center self-start border border-black text-black font-medium tracking-wide uppercase mb-6"
+          style={{ borderRadius: "7px", padding: "5px 14px", fontSize: "15px" }}
+        >
+          Product &amp; Service Company — Execution Partner Cognitivo
+        </span>
         <h1
           ref={headlineRef}
           className="text-h1 text-black font-normal uppercase select-none cursor-default"
         >
-          <HeroLine text="SIAMO UNA DIGITAL COMPANY" />
-          <HeroLine text="CI RIVOLGIAMO A START UP" />
-          <HeroLine text="E PICCOLE E MEDIE IMPRESE" />
+          <HeroLine text="RENDIAMO LE IMPRESE" />
+          <HeroLine text="CAPACI DI FARE COSE CHE" />
+          <HeroLine text="PRIMA NON SAPEVANO FARE" />
         </h1>
+        <div ref={copyRef} className="mt-8 flex flex-col items-start gap-6">
+          <p className="max-w-[62ch] text-black/70 text-lg leading-relaxed">
+            Non eseguiamo brief. Prima identifichiamo il problema vero, poi
+            costruiamo il sistema che lo risolve. Con il coraggio di dirti quando
+            stai chiedendo la cosa sbagliata, e di entrare nel rischio quando il
+            progetto lo merita.
+          </p>
+          <Link
+            href="/parliamo"
+            className="inline-flex items-center gap-2 rounded-[5px] border border-black px-5 py-2.5 text-black font-medium hover:bg-black hover:text-primary transition-all duration-300"
+          >
+            Apri una conversazione →
+          </Link>
+        </div>
       </div>
 
       {/* Scroll indicator */}

@@ -11,19 +11,25 @@ import Footer from "@/components/Footer";
 gsap.registerPlugin(ScrollTrigger);
 
 /* ── Data ── */
-const SERVICES = [
-  "Brand Identity",
-  "Website e E-commerce",
-  "Software Development",
-  "Comunicazione Marketing",
-  "Business Development",
-  "Performance Marketing",
+/* Oggetti della conversazione: sostituiscono il vecchio elenco servizi.
+   Il valore in query string (?oggetto=…) preseleziona il chip corrispondente. */
+const SUBJECTS = [
+  { label: "Un prodotto da costruire", value: "prodotto" },
+  { label: "Un processo da automatizzare", value: "automazione" },
+  { label: "La conoscenza dell'impresa da organizzare", value: "second-brain" },
+  { label: "Una decisione da prendere", value: "consulenza" },
+  { label: "Un'identità da costruire", value: "brand" },
+  { label: "Un progetto per co-investimento", value: "co-investimento" },
+  { label: "Non lo so ancora", value: "altro" },
 ];
 
-const BUDGETS = ["€ 10-25K", "€ 25-50K", "€ 50-100K", "€ 100-200K", "€ + 200K"];
-
 const INTRO_TEXT =
-  "Compila il modulo per parlare del lavoro sa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus sociis natoque penatibus et m";
+  "Scegli un oggetto, raccontaci il problema, e premi invia. Niente brief — ci pensiamo noi.";
+
+/* Endpoint di raccolta. Con output: 'export' non esistono API route: se la
+   variabile non è configurata, il form ricade su un mailto precompilato. */
+const FORM_ENDPOINT = process.env.NEXT_PUBLIC_FORM_ENDPOINT ?? "";
+const CONTACT_EMAIL = "info@seedera.it";
 
 interface SimilarProject {
   category: string;
@@ -345,10 +351,12 @@ function RadioCircle({ selected }: { selected: boolean }) {
 }
 
 /* ── Main page ── */
-export default function RichiediPreventivoPage() {
+export default function ParliamoPage() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [selectedBudget, setSelectedBudget] = useState<string | null>(null);
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const [status, setStatus] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
   const [formData, setFormData] = useState({
     nome: "",
     azienda: "",
@@ -356,12 +364,63 @@ export default function RichiediPreventivoPage() {
     progetto: "",
   });
 
-  const toggleService = (service: string) => {
-    setSelectedServices((prev) =>
-      prev.includes(service)
-        ? prev.filter((s) => s !== service)
-        : [...prev, service],
+  const toggleSubject = (subject: string) => {
+    setSelectedSubjects((prev) =>
+      prev.includes(subject)
+        ? prev.filter((s) => s !== subject)
+        : [...prev, subject],
     );
+  };
+
+  /* Preselezione dell'oggetto via ?oggetto=… (es. dal CTA co-investimento) */
+  useEffect(() => {
+    const param = new URLSearchParams(window.location.search).get("oggetto");
+    if (!param) return;
+    const match = SUBJECTS.find((s) => s.value === param);
+    if (match) setSelectedSubjects([match.label]);
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (status === "sending") return;
+
+    const payload = {
+      ...formData,
+      oggetto: selectedSubjects,
+    };
+
+    if (!FORM_ENDPOINT) {
+      /* Nessun endpoint configurato: apriamo il client di posta precompilato
+         invece di perdere silenziosamente la richiesta. */
+      const body = [
+        `Nome: ${payload.nome}`,
+        `Azienda: ${payload.azienda || "—"}`,
+        `Email: ${payload.email}`,
+        `Oggetto: ${selectedSubjects.join(", ") || "—"}`,
+        "",
+        payload.progetto,
+      ].join("\n");
+      window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+        `Nuova conversazione — ${payload.nome || "senza nome"}`,
+      )}&body=${encodeURIComponent(body)}`;
+      setStatus("sent");
+      return;
+    }
+
+    setStatus("sending");
+    try {
+      const res = await fetch(FORM_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setStatus("sent");
+      setFormData({ nome: "", azienda: "", email: "", progetto: "" });
+      setSelectedSubjects([]);
+    } catch {
+      setStatus("error");
+    }
   };
 
   /* GSAP: text reveal */
@@ -413,7 +472,7 @@ export default function RichiediPreventivoPage() {
         >
           <div className="container-content pb-10">
             <h1 className="text-h1 text-black font-normal uppercase select-none">
-              Richiedi Preventivo
+              Apri una conversazione
             </h1>
           </div>
         </section>
@@ -435,7 +494,7 @@ export default function RichiediPreventivoPage() {
                     fontSize: "15px",
                   }}
                 >
-                  Intestazione
+                  Come funziona
                 </span>
               </div>
 
@@ -470,11 +529,11 @@ export default function RichiediPreventivoPage() {
         >
           <div className="container-content">
             <form
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={handleSubmit}
               className="request-form flex flex-col"
               style={{ gap: "80px" }}
             >
-              {/* ── SERVIZIO ── */}
+              {/* ── OGGETTO ── */}
               <div className="flex flex-col md:flex-row md:items-start">
                 <div className="shrink-0 mb-6 md:mb-0">
                   <span
@@ -485,20 +544,20 @@ export default function RichiediPreventivoPage() {
                       fontSize: "15px",
                     }}
                   >
-                    Servizio
+                    Oggetto
                   </span>
                 </div>
                 <div
                   className="request-col flex flex-col"
                   style={{ gap: "12px" }}
                 >
-                  {SERVICES.map((service) => {
-                    const isSelected = selectedServices.includes(service);
+                  {SUBJECTS.map((subject) => {
+                    const isSelected = selectedSubjects.includes(subject.label);
                     return (
                       <button
-                        key={service}
+                        key={subject.value}
                         type="button"
-                        onClick={() => toggleService(service)}
+                        onClick={() => toggleSubject(subject.label)}
                         className={`form-option flex items-center justify-between w-full transition-all duration-300 text-left ${isSelected ? "form-option--active" : ""}`}
                         style={{
                           padding: "16px 20px",
@@ -511,7 +570,7 @@ export default function RichiediPreventivoPage() {
                             color: "var(--color-black)",
                           }}
                         >
-                          {service}
+                          {subject.label}
                         </span>
                         <RadioCircle selected={isSelected} />
                       </button>
@@ -601,51 +660,8 @@ export default function RichiediPreventivoPage() {
                 </div>
               </div>
 
-              {/* ── BUDGET ── */}
-              <div className="flex flex-col md:flex-row md:items-start">
-                <div className="shrink-0 mb-6 md:mb-0">
-                  <span
-                    className="inline-flex items-center border border-black text-black font-medium tracking-wide uppercase"
-                    style={{
-                      borderRadius: "7px",
-                      padding: "5px 14px",
-                      fontSize: "15px",
-                    }}
-                  >
-                    Budget
-                  </span>
-                </div>
-                <div
-                  className="request-col flex flex-col"
-                  style={{ gap: "12px" }}
-                >
-                  {BUDGETS.map((budget) => {
-                    const isSelected = selectedBudget === budget;
-                    return (
-                      <button
-                        key={budget}
-                        type="button"
-                        onClick={() => setSelectedBudget(budget)}
-                        className={`form-option flex items-center justify-between w-full transition-all duration-300 text-left ${isSelected ? "form-option--active" : ""}`}
-                        style={{
-                          padding: "16px 20px",
-                          fontSize: "var(--font-h4)",
-                        }}
-                      >
-                        <span
-                          className="transition-colors duration-300"
-                          style={{
-                            color: "var(--color-black)",
-                          }}
-                        >
-                          {budget}
-                        </span>
-                        <RadioCircle selected={isSelected} />
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+              {/* Nessuno step budget: la fascia di spesa non è un criterio di
+                  ingaggio, e chiederla contraddice il metodo (prima il problema). */}
 
               {/* ── Submit ── */}
               <div
@@ -679,7 +695,7 @@ export default function RichiediPreventivoPage() {
                     backgroundColor: "transparent",
                   }}
                 >
-                  Invia Richiesta
+                  {status === "sending" ? "Invio in corso…" : "Invia"}
                 </button>
                 <button
                   type="submit"
@@ -701,6 +717,24 @@ export default function RichiediPreventivoPage() {
                   />
                 </button>
               </div>
+
+              {/* ── Esito ── */}
+              {status !== "idle" && status !== "sending" && (
+                <p
+                  role="status"
+                  className="request-col leading-relaxed"
+                  style={{
+                    color:
+                      status === "error"
+                        ? "var(--color-red)"
+                        : "var(--color-black)",
+                  }}
+                >
+                  {status === "sent"
+                    ? "Ricevuto. Ti rispondiamo noi, di persona, entro un giorno lavorativo."
+                    : `Invio non riuscito. Scrivici direttamente a ${CONTACT_EMAIL}.`}
+                </p>
+              )}
             </form>
           </div>
         </section>

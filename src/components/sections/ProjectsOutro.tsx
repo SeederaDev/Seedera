@@ -8,7 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 const OUTRO_TEXT =
-  "Lorem ipsum dolor sit consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus sociis natoque penatibus et m";
+  "Nessuno di questi lavori è finito quando è stato consegnato. È finito quando il team interno ha saputo portarlo avanti da solo.";
 
 export default function ProjectsOutro() {
   const sectionRef = useRef<HTMLDivElement>(null);

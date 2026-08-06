@@ -11,18 +11,16 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 const FOOTER_LINKS = [
-  { label: "Chi siamo", href: "#about" },
-  { label: "Servizi", href: "#services" },
-  { label: "Portfolio", href: "#portfolio" },
-  { label: "Progetti", href: "#projects" },
-  { label: "Target", href: "#target" },
+  { label: "Metodo", href: "/#about" },
+  { label: "Capacità", href: "/#services" },
+  { label: "Portfolio", href: "/portfolio" },
+  { label: "Studio", href: "/#studio" },
+  { label: "Partnership", href: "/#partnership" },
+  { label: "Team", href: "/team" },
 ];
 
 const SOCIALS = [
-  { label: "Instagram", href: "#" },
-  { label: "LinkedIn", href: "#" },
-  { label: "Behance", href: "#" },
-  { label: "Dribbble", href: "#" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/company/seedera" },
 ];
 
 /* ── Glitch pill: text scrambles on hover ── */
@@ -152,9 +150,20 @@ export default function Footer() {
 
   const handleNavClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+      /* I link di pagina (/team, /portfolio…) devono navigare normalmente:
+         solo le ancore vengono intercettate per lo scroll morbido. Accetta
+         sia "#studio" sia "/#studio", così lo stesso elenco funziona quando
+         il footer è montato su una pagina interna. */
+      if (!href.includes("#")) return;
+      const hash = `#${href.split("#")[1]}`;
+
+      const target = document.querySelector(hash);
+      /* Se la sezione non è in questa pagina (footer mostrato su /team,
+         /portfolio…) lasciamo che il browser vada alla home con l'hash. */
+      if (!target) return;
+
       e.preventDefault();
-      const target = document.querySelector(href);
-      if (target && lenis) {
+      if (lenis) {
         lenis.scrollTo(target as HTMLElement, {
           duration: 1.4,
           easing: (t: number) => 1 - Math.pow(1 - t, 4),
@@ -233,18 +242,22 @@ export default function Footer() {
               fontSize: "15px",
             }}
           >
-            Contattaci
+            Parliamo
           </span>
           <h2
             className="font-medium leading-[1.05] uppercase"
             style={{ fontSize: "clamp(2.5rem, 7vw, 7rem)" }}
           >
             {renderAnimatedText([
-              { text: "Hai un progetto?" },
-              { text: "Parliamone.", className: "text-black" },
+              { text: "Hai un problema da risolvere" },
+              { text: "o un prodotto da costruire?", className: "text-black" },
             ])}
           </h2>
-          <WaveEmail email="hello@seedera.it" />
+          <p className="max-w-[52ch] text-black/70 text-lg leading-relaxed">
+            Iniziamo da una conversazione informale. Nessun brief. Nessun form.
+            Solo una chiamata per capire se il progetto ha senso per entrambi.
+          </p>
+          <WaveEmail email="info@seedera.it" />
         </div>
       </div>
 
@@ -311,11 +324,22 @@ export default function Footer() {
       </div>
 
       {/* ── Bottom bar ── */}
-      <div className="container-content py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <Image src="/Seedera-Logo.svg" alt="Seedera" width={120} height={28} />
-        <span className="text-black/40 text-sm">
-          © {new Date().getFullYear()} Seedera. Tutti i diritti riservati.
-        </span>
+      <div className="container-content py-8 flex flex-col gap-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <Image src="/Seedera-Logo.svg" alt="Seedera" width={120} height={28} />
+          <span className="text-black/60 text-sm">
+            Product & Service Company. Execution Partner Cognitivo. Roma, Italia.
+          </span>
+        </div>
+        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
+          <p className="text-black/40 text-sm max-w-[60ch] italic">
+            dal latino <em>sidera</em>, stelle e dall&apos;inglese <em>seed</em>,
+            seme — ogni impresa che guarda in alto inizia da un seme
+          </p>
+          <span className="text-black/40 text-sm whitespace-nowrap">
+            © {new Date().getFullYear()} Seedera — Tutti i diritti riservati
+          </span>
+        </div>
       </div>
     </footer>
   );

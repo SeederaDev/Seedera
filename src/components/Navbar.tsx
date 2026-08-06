@@ -8,18 +8,19 @@ import { useLenis } from "lenis/react";
 import gsap from "gsap";
 
 const NAV_ITEMS = [
-  { label: "Chi siamo", href: "/#about" },
-  { label: "Servizi", href: "/#services" },
+  { label: "Metodo", href: "/#about" },
+  { label: "Capacità", href: "/#services" },
   { label: "Portfolio", href: "/#portfolio" },
-  { label: "Progetti", href: "/#projects" },
-  { label: "Target", href: "/#target" },
-  { label: "Contattaci", href: "/#contact" },
+  { label: "Studio", href: "/#studio" },
+  { label: "Team", href: "/team" },
+  { label: "Parliamo →", href: "/parliamo" },
 ];
 
 const MENU_PAGES = [
   { label: "Home", href: "/" },
-  { label: "Progetti", href: "/portfolio" },
-  { label: "Richiedi Preventivo", href: "/richiedi-preventivo" },
+  { label: "Portfolio", href: "/portfolio" },
+  { label: "Team", href: "/team" },
+  { label: "Apri una conversazione", href: "/parliamo" },
 ];
 
 /* ── Magnetic pill: subtly follows cursor on hover ── */
