@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# I riferimenti di design (render dal PDF/Figma) sono binari pesanti:
+# 12MB di PNG a 2x. Si rigenerano con code/skills/figma-to-code.
+docs/design-references/

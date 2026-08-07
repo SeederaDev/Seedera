@@ -1,17 +1,17 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/sections/Hero";
-import Ledger from "@/components/sections/Ledger";
 import AboutUs from "@/components/sections/AboutUs";
-import Marquee from "@/components/sections/Marquee";
+import Principi from "@/components/sections/Principi";
 import Diagnostico from "@/components/sections/Diagnostico";
 import Services from "@/components/sections/Services";
 import SistemaOperativo from "@/components/sections/SistemaOperativo";
+import Marquee from "@/components/sections/Marquee";
 import Projects from "@/components/sections/Projects";
 import ProjectsMarquee from "@/components/sections/ProjectsMarquee";
 import ProjectsOutro from "@/components/sections/ProjectsOutro";
 import StartupStudio from "@/components/sections/StartupStudio";
+import Contatti from "@/components/sections/Contatti";
 import Partnership from "@/components/sections/Partnership";
-import TargetPhysics from "@/components/sections/TargetPhysics";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -20,18 +20,18 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
-        <Ledger />
         <AboutUs />
-        <Marquee />
+        <Principi />
         <Diagnostico />
         <Services />
         <SistemaOperativo />
+        <Marquee />
         <Projects />
         <ProjectsMarquee />
         <ProjectsOutro />
         <StartupStudio />
+        <Contatti />
         <Partnership />
-        <TargetPhysics />
       </main>
       <Footer />
     </>

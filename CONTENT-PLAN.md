@@ -255,9 +255,11 @@ blocco tagline+intro è compatto. **Ogni riga aggiunta dentro una card si somma
 all'altezza dell'intera pila** — tenerlo presente prima di allungare quei testi.
 
 **Debito tecnico non affrontato (fuori dal perimetro delle fasi):**
-- 69 MB di media in `public/images`, con singoli file fino a 9,3 MB. Con
-  `output: 'export'` `next/image` è disattivato e il codice usa `<img>`: da
-  comprimere prima di andare in produzione.
+- ~~69 MB di media~~ **Fatto il 2026-08-06**: JPEG ridimensionati a max 1920px
+  con qualità 72 (`sips`) e video riportati a 720p (`avconvert`, nativo macOS).
+  Da **70,6 MB a 19 MB**; output di build da 74 a 24 MB. Nessun path cambiato:
+  formati ed estensioni sono rimasti gli stessi, quindi zero modifiche al codice.
+  Gli originali restano nella storia git prima del commit `a6d31aa`.
 - `--color-purple` in `globals.css` è ancora un segnaposto duplicato di `--color-pink`.
 - **Replase** non ha immagini in `public/`: la card usa un placeholder tipografico.
 - `Zentro` compare sia nel portfolio sia nello Startup Studio. La descrizione del

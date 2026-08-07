@@ -116,7 +116,10 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  /* Direttamente la variabile di next/font: --font-sans vive dentro
+     @theme inline e a :root risulta vuota, facendo ripiegare tutto
+     il sito sul font di sistema. */
+  font-family: var(--font-bdo-grotesk), system-ui, sans-serif;
   font-size: var(--font-p);
   line-height: var(--lh-p);
   overflow-x: hidden;
@@ -137,7 +140,9 @@ body {
 
 @media (min-width: 768px) {
   .container-content {
-    padding-inline: 48px;
+    /* 40px, non 48: nel Figma ogni sezione parte da x=40 (badge, titoli,
+       card). Con 48 tutto il sito era spostato di 8px verso l'interno. */
+    padding-inline: 40px;
   }
 }
 

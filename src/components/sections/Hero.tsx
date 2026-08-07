@@ -99,19 +99,27 @@ function useHeroMagnetic(
   }, [containerRef, enabled]);
 }
 
-function HeroLine({ text }: { text: string }) {
+function HeroLine({ text, tracking }: { text: string; tracking: string }) {
   return (
     // Overflow-hidden wrapper clips the line during slide-up — no FOUC
     <span className="block overflow-hidden">
       <span
-        className="hero-line block"
-        style={{ transform: "translateY(100%)", willChange: "transform" }}
+        className="hero-line block whitespace-nowrap"
+        style={{
+          transform: "translateY(100%)",
+          willChange: "transform",
+          letterSpacing: tracking,
+        }}
       >
-        {text.split("").map((char, i) => (
-          <span key={i} className="hero-char inline-block">
-            {char === " " ? "\u00A0" : char}
-          </span>
-        ))}
+        {/* Lo spazio resta un nodo di testo: dentro uno span inline-block
+            diventerebbe un &nbsp;. */}
+        {text.split("").map((char, i) =>
+          char === " " ? " " : (
+            <span key={i} className="hero-char inline-block">
+              {char}
+            </span>
+          ),
+        )}
       </span>
     </span>
   );
@@ -120,7 +128,6 @@ function HeroLine({ text }: { text: string }) {
 export default function Hero() {
   const containerRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
-  const subRef = useRef<HTMLParagraphElement>(null);
   const eyebrowRef = useRef<HTMLSpanElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
   const magneticEnabled = useRef(false);
@@ -158,16 +165,6 @@ export default function Hero() {
             ease: "power2.out",
           },
           "-=0.6",
-        )
-        .from(
-          subRef.current,
-          {
-            y: 20,
-            opacity: 0,
-            duration: 0.8,
-            ease: "power2.out",
-          },
-          "-=0.5",
         );
     },
     { scope: containerRef },
@@ -178,65 +175,84 @@ export default function Hero() {
       ref={containerRef}
       id="hero"
       className="relative w-full flex flex-col justify-end overflow-hidden bg-primary"
-      style={{ height: "100svh", minHeight: "100dvh" }}
+      style={{ height: "min(100svh, 55.6vw)", minHeight: "600px" }}
       aria-label="Hero"
     >
       {/* Bottom-anchored content */}
-      <div className="container-content relative z-10 pb-16 md:pb-20">
+      <div className="container-content relative z-10 pb-16 md:pb-[66px]">
+        <div id="hero-block" className="md:max-w-[1002px] flex flex-col items-start gap-5">
         <span
           ref={eyebrowRef}
-          className="inline-flex items-center self-start border border-black text-black font-medium tracking-wide uppercase mb-6"
-          style={{ borderRadius: "7px", padding: "5px 14px", fontSize: "15px" }}
+          /* Nel design (nodo 461:202) il badge non e' maiuscolo — largo 208px,
+             non 255 — e il frame e' alto 30px con il bordo disegnato dentro:
+             in CSS il bordo si somma, quindi il padding verticale e' 4, non 5. */
+          className="inline-flex items-center self-start border border-black text-black"
+          style={{ borderRadius: "5px", padding: "4px 10px", fontSize: "14px", lineHeight: "20px" }}
         >
-          Product &amp; Service Company — Execution Partner Cognitivo
+          Product &amp; Service Company
         </span>
         <h1
           ref={headlineRef}
-          className="text-h1 text-black font-normal uppercase select-none cursor-default"
+          /* Ogni carattere e' un inline-block (serve all'effetto magnetico) e
+             questo azzera il kerning: le righe crescono e la terza sfora i
+             1002px del design, mandando a capo la "E" finale. Il compenso e'
+             per riga, sotto. */
+          className="text-black font-normal uppercase select-none cursor-default"
+          style={{
+            fontSize: "clamp(2.375rem, 4.72vw, 4.25rem)",
+            lineHeight: "1.03",
+            /* Figma ritaglia il mezzo-leading sotto l'ultima riga: il box del
+               titolo e' 194,88px invece dei 3x70=210 del blocco CSS. Senza
+               questo recupero il paragrafo e la freccia scendono di 16px. */
+            marginBottom: "-16px",
+          }}
         >
-          <HeroLine text="RENDIAMO LE IMPRESE" />
-          <HeroLine text="CAPACI DI FARE COSE CHE" />
-          <HeroLine text="PRIMA NON SAPEVANO FARE" />
+          {/* Il tracking non e' un vezzo: ogni riga perde un kerning diverso
+              (dipende dalle coppie di lettere) e senza compenso la terza sfora
+              i 1002px. I valori riportano le larghezze a quelle misurate sul
+              PDF del design: 795 / 906 / 989 px. */}
+          <HeroLine text="RENDIAMO LE IMPRESE" tracking="-0.005em" />
+          <HeroLine text="CAPACI DI FARE COSE CHE" tracking="-0.010em" />
+          <HeroLine text="PRIMA NON SAPEVANO FARE" tracking="-0.013em" />
         </h1>
-        <div ref={copyRef} className="mt-8 flex flex-col items-start gap-6">
-          <p className="max-w-[62ch] text-black/70 text-lg leading-relaxed">
+        <div ref={copyRef} className="flex flex-col items-start gap-5">
+          <p className="text-black text-[16px] leading-[22px] max-w-[888px]">
             Non eseguiamo brief. Prima identifichiamo il problema vero, poi
             costruiamo il sistema che lo risolve. Con il coraggio di dirti quando
             stai chiedendo la cosa sbagliata, e di entrare nel rischio quando il
             progetto lo merita.
           </p>
+          {/* Nel design la CTA e' la sola freccia: il testo vive nell'aria
+              label, non a schermo. */}
           <Link
             href="/parliamo"
-            className="inline-flex items-center gap-2 rounded-[5px] border border-black px-5 py-2.5 text-black font-medium hover:bg-black hover:text-primary transition-all duration-300"
+            aria-label="Apri una conversazione"
+            className="group inline-flex items-center text-black"
           >
-            Apri una conversazione →
+            <svg
+              width="35"
+              height="33"
+              viewBox="0 0 35 33"
+              fill="none"
+              aria-hidden="true"
+              className="transition-transform duration-300 group-hover:translate-x-2"
+            >
+              <path
+                d="M1 16.5h32M21 4l12 12.5L21 29"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </Link>
+          </div>
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div
-        ref={subRef}
-        className="absolute bottom-4 left-0 w-full container-content flex flex-col items-start gap-2"
-      >
-        <div className="w-10 h-10 rounded-full border-1 border-black flex items-center justify-center animate-bounce">
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 14 14"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M7 1v10M7 11l4-4M7 11L3 7"
-              stroke="black"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </div>
+      {/* Nel design l'hero ha UNA sola freccia, quella della CTA qui sopra.
+          Lo scroll indicator che stava qui era un residuo della versione
+          precedente e ne mostrava due. */}
     </section>
   );
 }

@@ -236,11 +236,12 @@ function PortfolioCarousel() {
       {/* Header */}
       <div className="container-content mb-10 flex flex-col items-center text-center">
         <span
-          className="inline-flex items-center border border-black text-black font-medium tracking-wide uppercase mb-4"
+          className="inline-flex items-center border border-black text-black tracking-wide uppercase mb-4"
           style={{
-            borderRadius: "7px",
-            padding: "5px 14px",
-            fontSize: "15px",
+            borderRadius: "5px",
+                padding: "5px 10px",
+                fontSize: "14px",
+                lineHeight: "20px",
           }}
         >
           Portfolio
@@ -487,11 +488,12 @@ export default function ParliamoPage() {
               {/* Label pill */}
               <div className="shrink-0 mb-6 md:mb-0">
                 <span
-                  className="inline-flex items-center border border-black text-black font-medium tracking-wide uppercase"
+                  className="inline-flex items-center border border-black text-black tracking-wide uppercase"
                   style={{
-                    borderRadius: "7px",
-                    padding: "5px 14px",
-                    fontSize: "15px",
+                    borderRadius: "5px",
+                padding: "5px 10px",
+                fontSize: "14px",
+                lineHeight: "20px",
                   }}
                 >
                   Come funziona
@@ -537,11 +539,12 @@ export default function ParliamoPage() {
               <div className="flex flex-col md:flex-row md:items-start">
                 <div className="shrink-0 mb-6 md:mb-0">
                   <span
-                    className="inline-flex items-center border border-black text-black font-medium tracking-wide uppercase"
+                    className="inline-flex items-center border border-black text-black tracking-wide uppercase"
                     style={{
-                      borderRadius: "7px",
-                      padding: "5px 14px",
-                      fontSize: "15px",
+                      borderRadius: "5px",
+                padding: "5px 10px",
+                fontSize: "14px",
+                lineHeight: "20px",
                     }}
                   >
                     Oggetto
@@ -583,11 +586,12 @@ export default function ParliamoPage() {
               <div className="flex flex-col md:flex-row md:items-start">
                 <div className="shrink-0 mb-6 md:mb-0">
                   <span
-                    className="inline-flex items-center border border-black text-black font-medium tracking-wide uppercase"
+                    className="inline-flex items-center border border-black text-black tracking-wide uppercase"
                     style={{
-                      borderRadius: "7px",
-                      padding: "5px 14px",
-                      fontSize: "15px",
+                      borderRadius: "5px",
+                padding: "5px 10px",
+                fontSize: "14px",
+                lineHeight: "20px",
                     }}
                   >
                     Progetto

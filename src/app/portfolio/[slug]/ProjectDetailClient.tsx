@@ -205,9 +205,10 @@ function SimilarCarousel() {
         <span
           className="inline-flex items-center border border-black text-black font-medium tracking-wide uppercase mb-4"
           style={{
-            borderRadius: "7px",
-            padding: "5px 14px",
-            fontSize: "15px",
+            borderRadius: "5px",
+                padding: "5px 10px",
+                fontSize: "14px",
+                lineHeight: "20px",
           }}
         >
           Portfolio
@@ -372,9 +373,10 @@ export default function ProjectDetailClient() {
                   key={i}
                   className="inline-flex items-center border border-black text-black font-medium tracking-wide uppercase"
                   style={{
-                    borderRadius: "7px",
-                    padding: "5px 14px",
-                    fontSize: "15px",
+                    borderRadius: "5px",
+                padding: "5px 10px",
+                fontSize: "14px",
+                lineHeight: "20px",
                   }}
                 >
                   {tag}
@@ -393,9 +395,10 @@ export default function ProjectDetailClient() {
                 <span
                   className="inline-flex items-center border border-black text-black font-medium tracking-wide uppercase"
                   style={{
-                    borderRadius: "7px",
-                    padding: "5px 14px",
-                    fontSize: "15px",
+                    borderRadius: "5px",
+                padding: "5px 10px",
+                fontSize: "14px",
+                lineHeight: "20px",
                   }}
                 >
                   Progetto
