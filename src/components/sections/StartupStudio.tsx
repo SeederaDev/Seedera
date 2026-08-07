@@ -138,7 +138,7 @@ export default function StartupStudio() {
             Start-up studio
           </span>
         </div>
-        <div className="studio-intro flex-1 md:max-w-[888px]">
+        <div className="studio-intro">
           {/* Design (nodo 461:105): Regular 48/54 su una colonna di 888 che parte
               a x=504 dell'artboard. Era medium con leading 1.2.
               Il tracking recupera il kerning che gli inline-block dell'effetto

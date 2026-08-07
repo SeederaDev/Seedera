@@ -152,7 +152,7 @@ export default function SistemaOperativo() {
                           collassa insieme all'altezza e non lascia un vuoto. */}
                       <div className="mt-[8px] rounded-[10px] bg-primary px-5 pt-[27px] pb-[30px] flex flex-col gap-[10px]">
                         <p className="text-black font-bold text-[16px]">{fase.claim}</p>
-                        <p className="max-w-[837px] text-black text-[16px] leading-[22px]">
+                        <p className="text-black text-[16px] leading-[22px]">
                           {fase.description}
                         </p>
                       </div>

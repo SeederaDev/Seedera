@@ -325,7 +325,7 @@ export default function Projects() {
           </div>
 
           {/* Text reveal */}
-          <div className="project-intro-text md:max-w-[888px]">
+          <div className="project-intro-text">
             {/* Regular 48/54 come ogni altro titolo di sezione: era medium con
                 interlinea 1.2 (57,6px) contro i 54 del design, e il margine
                 finto mr-[0.3em] valeva 14,4px al posto dello spazio vero.

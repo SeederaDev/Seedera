@@ -151,7 +151,7 @@ export default function Partnership() {
               restava tutto bianco e la meta' bassa della sezione era la parte
               piu' lontana dal design.
               Il tracking recupera il kerning che gli inline-block azzerano. */}
-          <h2 className="partnership-intro text-foreground font-normal max-w-[888px] text-[48px] leading-[54px] tracking-[-0.002em]">
+          <h2 className="partnership-intro text-foreground font-normal text-[48px] leading-[54px] tracking-[-0.002em]">
             {INTRO.split(" ").map((parola, wi) => (
               <span key={wi}>
                 {wi > 0 ? " " : null}

@@ -180,6 +180,7 @@ export default function Services() {
            Vale come minimo: se a una certa larghezza il titolo della prima
            card chiede piu' spazio, vince lo scalino misurato. */
         const STOP_SECONDA = 360;
+        const STOP_TERZA = 513;
 
         /* Lo scalino si MISURA, non si scrive. Con il valore fisso a 146 il
            design tornava solo a 1440px: sotto i 1366 il titolo della seconda
@@ -214,10 +215,11 @@ export default function Services() {
               /* Le fermate si costruiscono in fila: ognuna e' la precedente
                  piu' il suo scalino misurato. La seconda ha in piu' il valore
                  voluto a schermo, e le successive partono da li'. */
+              const voluta = [PIN_TOP, STOP_SECONDA, STOP_TERZA];
               const fermate = [PIN_TOP];
               for (let k = 1; k < cards.length; k++) {
                 const minimo = fermate[k - 1] + scalino(cards[k - 1]);
-                fermate.push(k === 1 ? Math.max(minimo, STOP_SECONDA) : minimo);
+                fermate.push(Math.max(minimo, voluta[k] ?? 0));
               }
               return `top top+=${fermate[i]}`;
             },
@@ -296,8 +298,11 @@ export default function Services() {
         </div>
       ))}
 
-      {/* Spacer for scroll after last pinned card */}
-      <div className="h-[50vh]" />
+      {/* Spaziatore dopo l'ultima card agganciata. Era 50vh e lasciava 386px
+          di scroll a vuoto: la pila era gia' ferma e composta, ma bisognava
+          continuare a scorrere senza che succedesse nulla. A 24vh ne restano
+          circa 150, quanto basta a leggerla prima che si sganci. */}
+      <div className="h-[24vh]" />
     </section>
   );
 }
