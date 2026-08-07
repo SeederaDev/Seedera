@@ -1,0 +1,3 @@
+:HL["/_next/static/chunks/ba883ff1c28b0119.css","style"]
+:HL["/_next/static/media/BDOGrotesk_VF-s.p.9073d4f2.ttf","font",{"crossOrigin":"","type":"font/ttf"}]
+0:{"buildId":"_bxaya3hzLDzpnnxjv-kN","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"parliamo","paramType":null,"paramKey":"parliamo","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}

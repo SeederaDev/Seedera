@@ -1,0 +1,15 @@
+Options -MultiViews -Indexes
+
+# Senza questo mod_dir vede la cartella portfolio/ e redirige
+# /portfolio a /portfolio/ prima che la rewrite possa agire.
+# L'export non genera index.html nelle sottocartelle, quindi
+# disattivarlo non toglie niente.
+DirectorySlash Off
+
+RewriteEngine On
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.*)$ $1.html [L]
+
+ErrorDocument 404 /404.html
