@@ -90,7 +90,11 @@ export default function SistemaOperativo() {
         </div>
 
         {/* ── Accordion ── */}
-        <ul className="fasi-lista flex flex-col gap-5 md:max-w-[920px]">
+        {/* Niente max-width: 920px e' quanto misura la colonna 92fr a 1440px,
+            non un vincolo del design. Su finestre piu' larghe fermava le barre
+            mentre le card delle altre sezioni arrivavano al bordo. La griglia
+            44fr/92fr da sola tiene gia' la proporzione a ogni larghezza. */}
+        <ul className="fasi-lista flex flex-col gap-5">
           {FASI.map((fase, i) => {
             const open = aperta === i;
             return (

@@ -183,12 +183,17 @@ export default function Services() {
            sola (ne bastano 85), quindi la card successiva tagliava o lasciava
            un vuoto. Misurando il titolo davvero renderizzato resta visibile
            tutto il titolo a qualsiasi larghezza, che e' la regola del design. */
+        /* Si misura dal bordo alto della CARD — l'elemento che viene
+           agganciato — e non da quello del riquadro interno: la prima card ha
+           pt-32, cioe' 128px che il calcolo sul solo riquadro non vedeva. Il
+           risultato era che a regime della prima card restavano visibili 18px
+           invece del titolo, e sembrava che la seconda salisse troppo. */
         const scalino = (card: HTMLElement) => {
-          const box = card.firstElementChild as HTMLElement | null;
           const titolo = card.querySelector("h3");
-          if (!box || !titolo) return 146;
-          const pad = parseFloat(getComputedStyle(box).paddingTop) || 41;
-          return Math.round(pad + titolo.getBoundingClientRect().height + RESPIRO);
+          if (!titolo) return 146;
+          const giu =
+            titolo.getBoundingClientRect().bottom - card.getBoundingClientRect().top;
+          return Math.round(giu + RESPIRO);
         };
 
         cards.forEach((card, i) => {
