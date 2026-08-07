@@ -26,6 +26,10 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+      # Marca quale commit e' online: permette di verificare che Plesk abbia
+      # davvero deployato con un curl su /version.txt, senza aprire il pannello.
+      - run: echo "$GITHUB_SHA" > out/version.txt
+
       # Next esporta /portfolio sia come portfolio.html sia come cartella
       # portfolio/ (le pagine progetto). Senza questa rewrite Apache tratta
       # /portfolio come directory, non trova index.html e risponde 403.
