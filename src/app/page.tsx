@@ -8,7 +8,6 @@ import SistemaOperativo from "@/components/sections/SistemaOperativo";
 import Marquee from "@/components/sections/Marquee";
 import Projects from "@/components/sections/Projects";
 import ProjectsMarquee from "@/components/sections/ProjectsMarquee";
-import ProjectsOutro from "@/components/sections/ProjectsOutro";
 import StartupStudio from "@/components/sections/StartupStudio";
 import Contatti from "@/components/sections/Contatti";
 import Partnership from "@/components/sections/Partnership";
@@ -28,7 +27,6 @@ export default function Home() {
         <Marquee />
         <Projects />
         <ProjectsMarquee />
-        <ProjectsOutro />
         <StartupStudio />
         <Contatti />
         <Partnership />
