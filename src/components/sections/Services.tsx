@@ -176,6 +176,8 @@ export default function Services() {
            Nel design (titoli a y 3665,7 · 3811,2 · 3963,9) lo scalino e' 145,5
            e il titolo occupa padding 41 + due righe da 44 = 129: restano 17. */
         const RESPIRO = 17;
+        /* Scendere ancora sulla seconda card: la prima si scopre di piu'. */
+        const EXTRA_PRIMA = 100;
 
         /* Lo scalino si MISURA, non si scrive. Con il valore fisso a 146 il
            design tornava solo a 1440px: sotto i 1366 il titolo della seconda
@@ -209,6 +211,11 @@ export default function Services() {
             start: () => {
               let y = PIN_TOP;
               for (let k = 0; k < i; k++) y += scalino(cards[k]);
+              /* La prima card resta scoperta 100px in piu' delle altre: e' una
+                 scelta voluta, si vede anche l'inizio dell'introduzione invece
+                 del solo titolo. Vale solo sul primo scalino, cosi' la terza
+                 card resta comunque dentro la finestra. */
+              if (i > 0) y += EXTRA_PRIMA;
               return `top top+=${y}`;
             },
             endTrigger: sectionRef.current,
