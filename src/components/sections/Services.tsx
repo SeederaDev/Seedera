@@ -172,27 +172,40 @@ export default function Services() {
       mm.add("(min-width: 768px)", () => {
         const cards = gsap.utils.toArray<HTMLElement>(".service-card");
         const PIN_TOP = 80;
-        /* Scalino tra una card e la successiva, misurato sui titoli nel PDF del
-           design: y 3665,7 · 3811,2 · 3963,9 → 145,5 e 152,6. Non è un numero
-           estetico, è padding (41) + titolo su due righe (88): di ogni card
-           coperta resta visibile esattamente la riga del titolo, come nel
-           design. Con 26px si vedeva una fessura e i titoli sparivano.
-           Il vincolo che aveva fatto scendere il valore — la quarta card sotto
-           il fold — non esiste più: le card sono tre, l'ultima parte a
-           80+292=372 e finisce entro il viewport. */
-        const STACK_OFFSET = 146;
+        /* Aria fra la fine del titolo e il bordo della card che lo copre.
+           Nel design (titoli a y 3665,7 · 3811,2 · 3963,9) lo scalino e' 145,5
+           e il titolo occupa padding 41 + due righe da 44 = 129: restano 17. */
+        const RESPIRO = 17;
+
+        /* Lo scalino si MISURA, non si scrive. Con il valore fisso a 146 il
+           design tornava solo a 1440px: sotto i 1366 il titolo della seconda
+           card va su tre righe (serve 173) e sopra i 1680 la terza sta su una
+           sola (ne bastano 85), quindi la card successiva tagliava o lasciava
+           un vuoto. Misurando il titolo davvero renderizzato resta visibile
+           tutto il titolo a qualsiasi larghezza, che e' la regola del design. */
+        const scalino = (card: HTMLElement) => {
+          const box = card.firstElementChild as HTMLElement | null;
+          const titolo = card.querySelector("h3");
+          if (!box || !titolo) return 146;
+          const pad = parseFloat(getComputedStyle(box).paddingTop) || 41;
+          return Math.round(pad + titolo.getBoundingClientRect().height + RESPIRO);
+        };
 
         cards.forEach((card, i) => {
           ScrollTrigger.create({
             trigger: card,
             /* Lo scalino va sul lato SCROLLER, non sul trigger: cosi' legge
-               "la card i si ferma a PIN_TOP + i*STACK_OFFSET dal bordo alto",
-               che e' quello che vogliamo. Scritto come `top-=${"i*OFFSET"}` sul
-               trigger sposta invece il punto d'innesco, e con pinSpacing:false
-               (che toglie le card dal flusso, facendo arrivare la successiva
-               prima del previsto) la card sopra veniva coperta fino in fondo
-               invece di lasciare visibile la riga del titolo. */
-            start: () => `top top+=${PIN_TOP + i * STACK_OFFSET}`,
+               "la card i si ferma a tot dal bordo alto", che e' quello che
+               vogliamo. Scritto sul trigger sposta invece il punto d'innesco, e
+               con pinSpacing:false (che toglie le card dal flusso, facendo
+               arrivare la successiva prima del previsto) la card sopra veniva
+               coperta fino in fondo. La somma e' cumulativa perche' ogni card
+               puo' chiedere un'altezza diversa. */
+            start: () => {
+              let y = PIN_TOP;
+              for (let k = 0; k < i; k++) y += scalino(cards[k]);
+              return `top top+=${y}`;
+            },
             endTrigger: sectionRef.current,
             end: "bottom bottom",
             pin: true,

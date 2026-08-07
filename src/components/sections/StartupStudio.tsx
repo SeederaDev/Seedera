@@ -140,8 +140,11 @@ export default function StartupStudio() {
         </div>
         <div className="studio-intro flex-1 md:max-w-[888px]">
           {/* Design (nodo 461:105): Regular 48/54 su una colonna di 888 che parte
-              a x=504 dell'artboard. Era medium con leading 1.2. */}
-          <h2 className="text-h2 font-normal leading-[54px]">
+              a x=504 dell'artboard. Era medium con leading 1.2.
+              Il tracking recupera il kerning che gli inline-block dell'effetto
+              colore azzerano: le righe misuravano 737,8/881,8/831,3/861,5 contro
+              735,9/877,8/826,7/859,4 del PDF, ~0,09px per carattere. */}
+          <h2 className="text-h2 font-normal leading-[54px] tracking-[-0.002em]">
             {INTRO.split(" ").map((word, wi) => (
               <span key={wi}>
               {wi > 0 ? " " : null}

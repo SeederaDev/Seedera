@@ -222,11 +222,11 @@ export default function Hero() {
             stai chiedendo la cosa sbagliata, e di entrare nel rischio quando il
             progetto lo merita.
           </p>
-          {/* Nel design la CTA e' la sola freccia: il testo vive nell'aria
-              label, non a schermo. */}
+          {/* A riposo la CTA e' la sola freccia, come nel design: la parola
+              compare al passaggio del mouse. */}
           <Link
             href="/parliamo"
-            aria-label="Apri una conversazione"
+            aria-label="Parliamo, apri una conversazione"
             className="group inline-flex items-center text-black"
           >
             <svg
@@ -235,7 +235,7 @@ export default function Hero() {
               viewBox="0 0 35 33"
               fill="none"
               aria-hidden="true"
-              className="transition-transform duration-300 group-hover:translate-x-2"
+              className="shrink-0 transition-transform duration-300 group-hover:translate-x-2"
             >
               <path
                 d="M1 16.5h32M21 4l12 12.5L21 29"
@@ -245,6 +245,21 @@ export default function Hero() {
                 strokeLinejoin="round"
               />
             </svg>
+            {/* Il trucco della colonna 0fr→1fr invece di max-width: anima
+                verso la larghezza VERA del testo, quindi non serve indovinare
+                un valore e la parola non "rimbalza" a fine transizione.
+                A riposo la colonna e' larga zero: il layout del design resta
+                quello, la freccia non si sposta. */}
+            <span
+              aria-hidden="true"
+              className="grid grid-cols-[0fr] transition-[grid-template-columns] duration-300 ease-out group-hover:grid-cols-[1fr] motion-reduce:transition-none"
+            >
+              <span className="overflow-hidden">
+                <span className="block whitespace-nowrap pl-[18px] text-[16px] leading-[22px] opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 motion-reduce:transition-none">
+                  Parliamo
+                </span>
+              </span>
+            </span>
           </Link>
           </div>
         </div>

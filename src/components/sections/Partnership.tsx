@@ -15,6 +15,12 @@ interface Model {
   selective?: boolean;
 }
 
+const INTRO =
+  "Quando ci crediamo, entriamo nel rischio, la differenza tra un fornitore e " +
+  "un partner si misura in una cosa sola: chi ha qualcosa da perdere se va " +
+  "male? Seedera può entrare nei progetti come co-investitore. Non è un " +
+  "servizio. È un segnale di allineamento";
+
 const MODELS: Model[] = [
   {
     label: "Modello 1",
@@ -69,6 +75,27 @@ export default function Partnership() {
 
   useGSAP(
     () => {
+      /* Rivelo progressivo del titolo, come in Start-up studio: il colore
+         segue lo scorrimento carattere per carattere. Su fondo scuro il
+         "gia' letto" e' bianco, il resto grigio. */
+      const chars = gsap.utils.toArray<HTMLElement>(".partnership-char");
+      if (chars.length) {
+        ScrollTrigger.create({
+          trigger: ".partnership-intro",
+          start: "top 80%",
+          end: "top 25%",
+          scrub: 0.5,
+          onUpdate: (self) => {
+            chars.forEach((c, i) => {
+              c.style.color =
+                self.progress > i / chars.length
+                  ? "var(--color-foreground)"
+                  : "#505050";
+            });
+          },
+        });
+      }
+
       const cards = gsap.utils.toArray<HTMLElement>(".partnership-card");
       gsap.from(cards, {
         y: 40,
@@ -77,8 +104,12 @@ export default function Partnership() {
         stagger: 0.12,
         ease: "power3.out",
         scrollTrigger: {
+          /* Appena la griglia si affaccia, non a 80%: il rivelo del titolo
+             qui sopra si consuma proprio in quella fascia di scroll, e con
+             l'ingresso piu' tardivo il design (titolo a meta' rivelo E card
+             gia' visibili) era uno stato che la pagina non raggiungeva mai. */
           trigger: ".partnership-grid",
-          start: "top 80%",
+          start: "top 98%",
           toggleActions: "play none none reverse",
         },
       });
@@ -113,12 +144,32 @@ export default function Partnership() {
             </span>
           </div>
 
-          {/* Design (nodo 468:73): Regular 48/54, non 39/44. */}
-          <h2 className="text-foreground font-normal max-w-[888px] text-[48px] leading-[54px]">
-            Quando ci crediamo, entriamo nel rischio, la differenza tra un
-            fornitore e un partner si misura in una cosa sola: chi ha qualcosa da
-            perdere se va male? Seedera può entrare nei progetti come
-            co-investitore. Non è un servizio. È un segnale di allineamento
+          {/* Design (nodo 468:73): Regular 48/54, non 39/44.
+              Nel PDF il titolo e' a due toni — bianco fino a "chi ha qualcosa
+              da per", grigio da li' in poi: e' il rivelo progressivo colto a
+              meta' animazione, lo stesso di Start-up studio. Senza, il testo
+              restava tutto bianco e la meta' bassa della sezione era la parte
+              piu' lontana dal design.
+              Il tracking recupera il kerning che gli inline-block azzerano. */}
+          <h2 className="partnership-intro text-foreground font-normal max-w-[888px] text-[48px] leading-[54px] tracking-[-0.002em]">
+            {INTRO.split(" ").map((parola, wi) => (
+              <span key={wi}>
+                {wi > 0 ? " " : null}
+                {/* La parola resta intera in un inline-block: cosi' va a capo
+                    per parole, non per lettere. */}
+                <span className="inline-block">
+                  {parola.split("").map((ch, ci) => (
+                    <span
+                      key={ci}
+                      className="partnership-char inline-block transition-colors duration-300 ease-out"
+                      style={{ color: "#505050" }}
+                    >
+                      {ch}
+                    </span>
+                  ))}
+                </span>
+              </span>
+            ))}
           </h2>
         </div>
 

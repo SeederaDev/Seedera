@@ -303,7 +303,10 @@ export default function Projects() {
 
       {/* Intro area */}
       <div className="container-content pt-24 md:pt-40 pb-16 md:pb-24">
-        <div className="flex flex-col md:flex-row md:items-start">
+        {/* 464 + 896 su 1360, come studio e partnership: nel design il testo
+            parte a x=504 dell'artboard. Con lo spacer al 20% partiva a 389, e
+            la colonna piu' larga mandava a capo in punti diversi. */}
+        <div className="flex flex-col md:grid md:grid-cols-[464fr_896fr] md:items-start">
           {/* Label pill */}
           <div className="shrink-0 mb-6 md:mb-0">
             <span
@@ -321,14 +324,19 @@ export default function Projects() {
             </span>
           </div>
 
-          {/* Spacer */}
-          <div className="hidden md:block w-[20%] shrink-0" />
-
           {/* Text reveal */}
-          <div className="flex-1 project-intro-text">
-            <h2 className="text-h2 font-medium leading-[1.2]">
+          <div className="project-intro-text md:max-w-[888px]">
+            {/* Regular 48/54 come ogni altro titolo di sezione: era medium con
+                interlinea 1.2 (57,6px) contro i 54 del design, e il margine
+                finto mr-[0.3em] valeva 14,4px al posto dello spazio vero.
+                Il tracking recupera il kerning che gli inline-block azzerano. */}
+            <h2 className="text-h2 font-normal leading-[54px] tracking-[-0.002em]">
               {INTRO_TEXT.split(" ").map((word, wi) => (
-                <span key={wi} className="inline-block mr-[0.3em]">
+                /* Lo spazio sta FUORI dall'inline-block: dentro non offrirebbe
+                   un punto di a capo e il titolo resterebbe una riga sola. */
+                <span key={wi}>
+                  {wi > 0 ? " " : null}
+                  <span className="inline-block">
                   {word.split("").map((char, ci) => (
                     <span
                       key={ci}
@@ -338,6 +346,7 @@ export default function Projects() {
                       {char}
                     </span>
                   ))}
+                  </span>
                 </span>
               ))}
             </h2>
