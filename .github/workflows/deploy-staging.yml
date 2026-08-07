@@ -50,14 +50,24 @@ jobs:
           ErrorDocument 404 /404.html
           EOF
 
+      # Commit SOPRA il branch deploy esistente, mai git init + force push:
+      # Plesk aggiorna il sito con un git pull, e una storia riscritta da capo
+      # non e' fast-forward, quindi il pull fallisce e il deploy non avviene.
       - name: Push build to deploy branch
         run: |
-          cd out
-          git init -q -b deploy
+          git clone -q --depth 1 --branch deploy \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" \
+            deploy-repo
+
+          rsync -a --delete --exclude .git out/ deploy-repo/
+
+          cd deploy-repo
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -q -m "Deploy ${GITHUB_SHA::7}"
-          git push -q --force \
-            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" \
-            deploy
+          if git diff --cached --quiet; then
+            echo "Nessuna modifica nel build, niente da deployare."
+          else
+            git commit -q -m "Deploy ${GITHUB_SHA::7}"
+            git push -q origin deploy
+          fi
