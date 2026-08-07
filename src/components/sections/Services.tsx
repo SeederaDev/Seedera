@@ -201,6 +201,22 @@ export default function Services() {
           return Math.round(giu + RESPIRO);
         };
 
+        /* Le fermate si costruiscono in fila: ognuna e' la precedente piu' il
+           suo scalino misurato. La seconda e la terza hanno in piu' il valore
+           voluto a schermo, che vale come minimo. */
+        const fermate = () => {
+          const voluta = [PIN_TOP, STOP_SECONDA, STOP_TERZA];
+          const out = [PIN_TOP];
+          for (let k = 1; k < cards.length; k++) {
+            out.push(Math.max(out[k - 1] + scalino(cards[k - 1]), voluta[k] ?? 0));
+          }
+          return out;
+        };
+        const fondoPila = () => {
+          const f = fermate();
+          return Math.round(f[f.length - 1] + cards[cards.length - 1].offsetHeight);
+        };
+
         cards.forEach((card, i) => {
           ScrollTrigger.create({
             trigger: card,
@@ -211,20 +227,15 @@ export default function Services() {
                arrivare la successiva prima del previsto) la card sopra veniva
                coperta fino in fondo. La somma e' cumulativa perche' ogni card
                puo' chiedere un'altezza diversa. */
-            start: () => {
-              /* Le fermate si costruiscono in fila: ognuna e' la precedente
-                 piu' il suo scalino misurato. La seconda ha in piu' il valore
-                 voluto a schermo, e le successive partono da li'. */
-              const voluta = [PIN_TOP, STOP_SECONDA, STOP_TERZA];
-              const fermate = [PIN_TOP];
-              for (let k = 1; k < cards.length; k++) {
-                const minimo = fermate[k - 1] + scalino(cards[k - 1]);
-                fermate.push(Math.max(minimo, voluta[k] ?? 0));
-              }
-              return `top top+=${fermate[i]}`;
-            },
+            start: () => `top top+=${fermate()[i]}`,
             endTrigger: sectionRef.current,
-            end: "bottom bottom",
+            /* Si sgancia quando il fondo della sezione raggiunge il fondo
+               della PILA, non il fondo della finestra. Con "bottom bottom" il
+               rilascio dipendeva dall'altezza della finestra: su schermi bassi
+               il bianco della sezione successiva saliva sopra le card ancora
+               agganciate e le tagliava. Legato alla pila, il punto e' lo
+               stesso a ogni altezza e la sezione dopo non arriva mai prima. */
+            end: () => `bottom top+=${fondoPila()}`,
             pin: true,
             pinSpacing: false,
             invalidateOnRefresh: true,
