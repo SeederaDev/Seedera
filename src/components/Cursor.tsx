@@ -19,13 +19,35 @@ export default function Cursor() {
     const dot = dotRef.current;
     if (!shadow || !dot) return;
 
+    /* Inseguimento morbido con lerp in requestAnimationFrame.
+     *
+     * Prima la posizione si scriveva su left/top con una transizione CSS: ogni
+     * mousemove la faceva ripartire da zero, quindi finche' il mouse si muoveva
+     * il cerchio non arrivava mai a destinazione e sembrava muoversi solo alla
+     * fermata. Il lerp invece avanza a ogni frame verso l'ultima posizione
+     * nota, quindi segue sempre, in movimento e da fermo.
+     *
+     * Si scrive transform (compositabile) e non left/top, che sono proprieta'
+     * di layout e costringono il browser a ricalcolare a ogni frame. */
+    let mx = -100;
+    let my = -100;
+    let sx = -100;
+    let sy = -100;
+    let raf = 0;
+
+    const anima = () => {
+      // 0.18 e' il "peso" del cerchio: piu' basso, piu' resta indietro.
+      sx += (mx - sx) * 0.18;
+      sy += (my - sy) * 0.18;
+      shadow.style.transform = `translate3d(${sx}px, ${sy}px, 0)`;
+      dot.style.transform = `translate3d(${mx}px, ${my}px, 0)`;
+      raf = requestAnimationFrame(anima);
+    };
+    raf = requestAnimationFrame(anima);
+
     const handleMouseMove = (e: MouseEvent) => {
-      // Dot follows instantly (no CSS transition on left/top)
-      dot.style.left = `${e.clientX}px`;
-      dot.style.top = `${e.clientY}px`;
-      // Shadow follows with CSS transition (smooth trailing)
-      shadow.style.left = `${e.clientX}px`;
-      shadow.style.top = `${e.clientY}px`;
+      mx = e.clientX;
+      my = e.clientY;
 
       // Check if hovering an interactive element
       const target = e.target as HTMLElement;
@@ -59,6 +81,7 @@ export default function Cursor() {
     window.addEventListener("similar-cursor-hide", show);
 
     return () => {
+      cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", handleMouseMove);
       document.documentElement.removeEventListener("mouseleave", handleLeave);
       window.removeEventListener("project-cursor-show", hide);
@@ -75,12 +98,12 @@ export default function Cursor() {
       <div
         ref={shadowRef}
         className="cursor cursor-shadow"
-        style={{ left: "-100px", top: "-100px" }}
+        style={{ transform: "translate3d(-100px, -100px, 0)" }}
       />
       <div
         ref={dotRef}
         className="cursor cursor-dot"
-        style={{ left: "-100px", top: "-100px" }}
+        style={{ transform: "translate3d(-100px, -100px, 0)" }}
       />
     </>
   );

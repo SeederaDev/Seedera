@@ -16,7 +16,6 @@ const FOOTER_LINKS = [
   { label: "Portfolio", href: "/portfolio" },
   { label: "Studio", href: "/#studio" },
   { label: "Partnership", href: "/#partnership" },
-  { label: "Team", href: "/team" },
 ];
 
 const SOCIALS = [
@@ -59,7 +58,7 @@ function GlitchPill({ text }: { text: string }) {
     <span
       ref={spanRef}
       onMouseEnter={handleEnter}
-      className="inline-flex items-center self-start border border-black text-black font-medium tracking-wide uppercase cursor-default"
+      className="inline-flex items-center self-start border border-black text-black font-medium uppercase cursor-default"
       style={{
         borderRadius: "7px",
         padding: "5px 14px",
@@ -231,36 +230,10 @@ export default function Footer() {
       className="relative bg-primary text-black z-10"
       aria-label="Footer"
     >
-      {/* ── Big CTA Section ── */}
-      <div className="container-content pt-24 md:pt-40 pb-16 md:pb-24">
-        <div className="flex flex-col gap-6">
-          <span
-            className="inline-flex items-center self-start border border-black text-black font-medium tracking-wide uppercase cursor-default"
-            style={{
-              borderRadius: "7px",
-              padding: "5px 14px",
-              fontSize: "15px",
-            }}
-          >
-            Parliamo
-          </span>
-          <h2
-            className="font-medium leading-[1.05] uppercase"
-            style={{ fontSize: "clamp(2.5rem, 7vw, 7rem)" }}
-          >
-            {renderAnimatedText([
-              { text: "Hai un problema da risolvere" },
-              { text: "o un prodotto da costruire?", className: "text-black" },
-            ])}
-          </h2>
-          <p className="max-w-[52ch] text-black/70 text-lg leading-relaxed">
-            Iniziamo da una conversazione informale. Nessun brief. Nessun form.
-            Solo una chiamata per capire se il progetto ha senso per entrambi.
-          </p>
-          <WaveEmail email="info@seedera.it" />
-        </div>
-      </div>
-
+      {/* Qui c'era un secondo blocco "Hai un problema da risolvere / o un
+          prodotto da costruire?" a corpo gigante (clamp fino a 7rem): una
+          riproposizione della sezione Contatti, che nel Figma non esiste e che
+          rompeva anche le andate a capo. Rimosso: il CTA vive in Contatti. */}
       {/* ── Separator ── */}
       <div className="container-content">
         <div className="h-[1px] bg-black/15" />

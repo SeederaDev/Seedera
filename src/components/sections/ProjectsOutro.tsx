@@ -57,11 +57,12 @@ export default function ProjectsOutro() {
           {/* Label pill */}
           <div className="shrink-0 mb-6 md:mb-0">
             <span
-              className="inline-flex items-center border border-black text-black font-medium tracking-wide uppercase"
+              className="inline-flex items-center border border-black text-black uppercase"
               style={{
-                borderRadius: "7px",
-                padding: "5px 14px",
-                fontSize: "15px",
+                borderRadius: "5px",
+                padding: "5px 10px",
+                fontSize: "14px",
+                lineHeight: "20px",
               }}
             >
               Progetti

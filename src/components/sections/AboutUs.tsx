@@ -7,8 +7,11 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+/* Il "\n" e' un a capo del design, non una preferenza: nel Figma (nodo 461:97)
+   la prima slide e' spezzata in tre paragrafi, e le righe misurano 812 e 746px
+   invece di riempire i 900 disponibili. */
 const SLIDES = [
-  "Non costruiamo la soluzione che ci chiedono. Costruiamo la soluzione che serve.",
+  "La maggior parte delle agenzie inizia\ndal cosa. Noi iniziamo dal perché.\nNon costruiamo la soluzione che ci chiedono, costruiamo la soluzione che effettivamente serve",
   "La maggior parte dei partner inizia dal cosa. Noi iniziamo dal perché. Prima di accettare un progetto, diagnostichiamo il bisogno reale, che raramente coincide con la richiesta iniziale.",
   "Non consegniamo file. Costruiamo capacità che restano nell'organizzazione dopo che usciamo. Non consigliamo dall'esterno: operiamo dall'interno, condividendo gli obiettivi.",
 ];
@@ -122,7 +125,7 @@ export default function AboutUs() {
       aria-label="Chi siamo"
     >
       {/* Content */}
-      <div className="container-content h-full flex flex-col justify-center">
+      <div id="about-inner" className="container-content h-full flex flex-col justify-center">
         {/* Progress line – grey track with black fill */}
         <div className="relative w-full h-[1px] mb-8 md:mb-16">
           <div className="absolute inset-0 bg-grey" />
@@ -133,15 +136,21 @@ export default function AboutUs() {
         </div>
 
         {/* Mobile/Tablet: stacked — Desktop: side by side */}
-        <div className="w-full flex flex-col md:flex-row md:items-start">
+        {/* Nel design il testo parte a x=500 su un artboard di 1440: dentro il
+            container (40px di margine) sono 460 + 900 su 1360. In frazioni e
+            non in pixel, perche' il sito e' full-width e le due colonne devono
+            crescere insieme; 46fr/90fr evita l'arrotondamento di una
+            percentuale. */}
+        <div
+          id="about-block"
+          className="w-full flex flex-col md:grid md:grid-cols-[46fr_90fr] md:items-start"
+        >
           {/* Counter with border */}
           <div className="shrink-0 mb-6 md:mb-0">
             <span
-              className="inline-flex items-center border border-black text-black font-medium tracking-wide"
+              className="inline-flex items-center border border-black text-black"
               style={{
-                borderRadius: "7px",
-                padding: "5px 10px",
-                fontSize: "15px",
+                borderRadius: "5px", padding: "5px 10px", fontSize: "14px", lineHeight: "20px",
               }}
             >
               <span className="about-counter-current">01</span>
@@ -150,11 +159,8 @@ export default function AboutUs() {
             </span>
           </div>
 
-          {/* Spacer – only on desktop, pushes text to ~35% from left */}
-          <div className="hidden md:block w-[25%] shrink-0" />
-
           {/* Text reveal area */}
-          <div className="flex-1 relative">
+          <div className="relative">
             {SLIDES.map((text, si) => (
               <div
                 key={si}
@@ -165,12 +171,17 @@ export default function AboutUs() {
                   transition: "opacity 0.4s ease, visibility 0.4s ease",
                 }}
               >
-                <h2 className="text-h2 font-medium leading-[1.2]">
-                  {text.split(" ").map((word, wi) => (
-                    <span
-                      key={wi}
-                      className="about-word inline-block mr-[0.3em]"
-                    >
+                {/* Design (nodo 461:97): BDO Grotesk Regular 48px / 54px.
+                    Era font-medium con leading 1.2: piu' bold e piu' arioso
+                    del design, e il testo andava a capo prima. Lo spazio tra
+                    parole e' un nodo di testo, non un mr-[0.3em] inventato. */}
+                <h2 className="text-h2 font-normal leading-[54px]">
+                  {text.split("\n").map((riga, ri) => (
+                  <span key={ri} className="block">
+                  {riga.split(" ").map((word, wi) => (
+                    <span key={wi}>
+                      {wi > 0 ? " " : null}
+                      <span className="about-word inline-block">
                       {word.split("").map((char, ci) => (
                         <span
                           key={ci}
@@ -180,7 +191,10 @@ export default function AboutUs() {
                           {char}
                         </span>
                       ))}
+                      </span>
                     </span>
+                  ))}
+                  </span>
                   ))}
                 </h2>
               </div>

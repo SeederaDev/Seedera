@@ -11,15 +11,14 @@ const NAV_ITEMS = [
   { label: "Metodo", href: "/#about" },
   { label: "Capacità", href: "/#services" },
   { label: "Portfolio", href: "/#portfolio" },
-  { label: "Studio", href: "/#studio" },
-  { label: "Team", href: "/team" },
-  { label: "Parliamo →", href: "/parliamo" },
+  { label: "Progetti", href: "/#studio" },
+  { label: "Partnership", href: "/#partnership" },
+  { label: "Parliamo", href: "/parliamo" },
 ];
 
 const MENU_PAGES = [
   { label: "Home", href: "/" },
   { label: "Portfolio", href: "/portfolio" },
-  { label: "Team", href: "/team" },
   { label: "Apri una conversazione", href: "/parliamo" },
 ];
 
@@ -78,7 +77,10 @@ function SpinLogo() {
     <Link
       href="/"
       className="relative z-50 flex items-center justify-center bg-black rounded-[5px]"
-      style={{ padding: "12px 18px" }}
+      /* Misurato sul PDF del design: pillola 40→147 x 15→45, cioe' 107x30, con
+         il lettering bianco 85x14 centrato. Erano 142x42 con il logo a 18px, e
+         i 35px di troppo spingevano a destra tutte le voci del menu. */
+      style={{ padding: "8px 11px" }}
     >
       <Image
         src="/Seedera-Logo.svg"
@@ -87,7 +89,7 @@ function SpinLogo() {
         height={22}
         priority
         style={{
-          height: "18px",
+          height: "14px",
           width: "auto",
           filter: "invert(1) brightness(2)",
         }}
@@ -186,8 +188,11 @@ export default function Navbar() {
             <SpinLogo />
 
             {/* Nav pills - hidden on mobile */}
+            {/* Passo fra le pillole: nel design il testo di una voce finisce a
+                218,03 e il successivo inizia a 248,14 → 30,11 di stacco, di cui
+                22 sono padding e bordo delle due pillole. Restano 8, non 10. */}
             <nav
-              className="hidden md:flex items-center gap-[10px]"
+              className="hidden md:flex items-center gap-[8px]"
               aria-label="Navigazione principale"
             >
               {NAV_ITEMS.map((item) => (
@@ -196,9 +201,13 @@ export default function Navbar() {
                   href={item.href}
                   onClick={(e) => handleNavClick(e, item.href)}
                   className="text-black rounded-[5px] border border-black hover:bg-black hover:text-white transition-all duration-300"
+                  /* 14/20 come ogni altro badge del design. Con 20px ogni voce
+                     era larga ~22px in piu' e l'errore si accumulava: l'ultima
+                     finiva 169px oltre la sua x (misura_testi.mjs). */
                   style={{
                     padding: "5px 10px",
-                    fontSize: "20px",
+                    fontSize: "14px",
+                    lineHeight: "20px",
                     fontWeight: 400,
                   }}
                 >

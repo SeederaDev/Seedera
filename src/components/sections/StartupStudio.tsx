@@ -1,206 +1,249 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-interface StudioProduct {
-  name: string;
-  status: string;
-  live: boolean;
-  claim: string;
-  description: string;
-  href: string;
-  linkLabel: string;
+interface Prodotto {
+  tipologia: string;
+  nome: string;
   image?: string;
+  href?: string;
   accent: string;
 }
 
-const PRODUCTS: StudioProduct[] = [
+const PRODOTTI: Prodotto[] = [
   {
-    name: "Zentro",
-    status: "Live",
-    live: true,
-    claim: "CRM e project management per freelancer e agenzie.",
-    description:
-      "Utenti paganti. In crescita. È la proof of concept vivente del nostro metodo: abbiamo costruito il nostro sistema di esecuzione e lo mettiamo a disposizione dei clienti come infrastruttura operativa.",
-    href: "https://zentro.it",
-    linkLabel: "zentro.it ↗",
+    tipologia: "CRM",
+    nome: "ZENTRO",
     image: "/images/our-brand/zentro.png",
+    href: "https://zentro.it",
     accent: "var(--color-green)",
   },
   {
-    name: "Replase",
-    status: "In sviluppo",
-    live: false,
-    claim:
-      "Connette le imprese alle iniziative globali di rimozione della plastica.",
-    description:
-      "Impatto ambientale reale e misurabile: ogni contributo è tracciato fino all'iniziativa che lo assorbe.",
+    tipologia: "IMPATTO AMBIENTALE",
+    nome: "REPLASE",
     href: "https://replase.com",
-    linkLabel: "replase.com ↗",
     accent: "var(--color-cyan)",
   },
 ];
 
+const INTRO =
+  "Costruiamo anche per noi stessi, nessuno di questi lavori è finito quando è stato consegnato. È finito quando il team interno ha saputo portarlo avanti da solo.";
+
+/* Pill che segue il cursore sopra il carosello: nel design e' un cerchio
+   giallo con la scritta < DRAG >. */
+function DragPill({ visible }: { visible: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    const el = ref.current;
+    if (!el) return;
+    const move = (e: MouseEvent) =>
+      gsap.to(el, {
+        left: e.clientX,
+        top: e.clientY,
+        duration: 0.18,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+    window.addEventListener("mousemove", move);
+    return () => window.removeEventListener("mousemove", move);
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      aria-hidden="true"
+      className="pointer-events-none fixed z-50 hidden md:flex items-center justify-center rounded-full bg-primary text-black font-medium transition-opacity duration-300"
+      style={{
+        width: 96,
+        height: 96,
+        transform: "translate(-50%, -50%)",
+        opacity: visible ? 1 : 0,
+        fontSize: "var(--font-btn)",
+      }}
+    >
+      &lt; DRAG &gt;
+    </div>
+  );
+}
+
 export default function StartupStudio() {
   const sectionRef = useRef<HTMLElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [dragging, setDragging] = useState(false);
+  const [hovering, setHovering] = useState(false);
+  const drag = useRef({ startX: 0, scrollLeft: 0 });
 
   useGSAP(
     () => {
-      const cards = gsap.utils.toArray<HTMLElement>(".studio-card");
-      gsap.from(cards, {
-        y: 40,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.15,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 70%",
-          toggleActions: "play none none reverse",
+      const chars = gsap.utils.toArray<HTMLElement>(".studio-char");
+      if (!chars.length) return;
+      ScrollTrigger.create({
+        trigger: ".studio-intro",
+        start: "top 80%",
+        end: "top 25%",
+        scrub: 0.5,
+        onUpdate: (self) => {
+          chars.forEach((c, i) => {
+            c.style.color =
+              self.progress > i / chars.length
+                ? "var(--color-black)"
+                : "var(--color-grey)";
+          });
         },
       });
     },
     { scope: sectionRef },
   );
 
+  const onPointerDown = (e: React.PointerEvent) => {
+    const track = trackRef.current;
+    if (!track) return;
+    setDragging(true);
+    drag.current = { startX: e.clientX, scrollLeft: track.scrollLeft };
+    track.setPointerCapture(e.pointerId);
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!dragging || !trackRef.current) return;
+    trackRef.current.scrollLeft =
+      drag.current.scrollLeft - (e.clientX - drag.current.startX);
+  };
+
+  const onPointerUp = () => setDragging(false);
+
   return (
     <section
       ref={sectionRef}
       id="studio"
       className="relative bg-white z-10 py-24 md:py-40"
-      aria-label="Startup Studio"
+      aria-label="Start-up studio"
     >
-      <div className="container-content flex flex-col gap-12 md:gap-16">
-        {/* ── Header ── */}
-        <header className="flex flex-col gap-5 max-w-[70ch]">
-          <span
-            className="uppercase tracking-[0.2em]"
-            style={{
-              fontSize: "var(--font-p)",
-              color: "var(--color-middle-grey)",
-            }}
-          >
-            {"// Startup Studio"}
-          </span>
-          <h2
-            className="text-black font-normal uppercase leading-none"
-            style={{ fontSize: "var(--font-h2)" }}
-          >
-            Costruiamo anche per noi stessi.
-          </h2>
-          <p className="text-black/70 text-lg leading-relaxed">
-            Seedera è anche uno startup studio. Quando identifichiamo un problema
-            irrisolto, costruiamo il prodotto.
-          </p>
-        </header>
+      <DragPill visible={hovering && !dragging} />
 
-        {/* ── Products ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {PRODUCTS.map((product) => (
+      {/* ── Intro ── */}
+      <div className="container-content">
+        {/* 464 + 896 su 1360: nel design il testo parte a x=504 dell'artboard. */}
+        <div id="studio-block" className="flex flex-col md:grid md:grid-cols-[464fr_896fr] md:items-start">
+        <div className="shrink-0 mb-6 md:mb-0">
+          <span
+            className="inline-flex items-center border border-black text-black"
+            style={{ borderRadius: "5px", padding: "4px 10px", fontSize: "14px", lineHeight: "20px" }}
+          >
+            Start-up studio
+          </span>
+        </div>
+        <div className="studio-intro flex-1 md:max-w-[888px]">
+          {/* Design (nodo 461:105): Regular 48/54 su una colonna di 888 che parte
+              a x=504 dell'artboard. Era medium con leading 1.2. */}
+          <h2 className="text-h2 font-normal leading-[54px]">
+            {INTRO.split(" ").map((word, wi) => (
+              <span key={wi}>
+              {wi > 0 ? " " : null}
+              <span className="inline-block">
+                {word.split("").map((char, ci) => (
+                  <span
+                    key={ci}
+                    className="studio-char inline-block transition-colors duration-300 ease-out"
+                    style={{ color: "var(--color-grey)" }}
+                  >
+                    {char}
+                  </span>
+                ))}
+              </span>
+              </span>
+            ))}
+          </h2>
+        </div>
+        </div>
+      </div>
+
+      {/* ── Carosello trascinabile ── */}
+      <div className="container-content mt-14 md:mt-20">
+        <div
+          ref={trackRef}
+          className={`flex gap-6 overflow-x-auto scrollbar-hide select-none -mr-5 pr-5 md:-mr-12 md:pr-12 md:cursor-none ${
+            dragging ? "cursor-grabbing" : "cursor-grab"
+          }`}
+          style={{ scrollbarWidth: "none" }}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          onMouseEnter={() => setHovering(true)}
+          onMouseLeave={() => {
+            setHovering(false);
+            setDragging(false);
+          }}
+        >
+          {PRODOTTI.map((p) => (
             <article
-              key={product.name}
-              className="studio-card flex flex-col rounded-[10px] border border-black/10 overflow-hidden"
+              key={p.nome}
+              className="shrink-0"
+              style={{ width: "clamp(280px, 42vw, 560px)" }}
             >
-              {/* Visual */}
               <div
-                className="relative overflow-hidden"
-                style={{ aspectRatio: "16 / 10" }}
+                className="relative overflow-hidden rounded-[10px] group"
+                style={{ aspectRatio: "4 / 3" }}
               >
-                {product.image ? (
+                {p.image ? (
                   <img
-                    src={product.image}
-                    alt={product.name}
-                    className="absolute inset-0 w-full h-full object-cover"
+                    src={p.image}
+                    alt={p.nome}
+                    draggable={false}
                     loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out scale-[1.08] group-hover:scale-100"
                   />
                 ) : (
                   <div
                     className="absolute inset-0 flex items-center justify-center"
-                    style={{ backgroundColor: product.accent }}
+                    style={{ backgroundColor: p.accent }}
                   >
                     <span
-                      className="uppercase font-medium tracking-wide text-black/80"
+                      className="uppercase font-medium text-black/80"
                       style={{ fontSize: "var(--font-h3)" }}
                     >
-                      {product.name}
+                      {p.nome}
                     </span>
                   </div>
                 )}
               </div>
 
-              {/* Body */}
-              <div className="flex flex-col gap-4 p-6 md:p-8">
-                <div className="flex items-center gap-3">
-                  <span
-                    className="inline-flex items-center gap-2 rounded-[5px] border border-black/30 px-3 py-1 uppercase tracking-wide"
-                    style={{ fontSize: "var(--font-btn)" }}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="inline-block w-2 h-2 rounded-full"
-                      style={{
-                        backgroundColor: product.live
-                          ? "var(--color-green)"
-                          : "var(--color-middle-grey)",
-                      }}
-                    />
-                    {product.status}
-                  </span>
-                  <h3
-                    className="uppercase tracking-wide font-medium text-black"
-                    style={{ fontSize: "var(--font-h4)" }}
-                  >
-                    {product.name}
-                  </h3>
-                </div>
+              <p
+                className="mt-4 uppercase tracking-wide"
+                style={{
+                  fontSize: "var(--font-p)",
+                  color: "var(--color-middle-grey)",
+                }}
+              >
+                {p.tipologia}
+              </p>
 
-                <p className="text-black font-medium">{product.claim}</p>
-                <p className="text-black/70 leading-relaxed">
-                  {product.description}
-                </p>
-
-                <a
-                  href={product.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 self-start rounded-[5px] border border-black px-4 py-2 text-black font-medium hover:bg-black hover:text-white transition-all duration-300"
-                  style={{ fontSize: "var(--font-btn)" }}
-                >
-                  {product.linkLabel}
-                </a>
-              </div>
+              <h3
+                className="uppercase tracking-wide font-medium text-black"
+                style={{ fontSize: "var(--font-h4)" }}
+              >
+                {p.href ? (
+                  <a
+                    href={p.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className="hover:opacity-60 transition-opacity"
+                  >
+                    {p.nome}
+                  </a>
+                ) : (
+                  p.nome
+                )}
+              </h3>
             </article>
           ))}
-        </div>
-
-        {/* ── Principle ── */}
-        <div className="studio-card flex flex-col gap-3 border-t border-black/15 pt-8 md:flex-row md:items-baseline md:gap-16">
-          <span
-            className="uppercase tracking-[0.2em] shrink-0"
-            style={{
-              fontSize: "var(--font-p)",
-              color: "var(--color-middle-grey)",
-            }}
-          >
-            Principio
-          </span>
-          <div className="flex flex-col gap-2">
-            <h3
-              className="text-black font-medium uppercase leading-none"
-              style={{ fontSize: "var(--font-h4)" }}
-            >
-              Build to learn
-            </h3>
-            <p className="max-w-[60ch] text-black/70 leading-relaxed">
-              Ogni prodotto costruito diventa know-how per i clienti successivi.
-              Il ciclo non si ferma.
-            </p>
-          </div>
         </div>
       </div>
     </section>

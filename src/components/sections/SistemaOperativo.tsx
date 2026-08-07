@@ -1,103 +1,62 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-interface Phase {
-  number: string;
+interface Fase {
   title: string;
   claim: string;
   description: string;
-  color: string;
 }
 
-const PHASES: Phase[] = [
+const FASI: Fase[] = [
   {
-    number: "01",
     title: "Diagnosi",
     claim: "Prima il problema",
     description:
       "Ogni progetto inizia con una domanda: perché? Non cosa vuoi costruire. Perché lo vuoi costruire. Solo dopo la risposta progettiamo la soluzione.",
-    color: "var(--color-yellow)",
   },
   {
-    number: "02",
     title: "Integrazione",
     claim: "Un solo sistema",
     description:
       "Tech, second brain e AI si progettano insieme. Nessun passaggio di mano, nessuna perdita di contesto. Un interlocutore, dall'inizio alla fine.",
-    color: "var(--color-cyan)",
   },
   {
-    number: "03",
     title: "Esecuzione",
     claim: "Risultati, non output",
     description:
       "Definiamo i KPI prima di iniziare. Il successo non si misura in deliverable consegnati — si misura in capacità acquisite dall'organizzazione.",
-    color: "var(--color-green)",
   },
   {
-    number: "04",
     title: "Trasferimento",
     claim: "Usciamo quando sai fare da solo",
     description:
       "Il progetto si chiude quando il team interno sa fare le cose che prima non sapeva fare. Non prima.",
-    color: "var(--color-pink)",
   },
 ];
 
-/* ── Rolling text: stessa meccanica delle card portfolio, ma innescata
-      dall'hover dell'intera card (vedi .phase-card in globals.css) ── */
-function RollingText({ text }: { text: string }) {
-  const letters = text.split("");
-
-  return (
-    <span className="rolling-text-wrap font-medium">
-      <span className="rolling-text-row" aria-hidden="true">
-        {letters.map((char, i) => (
-          <span
-            key={i}
-            className="rolling-text-char"
-            style={{ transitionDelay: `${i * 15}ms` }}
-          >
-            {char === " " ? " " : char}
-          </span>
-        ))}
-      </span>
-      <span className="rolling-text-row">
-        {letters.map((char, i) => (
-          <span
-            key={i}
-            className="rolling-text-char"
-            style={{ transitionDelay: `${i * 15}ms` }}
-          >
-            {char === " " ? " " : char}
-          </span>
-        ))}
-      </span>
-    </span>
-  );
-}
-
 export default function SistemaOperativo() {
   const sectionRef = useRef<HTMLElement>(null);
+  /* Nel design la seconda barra e' quella aperta: l'accordion parte da li'. */
+  const [aperta, setAperta] = useState(1);
 
   useGSAP(
     () => {
-      const cards = gsap.utils.toArray<HTMLElement>(".phase-card");
-      gsap.from(cards, {
-        y: 48,
+      const barre = gsap.utils.toArray<HTMLElement>(".fase-barra");
+      gsap.from(barre, {
+        y: 24,
         opacity: 0,
-        duration: 0.7,
-        stagger: 0.12,
+        duration: 0.6,
+        stagger: 0.1,
         ease: "power3.out",
         scrollTrigger: {
-          trigger: ".phase-track",
-          start: "top 80%",
+          trigger: ".fasi-lista",
+          start: "top 82%",
           toggleActions: "play none none reverse",
         },
       });
@@ -109,107 +68,97 @@ export default function SistemaOperativo() {
     <section
       ref={sectionRef}
       id="sistema-operativo"
-      className="relative bg-white z-10 py-24 md:py-40 overflow-hidden"
+      className="relative bg-white z-10 py-24 md:py-40"
       aria-label="Il sistema operativo"
     >
-      <div className="container-content flex flex-col gap-12 md:gap-16">
-        {/* ── Header ── */}
-        <header className="flex flex-col gap-5">
+      {/* 440 + 920 su 1360, come nel design: le barre partono a x=480
+          dell'artboard. In frazioni, non in percentuali arrotondate. */}
+      <div id="sistema-inner" className="container-content flex flex-col md:grid md:grid-cols-[44fr_92fr] md:items-start">
+        {/* ── Colonna sinistra: badge in alto, claim in basso ── */}
+        <div className="flex flex-col justify-between self-stretch mb-8 md:mb-0">
           <span
-            className="uppercase tracking-[0.2em]"
-            style={{
-              fontSize: "var(--font-p)",
-              color: "var(--color-middle-grey)",
-            }}
+            className="inline-flex items-center self-start border border-black text-black"
+            style={{ borderRadius: "5px", padding: "5px 10px", fontSize: "14px", lineHeight: "20px" }}
           >
-            {"// Il sistema operativo"}
+            Il sistema operativo
           </span>
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <h2
-              className="text-black font-normal uppercase leading-none max-w-[20ch]"
-              style={{ fontSize: "var(--font-h2)" }}
-            >
-              Quattro fasi. Nessuna scorciatoia.
-            </h2>
-            {/* Suggerimento di scorrimento, solo dove il carosello è attivo */}
-            <span
-              className="md:hidden uppercase tracking-wide"
-              style={{
-                fontSize: "var(--font-btn)",
-                color: "var(--color-middle-grey)",
-              }}
-            >
-              Scorri →
-            </span>
+
+          <div className="mt-10 md:mt-0">
+            <p className="text-black font-bold text-[16px]">Quattro fasi</p>
+            <p className="text-black text-[16px]">Nessuna scorciatoia</p>
           </div>
-        </header>
-      </div>
+        </div>
 
-      {/* ── Track: carosello su mobile, griglia da md in su ──
-           Su mobile lo scroll sfora a destra fino al bordo schermo (-mr/pr),
-           così la prima card resta allineata al titolo e l'ultima non finisce
-           incastrata nel padding del container. */}
-      <div className="container-content mt-12 md:mt-16">
-        <div
-          className="phase-track flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mr-5 pr-5 md:mr-0 md:pr-0 md:grid md:grid-cols-2 md:gap-6 lg:grid-cols-4 md:overflow-visible"
-          style={{ scrollbarWidth: "none" }}
-        >
-          {PHASES.map((phase) => (
-            <article
-              key={phase.number}
-              className="phase-card group relative shrink-0 snap-start w-[78vw] sm:w-[52vw] md:w-auto rounded-[10px] overflow-hidden cursor-default"
-              style={{ backgroundColor: phase.color }}
-            >
-              {/* Velo che rientra all'hover: stessa logica dello zoom immagine
-                  delle card portfolio, qui su un layer di colore. */}
-              <div
-                aria-hidden="true"
-                className="absolute inset-0 scale-[1.15] group-hover:scale-100 transition-transform duration-700 ease-out will-change-transform"
-                style={{
-                  background:
-                    "radial-gradient(120% 90% at 100% 0%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 60%)",
-                }}
-              />
-
-              <div className="relative flex flex-col min-h-[400px] md:min-h-[440px] p-6 md:p-7">
-                {/* Numero */}
-                <span
-                  className="font-medium leading-none text-black/25 group-hover:text-black/45 transition-colors duration-500"
-                  style={{ fontSize: "clamp(3rem, 5vw, 4.5rem)" }}
-                >
-                  {phase.number}
-                </span>
-
-                {/* Blocco testo, ancorato in basso */}
-                <div className="mt-auto flex flex-col gap-3">
-                  <h3
-                    className="text-black uppercase leading-none"
-                    style={{ fontSize: "var(--font-h4)" }}
+        {/* ── Accordion ── */}
+        <ul className="fasi-lista flex flex-col gap-5 md:max-w-[920px]">
+          {FASI.map((fase, i) => {
+            const open = aperta === i;
+            return (
+              <li key={fase.title} className="fase-barra">
+                {/* Nel design il pannello aperto NON sta dentro la barra: e' un
+                    secondo blocco, staccato di 8px e di colore scuro. Per
+                    questo nel Figma i rettangoli sono cinque e non quattro. */}
+                {/* Il giallo sta sulla BARRA, non sul contenitore: messo qui,
+                    riempiva gli 8px di stacco fra barra e pannello aperto e i
+                    due blocchi diventavano uno solo — misurati 158px continui
+                    dove il design ne ha 81 e 65. */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setAperta(open ? -1 : i)}
+                    aria-expanded={open}
+                    className="w-full flex items-center justify-between gap-6 px-5 md:px-5 text-left cursor-pointer md:h-[81px] rounded-[10px] bg-primary"
                   >
-                    <RollingText text={phase.title} />
-                  </h3>
+                    <span
+                      className="text-black leading-none"
+                      style={{ fontSize: "clamp(1.5rem, 2.7vw, 2.4375rem)", lineHeight: "44px" }}
+                    >
+                      {fase.title}
+                    </span>
 
-                  <p className="text-black/70 font-medium leading-snug">
-                    {phase.claim}
-                  </p>
+                    {/* La freccia ruota da → a ↓ quando la barra si apre */}
+                    <svg
+                      width="40"
+                      height="24"
+                      viewBox="0 0 40 24"
+                      fill="none"
+                      aria-hidden="true"
+                      className={`shrink-0 text-black transition-transform duration-500 ${
+                        open ? "rotate-90" : ""
+                      }`}
+                    >
+                      <path
+                        d="M2 12h34M26 3l10 9-10 9"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
 
-                  {/* Descrizione: rivelata all'hover con grid 0fr → 1fr, così
-                      l'altezza si anima senza max-height arbitrarie. Su mobile
-                      (dove l'hover non esiste) resta sempre visibile. */}
-                  <div className="grid grid-rows-[1fr] md:grid-rows-[0fr] md:group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-out">
+                  {/* Contenuto: grid 0fr → 1fr, si anima all'altezza esatta */}
+                  <div
+                    className={`grid transition-[grid-template-rows] duration-500 ease-out ${
+                      open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                    }`}
+                  >
                     <div className="overflow-hidden">
-                      <div className="pt-3 border-t border-black/20">
-                        <p className="text-black/70 leading-relaxed text-sm">
-                          {phase.description}
+                      {/* Il margine sta qui dentro: cosi' a pannello chiuso
+                          collassa insieme all'altezza e non lascia un vuoto. */}
+                      <div className="mt-[8px] rounded-[10px] bg-primary px-5 pt-[27px] pb-[30px] flex flex-col gap-[10px]">
+                        <p className="text-black font-bold text-[16px]">{fase.claim}</p>
+                        <p className="max-w-[837px] text-black text-[16px] leading-[22px]">
+                          {fase.description}
                         </p>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </article>
-          ))}
-        </div>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </section>
   );

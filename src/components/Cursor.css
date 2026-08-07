@@ -14,7 +14,14 @@
   border-radius: 50%;
   position: fixed;
   z-index: 10000;
-  transform: translate(-50%, -50%);
+  /* La posizione arriva da JS come translate3d, e il centraggio e' fatto qui
+     con i margini: mettere translate(-50%,-50%) nel transform costringerebbe
+     a riscriverlo a ogni frame. */
+  left: 0;
+  top: 0;
+  margin-left: calc(var(--size) / -2);
+  margin-top: calc(var(--size) / -2);
+  will-change: transform;
   pointer-events: none;
   transition: opacity 0.2s ease-out;
 }
@@ -23,9 +30,11 @@
   background-color: transparent;
   border: 1px solid #000;
   --size: 40px;
+  /* NIENTE transizione su left/top: ogni mousemove la faceva ripartire da
+     capo, quindi finche' il mouse si muoveva il cerchio non arrivava mai e
+     "recuperava" solo alla fermata. L'inseguimento morbido ora e' un lerp in
+     requestAnimationFrame su transform, che e' compositabile. */
   transition:
-    top 0.15s ease-out,
-    left 0.15s ease-out,
     width 0.2s ease-out,
     height 0.2s ease-out,
     background-color 0.2s ease-out,

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useRef } from "react";
 import gsap from "gsap";
@@ -7,38 +7,24 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const MARQUEE_TEXTS = [
-  "Prima il problema",
-  "✦",
-  "Sistemi, non deliverable",
-  "✦",
-  "Software su misura",
-  "✦",
-  "Agenti AI",
-  "✦",
-  "Second Brain",
-  "✦",
-  "Startup Studio",
-  "✦",
-  "Shared Risk",
-  "✦",
-  "Digital Products",
-  "✦",
-  "Execution Partner",
-  "✦",
-  "Web & App",
-  "✦",
-];
+/* Riga grande, nera su bianco: scorre verso sinistra allo scroll. */
+/* Nel design la frase E' maiuscola: nel PDF si legge, a meta' scorrimento,
+   "NSIEME • INNOVIAMO, TRASFORMIAM". La nota precedente diceva il contrario
+   ed era sbagliata — presa da un nodo, non dal rendering. */
+const RIGA_GRANDE = "INNOVIAMO, TRASFORMIAMO, CRESCIAMO. INSIEME";
+
+/* Fascia gialla sottile, scorre in senso opposto. */
+const RIGA_GIALLA =
+  "Siamo una digital factory che usa i dati ma genera idee out of the box. Tu ci indichi un obiettivo, noi troviamo strade alternative per raggiungerlo velocemente e con il massimo ritorno sull'investimento.";
 
 export default function Marquee() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const track1Ref = useRef<HTMLDivElement>(null);
-  const track2Ref = useRef<HTMLDivElement>(null);
+  const grandeRef = useRef<HTMLDivElement>(null);
+  const giallaRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
-      // First row: scroll left
-      gsap.to(track1Ref.current, {
+      gsap.to(grandeRef.current, {
         xPercent: -50,
         ease: "none",
         scrollTrigger: {
@@ -49,8 +35,8 @@ export default function Marquee() {
         },
       });
 
-      // Second row: scroll right
-      gsap.to(track2Ref.current, {
+      /* Direzione opposta: le due fasce si muovono l'una contro l'altra. */
+      gsap.to(giallaRef.current, {
         xPercent: 0,
         ease: "none",
         scrollTrigger: {
@@ -64,40 +50,38 @@ export default function Marquee() {
     { scope: sectionRef },
   );
 
-  const row = MARQUEE_TEXTS.join(" ");
-  // Duplicate text for seamless loop
-  const doubleRow = `${row} ${row} ${row} ${row}`;
+  const grande = `${RIGA_GRANDE} • `.repeat(4);
+  const gialla = `${RIGA_GIALLA}   `.repeat(4);
 
   return (
     <section
       ref={sectionRef}
-      className="relative py-20 md:py-32 overflow-hidden bg-background"
-      aria-label="Competenze"
+      /* Misure del design: la sezione e' alta 332, il testo grande cade a 109
+         e la fascia gialla (70px) chiude in basso senza padding dopo. */
+      className="relative pt-[104px] overflow-hidden bg-white"
+      aria-label="Come lavoriamo"
     >
-      {/* Row 1 - moves left */}
-      <div className="mb-4">
-        <div ref={track1Ref} className="marquee-track">
+      {/* Riga grande */}
+      <div className="mb-6 md:mb-[78px]">
+        <div ref={grandeRef} className="marquee-track">
           <span
-            className="text-h1 font-bold text-foreground whitespace-nowrap"
-            style={{ fontSize: "clamp(3rem, 6.25vw, 6rem)" }}
+            className="text-black font-normal whitespace-nowrap leading-none"
+            style={{ fontSize: "clamp(2.5rem, 5.5vw, 5rem)" }}
           >
-            {doubleRow}
+            {grande}
           </span>
         </div>
       </div>
 
-      {/* Row 2 - moves right, starts offset */}
-      <div>
+      {/* Fascia gialla */}
+      <div className="bg-primary py-[19px] overflow-hidden">
         <div
-          ref={track2Ref}
+          ref={giallaRef}
           className="marquee-track"
           style={{ transform: "translateX(-50%)" }}
         >
-          <span
-            className="text-h1 font-bold text-foreground/10 whitespace-nowrap"
-            style={{ fontSize: "clamp(3rem, 6.25vw, 6rem)" }}
-          >
-            {doubleRow}
+          <span className="text-black whitespace-nowrap text-[16px] leading-[22px]">
+            {gialla}
           </span>
         </div>
       </div>
