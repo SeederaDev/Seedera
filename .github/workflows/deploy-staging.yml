@@ -63,7 +63,17 @@ jobs:
             "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" \
             deploy-repo
 
-          rsync -a --delete --exclude .git out/ deploy-repo/
+          # NIENTE rsync qui. Il suo quick-check salta i file con stessa
+          # dimensione e stesso mtime al secondo, e fra due build consecutivi
+          # index.html cambia solo l'hash dei chunk: stessa lunghezza. Se il
+          # clone del branch deploy cade nello stesso secondo in cui Next ha
+          # scritto out/, l'HTML resta quello vecchio mentre i chunk (nomi
+          # nuovi) vengono sostituiti: la pagina chiede un chunk cancellato,
+          # 404, e Next mostra "Application error: a client-side exception".
+          # E' successo davvero nel deploy di 2775a3d. Svuotare e ricopiare
+          # non dipende dai timestamp.
+          find deploy-repo -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a out/. deploy-repo/
 
           cd deploy-repo
           git config user.name "github-actions[bot]"
@@ -75,3 +85,22 @@ jobs:
             git commit -q -m "Deploy ${GITHUB_SHA::7}"
             git push -q origin deploy
           fi
+
+      # Rete di sicurezza: se per qualsiasi motivo l'albero deployato tornasse
+      # incoerente, meglio un job rosso che uno staging bianco. Gira dopo il
+      # push perche' controlla esattamente cio' che Plesk andra' a scaricare.
+      - name: Verify deployed tree
+        run: |
+          cd deploy-repo
+
+          deployed=$(cat version.txt)
+          if [ "$deployed" != "$GITHUB_SHA" ]; then
+            echo "::error::version.txt e' $deployed invece di $GITHUB_SHA: albero misto."
+            exit 1
+          fi
+
+          missing=0
+          while read -r asset; do
+            [ -f "$asset" ] || { echo "::error::Asset referenziato ma assente: /$asset"; missing=1; }
+          done < <(grep -rhoE '_next/static/[A-Za-z0-9._/-]+\.(js|css|ttf|woff2?)' --include='*.html' . | sort -u)
+          exit $missing
