@@ -103,23 +103,33 @@ function HeroLine({ text, tracking }: { text: string; tracking: string }) {
   return (
     // Overflow-hidden wrapper clips the line during slide-up — no FOUC
     <span className="block overflow-hidden">
+      {/* Il nowrap vale solo da md in su: sotto, il font non scende oltre i
+          38px del clamp e le righe fisse del design (557px la piu' larga)
+          verrebbero recise dall'overflow-hidden della sezione. Su mobile il
+          titolo va a capo dentro la riga; lo slide-up muove il blocco intero. */}
       <span
-        className="hero-line block whitespace-nowrap"
+        className="hero-line block md:whitespace-nowrap"
         style={{
           transform: "translateY(100%)",
           willChange: "transform",
           letterSpacing: tracking,
         }}
       >
-        {/* Lo spazio resta un nodo di testo: dentro uno span inline-block
-            diventerebbe un &nbsp;. */}
-        {text.split("").map((char, i) =>
-          char === " " ? " " : (
-            <span key={i} className="hero-char inline-block">
-              {char}
+        {/* Le lettere inline-block creano punti di a-capo anche in mezzo alle
+            parole: l'involucro inline-block per parola limita gli a-capo agli
+            spazi, che restano nodi di testo fra un involucro e l'altro. */}
+        {text.split(" ").map((word, wi) => (
+          <span key={wi}>
+            {wi > 0 ? " " : null}
+            <span className="inline-block">
+              {word.split("").map((char, ci) => (
+                <span key={ci} className="hero-char inline-block">
+                  {char}
+                </span>
+              ))}
             </span>
-          ),
-        )}
+          </span>
+        ))}
       </span>
     </span>
   );
@@ -174,8 +184,10 @@ export default function Hero() {
     <section
       ref={containerRef}
       id="hero"
-      className="relative w-full flex flex-col justify-end overflow-hidden bg-primary"
-      style={{ height: "min(100svh, 55.6vw)", minHeight: "600px" }}
+      /* La sezione riempie sempre almeno lo schermo; svh e non vh, cosi' su
+         iPhone la barra dell'URL non copre il fondo. Il contenuto resta
+         ancorato in basso dal justify-end. */
+      className="relative w-full flex flex-col justify-end overflow-hidden bg-primary min-h-[100svh]"
       aria-label="Hero"
     >
       {/* Bottom-anchored content */}
@@ -227,7 +239,9 @@ export default function Hero() {
           <Link
             href="/parliamo"
             aria-label="Parliamo, apri una conversazione"
-            className="group inline-flex items-center text-black"
+            /* Freccia 35x33: padding e margine negativo si annullano a vista
+               ma portano il bersaglio di tocco sopra i 44px. */
+            className="group inline-flex items-center text-black p-1.5 -m-1.5"
           >
             <svg
               width="35"

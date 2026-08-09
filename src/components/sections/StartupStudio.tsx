@@ -170,7 +170,10 @@ export default function StartupStudio() {
       <div className="container-content mt-14 md:mt-20">
         <div
           ref={trackRef}
-          className={`flex gap-6 overflow-x-auto scrollbar-hide select-none -mr-5 pr-5 md:-mr-12 md:pr-12 md:cursor-none ${
+          /* Lo sbordo a destra deve coincidere col padding del container
+             (24px mobile, 40px da md, vedi .container-content): con -mr-12
+             la traccia usciva di 8px dal viewport e la pagina scorreva. */
+          className={`flex gap-6 overflow-x-auto scrollbar-hide select-none -mr-6 pr-6 md:-mr-10 md:pr-10 md:cursor-none ${
             dragging ? "cursor-grabbing" : "cursor-grab"
           }`}
           style={{ scrollbarWidth: "none" }}
@@ -237,7 +240,9 @@ export default function StartupStudio() {
                     target="_blank"
                     rel="noopener noreferrer"
                     onPointerDown={(e) => e.stopPropagation()}
-                    className="hover:opacity-60 transition-opacity"
+                    /* Riga alta 22px: padding e margine verticali opposti
+                       portano il tocco a 44px senza spostare nulla. */
+                    className="inline-block py-[11px] -my-[11px] hover:opacity-60 transition-opacity"
                   >
                     {p.nome}
                   </a>

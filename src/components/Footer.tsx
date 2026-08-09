@@ -253,7 +253,9 @@ export default function Footer() {
                   key={link.href}
                   href={link.href}
                   onClick={(e) => handleNavClick(e, link.href)}
-                  className="text-black rounded-[5px] border border-black/30 hover:bg-black hover:text-primary transition-all duration-300"
+                  /* Pillola alta 35px: l'after invisibile estende il tocco a
+                     45 senza toccare bordo e sfondo. */
+                  className="relative text-black rounded-[5px] border border-black/30 hover:bg-black hover:text-primary transition-all duration-300 after:absolute after:-inset-y-[5px] after:inset-x-0 after:content-['']"
                   style={{
                     padding: "5px 14px",
                     fontSize: "15px",
@@ -277,7 +279,9 @@ export default function Footer() {
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-black rounded-[5px] border border-black/30 hover:bg-black hover:text-primary transition-all duration-300"
+                  /* Pillola alta 35px: l'after invisibile estende il tocco a
+                     45 senza toccare bordo e sfondo. */
+                  className="relative text-black rounded-[5px] border border-black/30 hover:bg-black hover:text-primary transition-all duration-300 after:absolute after:-inset-y-[5px] after:inset-x-0 after:content-['']"
                   style={{
                     padding: "5px 14px",
                     fontSize: "15px",

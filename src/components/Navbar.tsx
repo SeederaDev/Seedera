@@ -76,7 +76,9 @@ function SpinLogo() {
   return (
     <Link
       href="/"
-      className="relative z-50 flex items-center justify-center bg-black rounded-[5px]"
+      /* La pillola e' alta 30px: l'after invisibile estende il tocco a 44
+         senza allargare lo sfondo nero (un padding lo farebbe). */
+      className="relative z-50 flex items-center justify-center bg-black rounded-[5px] after:absolute after:-inset-y-[7px] after:inset-x-0 after:content-['']"
       /* Misurato sul PDF del design: pillola 40→147 x 15→45, cioe' 107x30, con
          il lettering bianco 85x14 centrato. Erano 142x42 con il logo a 18px, e
          i 35px di troppo spingevano a destra tutte le voci del menu. */
@@ -242,7 +244,10 @@ export default function Navbar() {
             className={`relative z-50 flex flex-col justify-center items-center ${
               showX ? "hamburger-open" : ""
             }`}
-            style={{ gap: "7px" }}
+            /* Le tre linee misurano 33x17: il padding simmetrico porta il
+               bersaglio di tocco a 45px e il margine negativo lo compensa,
+               cosi' il layout (e il centro usato dal clip-path) non cambia. */
+            style={{ gap: "7px", padding: "14px 6px", margin: "-14px -6px" }}
             aria-label={isOpen ? "Chiudi menu" : "Apri menu"}
             aria-expanded={isOpen}
           >

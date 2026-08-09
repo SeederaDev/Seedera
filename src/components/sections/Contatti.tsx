@@ -63,7 +63,9 @@ export default function Contatti() {
         <Link
           href="/parliamo"
           aria-label="Apri una conversazione"
-          className="contatti-riga group inline-flex items-center self-start text-black"
+          /* Freccia 35x33: padding e margine negativo si annullano a vista
+             ma portano il bersaglio di tocco sopra i 44px. */
+          className="contatti-riga group inline-flex items-center self-start text-black p-1.5 -m-1.5"
         >
           <svg
               width="35"
