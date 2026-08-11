@@ -68,7 +68,9 @@ export default function SistemaOperativo() {
     <section
       ref={sectionRef}
       id="sistema-operativo"
-      className="relative bg-white z-10 py-24 md:py-40"
+      /* pb ridotto da mobile: sotto c'e' la fascia scorrevole, che porta gia'
+         il suo stacco. Da md restano i 40 di design. */
+      className="relative bg-white z-10 pt-24 pb-12 md:py-40"
       aria-label="Il sistema operativo"
     >
       {/* 440 + 920 su 1360, come nel design: le barre partono a x=480

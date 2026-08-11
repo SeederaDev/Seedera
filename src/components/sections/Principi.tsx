@@ -69,10 +69,17 @@ export default function Principi() {
     >
       <div id="principi-inner" className="container-content">
         {/* gap 20, non 24: nel design le card stanno a x 40 / 385 / 730 / 1075
-            e sono larghe 325. Con gap-6 diventano 322 e ognuna slitta. */}
-        <div className="principi-griglia grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            e sono larghe 325. Con gap-6 diventano 322 e ognuna slitta.
+            Da mobile la griglia diventa un carosello: quattro card impilate
+            facevano una colonna lunghissima. Lo sbordo a destra vale quanto il
+            padding del container (24px, vedi .container-content), come nel
+            carosello di Start-up studio. */}
+        <div className="principi-griglia flex snap-x snap-mandatory overflow-x-auto scrollbar-hide -mr-6 pr-6 gap-5 sm:grid sm:overflow-visible sm:mr-0 sm:pr-0 sm:grid-cols-2 lg:grid-cols-4">
           {PRINCIPI.map((p) => (
-            <article key={p.title} className="principio-card flex flex-col gap-[10px]">
+            <article
+              key={p.title}
+              className="principio-card flex flex-col gap-[10px] shrink-0 snap-start w-[78%] sm:w-auto sm:shrink"
+            >
               <div
                 className="w-full rounded-[5px] overflow-hidden bg-[#F2F2F2]"
                 style={{ aspectRatio: "1 / 1" }}

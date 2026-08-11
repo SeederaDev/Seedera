@@ -151,7 +151,9 @@ export default function Partnership() {
               restava tutto bianco e la meta' bassa della sezione era la parte
               piu' lontana dal design.
               Il tracking recupera il kerning che gli inline-block azzerano. */}
-          <h2 className="partnership-intro text-foreground font-normal text-[48px] leading-[54px] tracking-[-0.002em]">
+          {/* text-h2 (clamp 28→48) come ogni altro titolo di sezione: con i
+              48px fissi da mobile il testo sbordava e restava enorme. */}
+          <h2 className="partnership-intro text-foreground font-normal text-h2 leading-[54px] tracking-[-0.002em]">
             {INTRO.split(" ").map((parola, wi) => (
               <span key={wi}>
                 {wi > 0 ? " " : null}

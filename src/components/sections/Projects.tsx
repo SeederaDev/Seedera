@@ -302,7 +302,9 @@ export default function Projects() {
       <CustomCursor />
 
       {/* Intro area */}
-      <div className="container-content pt-24 md:pt-40 pb-16 md:pb-24">
+      {/* pt ridotto da mobile: sopra chiude la fascia gialla scorrevole e i 96px
+          pieni la staccavano troppo dal portfolio. */}
+      <div className="container-content pt-14 md:pt-40 pb-16 md:pb-24">
         {/* 464 + 896 su 1360, come studio e partnership: nel design il testo
             parte a x=504 dell'artboard. Con lo spacer al 20% partiva a 389, e
             la colonna piu' larga mandava a capo in punti diversi. */}

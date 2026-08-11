@@ -57,8 +57,10 @@ export default function Marquee() {
     <section
       ref={sectionRef}
       /* Misure del design: la sezione e' alta 332, il testo grande cade a 109
-         e la fascia gialla (70px) chiude in basso senza padding dopo. */
-      className="relative pt-[104px] overflow-hidden bg-white"
+         e la fascia gialla (70px) chiude in basso senza padding dopo.
+         I 104px valgono da desktop: da mobile si sommavano al pb della
+         sezione accordion e fra i due blocchi restavano 200px di bianco. */
+      className="relative pt-6 md:pt-[104px] overflow-hidden bg-white"
       aria-label="Come lavoriamo"
     >
       {/* Riga grande */}
