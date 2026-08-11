@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { AZIENDA } from "@/lib/seo";
 import { useLenis } from "lenis/react";
 import { useCallback, useRef, useState, useEffect } from "react";
 import gsap from "gsap";
@@ -313,9 +314,22 @@ export default function Footer() {
             dal latino <em>sidera</em>, stelle e dall&apos;inglese <em>seed</em>,
             seme — ogni impresa che guarda in alto inizia da un seme
           </p>
-          <span className="text-black/40 text-sm whitespace-nowrap">
-            © {new Date().getFullYear()} Seedera — Tutti i diritti riservati
-          </span>
+          {/* La riga legale: ragione sociale e P.IVA vanno esposte, e la
+              privacy policy dev'essere raggiungibile da ogni pagina. */}
+          <div className="flex flex-col sm:items-end gap-1 text-black/40 text-sm">
+            <span>
+              Altera SRLs — P.IVA {AZIENDA.piva} ·{" "}
+              <Link
+                href="/privacy-policy"
+                className="underline underline-offset-[3px] hover:text-black transition-colors duration-300"
+              >
+                Privacy policy
+              </Link>
+            </span>
+            <span className="whitespace-nowrap">
+              © {new Date().getFullYear()} Seedera — Tutti i diritti riservati
+            </span>
+          </div>
         </div>
       </div>
     </footer>

@@ -341,3 +341,34 @@ body {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ---- Testo lungo di servizio (informativa privacy) ----
+   Il reset di Tailwind azzera margini ed elenchi: qui il documento deve
+   leggersi come un documento, non come una sequenza di div. */
+.informativa p,
+.informativa li {
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--color-black);
+}
+.informativa p {
+  margin-bottom: 12px;
+}
+.informativa p:last-child {
+  margin-bottom: 0;
+}
+.informativa ul {
+  list-style: disc;
+  padding-left: 1.2em;
+}
+.informativa li {
+  margin-bottom: 10px;
+}
+.informativa a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity 0.2s ease;
+}
+.informativa a:hover {
+  opacity: 0.6;
+}

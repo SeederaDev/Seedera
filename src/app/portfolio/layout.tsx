@@ -6,10 +6,12 @@ export const metadata: Metadata = {
   title: { default: "Portfolio", template: "%s | Seedera" },
   description:
     "I progetti in cui abbiamo costruito il sistema, non solo il deliverable. Ogni lavoro qui è nato da una diagnosi, non da un brief.",
+  alternates: { canonical: "/portfolio" },
   openGraph: {
     title: "Portfolio | Seedera",
     description:
       "I progetti in cui abbiamo costruito il sistema, non solo il deliverable.",
+    url: "/portfolio",
     type: "website",
   },
 };

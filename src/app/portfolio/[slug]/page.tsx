@@ -18,10 +18,18 @@ export async function generateMetadata({
   return {
     title: project.client,
     description: project.description.slice(0, 160),
+    alternates: { canonical: `/portfolio/${project.slug}` },
     openGraph: {
       title: `${project.client} | Seedera`,
       description: project.description.slice(0, 200),
+      url: `/portfolio/${project.slug}`,
       type: "article",
+      images: [project.thumbnail],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${project.client} | Seedera`,
+      description: project.description.slice(0, 200),
       images: [project.thumbnail],
     },
   };
