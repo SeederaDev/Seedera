@@ -17,12 +17,29 @@ interface Project {
   slug: string;
 }
 
-const HOMEPAGE_PROJECTS: Project[] = PROJECTS.map((p) => ({
-  client: p.client,
-  tags: p.tags,
-  image: p.thumbnail,
-  slug: p.slug,
-}));
+/* In home va una selezione, non il catalogo: quello sta in /portfolio.
+   L'elenco e' per slug e in ordine di apparizione, cosi' si cambia la
+   vetrina senza toccare l'ordine del portfolio.
+   quinte-parallele non e' ancora fra i progetti: appena la scheda esiste
+   entra da sola al suo posto, qui non c'e' altro da fare. */
+const IN_HOME = [
+  "zentro",
+  "suoni-oltre-confine",
+  "replase",
+  "quinte-parallele",
+  "il-trust-in-italia",
+];
+
+const HOMEPAGE_PROJECTS: Project[] = IN_HOME.map((slug) =>
+  PROJECTS.find((p) => p.slug === slug),
+)
+  .filter((p) => p !== undefined)
+  .map((p) => ({
+    client: p.client,
+    tags: p.tags,
+    image: p.thumbnail,
+    slug: p.slug,
+  }));
 
 const INTRO_TEXT =
   "Ogni progetto qui sotto è nato da una diagnosi, non da un brief. Quello che vedi è il risultato: quello che conta è il problema che c'era prima.";
@@ -363,6 +380,29 @@ export default function Projects() {
             <ProjectCard key={i} project={project} index={i} />
           ))}
         </div>
+
+        {PROJECTS.length > HOMEPAGE_PROJECTS.length ? (
+          <div className="mt-12 md:mt-16 flex justify-center">
+            <Link
+              href="/portfolio"
+              /* Stessa pillola del resto del sito: bordo nero, riempimento
+                 al passaggio. L'after invisibile porta il tocco a 45px. */
+              className="relative inline-flex items-center gap-3 rounded-[5px] border border-black text-black hover:bg-black hover:text-primary transition-all duration-300 after:absolute after:-inset-y-[5px] after:inset-x-0 after:content-['']"
+              style={{ padding: "8px 18px", fontSize: "15px" }}
+            >
+              Tutti i progetti
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path
+                  d="M4 10h12M11 5l5 5-5 5"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </Link>
+          </div>
+        ) : null}
       </div>
     </section>
   );
