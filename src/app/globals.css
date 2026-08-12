@@ -372,3 +372,15 @@ body {
 .informativa a:hover {
   opacity: 0.6;
 }
+
+/* ---- Griglia delle persone ----
+   Nel design (frame "Chi siamo") le schede non riempiono la griglia: stanno
+   su tre colonne lasciando delle celle vuote, e la scacchiera e' voluta.
+   Riga e colonna arrivano dal dato della persona; sotto md la griglia
+   torna una colonna sola e il posizionamento non deve valere piu'. */
+@media (min-width: 768px) {
+  .persone-griglia .persona-card {
+    grid-column: var(--col);
+    grid-row: var(--riga);
+  }
+}
