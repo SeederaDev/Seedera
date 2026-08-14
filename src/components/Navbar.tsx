@@ -13,14 +13,14 @@ const NAV_ITEMS = [
   { label: "Portfolio", href: "/#portfolio" },
   { label: "Progetti", href: "/#studio" },
   { label: "Partnership", href: "/#partnership" },
-  { label: "Persone", href: "/persone" },
+  /* pagina persone nascosta: la voce torna qui quando si rimette online */
   { label: "Parliamo", href: "/parliamo" },
 ];
 
 const MENU_PAGES = [
   { label: "Home", href: "/" },
   { label: "Portfolio", href: "/portfolio" },
-  { label: "Chi siamo", href: "/persone" },
+  /* pagina persone nascosta: qui stava "Chi siamo" → /persone */
   { label: "Apri una conversazione", href: "/parliamo" },
 ];
 

@@ -15,7 +15,7 @@ const FOOTER_LINKS = [
   { label: "Metodo", href: "/#about" },
   { label: "Capacità", href: "/#services" },
   { label: "Portfolio", href: "/portfolio" },
-  { label: "Persone", href: "/persone" },
+  /* pagina persone nascosta: la voce torna qui quando si rimette online */
   { label: "Studio", href: "/#studio" },
   { label: "Partnership", href: "/#partnership" },
 ];
