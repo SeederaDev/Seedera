@@ -11,10 +11,9 @@ import { TEAM, type Persona } from "./team";
 gsap.registerPlugin(ScrollTrigger);
 
 const INTRO =
-  `Non consulenti che consigliano da fuori: operatori che entrano nel progetto e ` +
-  `condividono gli obiettivi. Siamo in ${TEAM.length}, con un metodo solo — prima il ` +
-  `problema, poi il sistema — e un obiettivo dichiarato: rendere il tuo team capace ` +
-  `di fare da solo quello per cui oggi chiama noi.`;
+  `Siamo un gruppo che entra nel progetto e lavora agli stessi obiettivi di chi ` +
+  `c'è già dentro. Un metodo solo: prima il problema, poi il sistema. E un ` +
+  `obiettivo: che il tuo team sappia fare da solo quello per cui oggi chiama noi.`;
 
 /* Freccia della scheda: la stessa di Partnership, non un'altra. */
 function Freccia() {
