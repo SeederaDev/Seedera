@@ -10,10 +10,14 @@ gsap.registerPlugin(ScrollTrigger);
 /* Il "\n" e' un a capo del design, non una preferenza: nel Figma (nodo 461:97)
    la prima slide e' spezzata in tre paragrafi, e le righe misurano 812 e 746px
    invece di riempire i 900 disponibili. */
+/* Le tre slide dicevano due volte la stessa cosa (la 1 e la 2 aprivano
+   entrambe con "inizia dal cosa, noi dal perche'") e la terza ripeteva parola
+   per parola due dei quattro Principi. Ora una slide, un'idea: la promessa,
+   come si lavora, cosa resta. */
 const SLIDES = [
-  "La maggior parte delle agenzie inizia\ndal cosa. Noi iniziamo dal perché.\nNon costruiamo la soluzione che ci chiedono, costruiamo la soluzione che effettivamente serve",
-  "La maggior parte dei partner inizia dal cosa. Noi iniziamo dal perché. Prima di accettare un progetto, diagnostichiamo il bisogno reale, che raramente coincide con la richiesta iniziale.",
-  "Non consegniamo file. Costruiamo capacità che restano nell'organizzazione dopo che usciamo. Non consigliamo dall'esterno: operiamo dall'interno, condividendo gli obiettivi.",
+  "La maggior parte delle agenzie parte\ndal cosa. Noi partiamo dal perché.\nPerché è lì che si decide se un progetto vale i soldi che costa.",
+  "Prima di firmare passiamo del tempo a capire il problema. Quasi sempre quello che serve davvero è diverso da quello che era scritto nella richiesta iniziale.",
+  "Lavoriamo dentro l'azienda, agli stessi obiettivi delle persone che ci stanno. E quando usciamo, quello che abbiamo costruito resta in mano loro.",
 ];
 
 const TOTAL = SLIDES.length;

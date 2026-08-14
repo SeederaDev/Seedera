@@ -15,7 +15,7 @@ const RIGA_GRANDE = "INNOVIAMO, TRASFORMIAMO, CRESCIAMO. INSIEME";
 
 /* Fascia gialla sottile, scorre in senso opposto. */
 const RIGA_GIALLA =
-  "Siamo una digital factory che usa i dati ma genera idee out of the box. Tu ci indichi un obiettivo, noi troviamo strade alternative per raggiungerlo velocemente e con il massimo ritorno sull'investimento.";
+  "Siamo una digital factory: leggiamo i dati e poi cerchiamo la strada che gli altri non hanno guardato. Tu dici dove vuoi arrivare, noi troviamo il modo più corto per arrivarci.";
 
 export default function Marquee() {
   const sectionRef = useRef<HTMLDivElement>(null);

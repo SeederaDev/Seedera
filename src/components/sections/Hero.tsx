@@ -229,10 +229,10 @@ export default function Hero() {
         </h1>
         <div ref={copyRef} className="flex flex-col items-start gap-5">
           <p className="text-black text-[16px] leading-[22px] max-w-[888px]">
-            Non eseguiamo brief. Prima identifichiamo il problema vero, poi
-            costruiamo il sistema che lo risolve. Con il coraggio di dirti quando
-            stai chiedendo la cosa sbagliata, e di entrare nel rischio quando il
-            progetto lo merita.
+            Partiamo dal problema vero, che quasi mai coincide con quello
+            scritto nel brief, e costruiamo il sistema che lo risolve. Abbiamo
+            il coraggio di dirti quando stai chiedendo la cosa sbagliata, e di
+            metterci del nostro quando il progetto lo merita.
           </p>
           {/* A riposo la CTA e' la sola freccia, come nel design: la parola
               compare al passaggio del mouse. */}

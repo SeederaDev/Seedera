@@ -15,11 +15,14 @@ interface Model {
   selective?: boolean;
 }
 
+/* La versione precedente era una frase sola tenuta insieme da virgole, con
+   una domanda che finiva dentro un'altra proposizione e senza punto finale.
+   Qui sono tre periodi, e dicono la stessa cosa. */
 const INTRO =
-  "Quando ci crediamo, entriamo nel rischio, la differenza tra un fornitore e " +
-  "un partner si misura in una cosa sola: chi ha qualcosa da perdere se va " +
-  "male? Seedera può entrare nei progetti come co-investitore. Non è un " +
-  "servizio. È un segnale di allineamento";
+  "La differenza tra un fornitore e un partner si misura su una cosa sola: " +
+  "chi ha qualcosa da perdere se il progetto va male. Quando ci crediamo " +
+  "davvero, Seedera entra nel capitale e mette a rischio anche il proprio. " +
+  "Non è un listino: è il modo che abbiamo di dirti quanto ci crediamo.";
 
 const MODELS: Model[] = [
   {
@@ -40,7 +43,7 @@ const MODELS: Model[] = [
     label: "Modello 3",
     title: "Co-investimento diretto",
     description:
-      "Mettiamo risorse proprie oltre alle competenze. Non è la regola — è l'eccezione per i progetti in cui crediamo davvero.",
+      "Mettiamo risorse nostre oltre alle competenze. Succede raramente, e solo sui progetti in cui crediamo davvero.",
     accent: "var(--color-yellow)",
     selective: true,
   },
@@ -150,6 +153,10 @@ export default function Partnership() {
               meta' animazione, lo stesso di Start-up studio. Senza, il testo
               restava tutto bianco e la meta' bassa della sezione era la parte
               piu' lontana dal design.
+              NB: l'INTRO e' stata riscritta e "chi ha qualcosa da per" ora cade
+              a un terzo della frase invece che a meta'. Il rivelo segue lo
+              scroll, quindi funziona lo stesso, ma il fotogramma del PDF non e'
+              piu' riproducibile parola per parola.
               Il tracking recupera il kerning che gli inline-block azzerano. */}
           {/* text-h2 (clamp 28→48) come ogni altro titolo di sezione: con i
               48px fissi da mobile il testo sbordava e restava enorme. */}

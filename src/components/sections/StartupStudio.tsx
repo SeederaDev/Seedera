@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -26,13 +27,24 @@ const PRODOTTI: Prodotto[] = [
   {
     tipologia: "IMPATTO AMBIENTALE",
     nome: "REPLASE",
+    image: "/images/projects/replase/replase-01.jpg",
     href: "https://replase.com",
     accent: "var(--color-cyan)",
+  },
+  {
+    /* Non ha un sito proprio: il nome porta alla scheda di portfolio, quindi
+       il link e' interno e non deve aprire una scheda nuova (vedi `esterno`
+       piu' sotto). */
+    tipologia: "FORMAT CULTURALE",
+    nome: "SUONI OLTRE CONFINE",
+    image: "/images/projects/suoni-oltre-confine/suoni-oltre-confine-01.jpg",
+    href: "/portfolio/suoni-oltre-confine",
+    accent: "var(--color-yellow)",
   },
 ];
 
 const INTRO =
-  "Costruiamo anche per noi stessi, nessuno di questi lavori è finito quando è stato consegnato. È finito quando il team interno ha saputo portarlo avanti da solo.";
+  "Una parte del nostro lavoro non ha committente: sono idee nostre, che portiamo dal prototipo fino alla società che le gestisce. È dove il metodo lo proviamo addosso a noi, prima che a qualcun altro.";
 
 /* Pill che segue il cursore sopra il carosello: nel design e' un cerchio
    giallo con la scritta < DRAG >. */
@@ -187,7 +199,16 @@ export default function StartupStudio() {
             setDragging(false);
           }}
         >
-          {PRODOTTI.map((p) => (
+          {PRODOTTI.map((p) => {
+            /* Un prodotto con sito proprio esce dal sito; una scheda di
+               portfolio resta dentro e passa dal router, altrimenti la
+               navigazione ricarica la pagina intera. */
+            const esterno = p.href?.startsWith("http") ?? false;
+            /* Riga alta 22px: padding e margine verticali opposti portano il
+               tocco a 44px senza spostare nulla. */
+            const classiNome =
+              "inline-block py-[11px] -my-[11px] hover:opacity-60 transition-opacity";
+            return (
             <article
               key={p.nome}
               className="shrink-0"
@@ -234,24 +255,31 @@ export default function StartupStudio() {
                 className="uppercase tracking-wide font-medium text-black"
                 style={{ fontSize: "var(--font-h4)" }}
               >
-                {p.href ? (
+                {!p.href ? (
+                  p.nome
+                ) : esterno ? (
                   <a
                     href={p.href}
                     target="_blank"
                     rel="noopener noreferrer"
                     onPointerDown={(e) => e.stopPropagation()}
-                    /* Riga alta 22px: padding e margine verticali opposti
-                       portano il tocco a 44px senza spostare nulla. */
-                    className="inline-block py-[11px] -my-[11px] hover:opacity-60 transition-opacity"
+                    className={classiNome}
                   >
                     {p.nome}
                   </a>
                 ) : (
-                  p.nome
+                  <Link
+                    href={p.href}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className={classiNome}
+                  >
+                    {p.nome}
+                  </Link>
                 )}
               </h3>
             </article>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

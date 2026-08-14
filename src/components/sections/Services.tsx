@@ -33,7 +33,7 @@ const SERVICES: Service[] = [
       {
         name: "Software su misura e piattaforme",
         description:
-          "Sistemi costruiti sul processo reale dell'impresa, non sul processo che il software da scaffale impone.",
+          "Il software si adatta al processo dell'impresa, invece di costringere l'impresa dentro il processo di un gestionale da scaffale.",
       },
       {
         name: "App mobile e web",
@@ -43,7 +43,7 @@ const SERVICES: Service[] = [
       {
         name: "Agenti AI e automazioni",
         description:
-          "Automatizziamo il lavoro ripetitivo e mettiamo l'AI dove produce un risultato misurabile, non dove fa notizia.",
+          "Automatizziamo il lavoro ripetitivo e mettiamo l'AI dove produce un risultato che si vede nei numeri di fine mese.",
       },
       {
         name: "Integrazioni, API, architetture dati",
@@ -61,7 +61,7 @@ const SERVICES: Service[] = [
     title: "Second brain",
     tagline: "La conoscenza dell'impresa, viva e interrogabile",
     intro:
-      "Le informazioni più preziose di un'impresa vivono sparse tra teste, chat e file. Costruiamo il cervello operativo che le cattura, le struttura e le rende interrogabili — in linguaggio naturale, anche dall'AI.",
+      "Le informazioni più preziose di un'impresa vivono sparse tra teste, chat e file. Costruiamo il cervello operativo che le raccoglie, le mette in ordine e le rende interrogabili in linguaggio naturale, dalle persone e dall'AI.",
     color: "#CCCCCC",
     textDark: true,
     subs: [
@@ -78,7 +78,7 @@ const SERVICES: Service[] = [
       {
         name: "Ricerca semantica e RAG",
         description:
-          "Si cerca per significato, non per parola esatta: quello che serve emerge anche senza sapere dove sta.",
+          "Si cerca per significato: quello che serve viene fuori anche senza ricordare come era stato chiamato.",
       },
       {
         name: "Automazione documentale e processi",
@@ -88,7 +88,7 @@ const SERVICES: Service[] = [
       {
         name: "Onboarding e formazione accelerati",
         description:
-          "Chi entra trova il contesto già scritto e diventa operativo in giorni, non in mesi.",
+          "Chi entra trova il contesto già scritto e in pochi giorni lavora come chi c'era da prima.",
       },
     ],
   },
@@ -96,7 +96,7 @@ const SERVICES: Service[] = [
     title: "Consulenza",
     tagline: "Affianchiamo dove le decisioni pesano",
     intro:
-      "Nelle fasi dove sbagliare costa caro — lancio di un prodotto, cambio di modello, adozione dell'AI, salto di scala — serve qualcuno che ragioni con te, non per te.",
+      "Ci sono fasi in cui sbagliare costa caro: il lancio di un prodotto, un cambio di modello, l'adozione dell'AI, un salto di scala. Lì serve qualcuno che si sieda dalla tua parte del tavolo e ragioni insieme a te.",
     color: "#9E9E9E",
     textDark: true,
     subs: [

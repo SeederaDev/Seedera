@@ -18,25 +18,25 @@ const FASI: Fase[] = [
     title: "Diagnosi",
     claim: "Prima il problema",
     description:
-      "Ogni progetto inizia con una domanda: perché? Non cosa vuoi costruire. Perché lo vuoi costruire. Solo dopo la risposta progettiamo la soluzione.",
+      "Ogni progetto comincia da una domanda sola: perché lo vuoi costruire. Finché non c'è una risposta chiara, non si progetta niente.",
   },
   {
     title: "Integrazione",
     claim: "Un solo sistema",
     description:
-      "Tech, second brain e AI si progettano insieme. Nessun passaggio di mano, nessuna perdita di contesto. Un interlocutore, dall'inizio alla fine.",
+      "Tech, second brain e AI si progettano insieme, con un interlocutore unico dall'inizio alla fine. Niente passaggi di mano, niente contesto perso per strada.",
   },
   {
     title: "Esecuzione",
-    claim: "Risultati, non output",
+    claim: "I numeri prima del lavoro",
     description:
-      "Definiamo i KPI prima di iniziare. Il successo non si misura in deliverable consegnati — si misura in capacità acquisite dall'organizzazione.",
+      "I KPI che diranno se è andata bene li scegliamo insieme al primo incontro, e li guardiamo mentre il progetto va avanti.",
   },
   {
     title: "Trasferimento",
     claim: "Usciamo quando sai fare da solo",
     description:
-      "Il progetto si chiude quando il team interno sa fare le cose che prima non sapeva fare. Non prima.",
+      "Il progetto si chiude quando il tuo team sa fare da solo le cose che prima non sapeva fare. È l'unica condizione di uscita che accettiamo.",
   },
 ];
 

@@ -42,7 +42,7 @@ const HOMEPAGE_PROJECTS: Project[] = IN_HOME.map((slug) =>
   }));
 
 const INTRO_TEXT =
-  "Ogni progetto qui sotto è nato da una diagnosi, non da un brief. Quello che vedi è il risultato: quello che conta è il problema che c'era prima.";
+  "Di ogni progetto qui sotto si vede il risultato. La parte che conta però viene prima: il problema che c'era, e come ci siamo accorti di qual era davvero.";
 
 /* ── Rolling text effect on hover (CSS translateY approach) ── */
 function RollingText({ text }: { text: string }) {

@@ -56,8 +56,8 @@ export default function Contatti() {
         </h2>
 
         <p className="contatti-riga text-black text-[16px] leading-[22px] max-w-[546px]">
-          Iniziamo da una conversazione informale. Nessun brief. Nessun form.
-          Solo una chiamata per capire se il progetto ha senso per entrambi.
+          Si parte da una chiacchierata, senza brief e senza moduli da
+          compilare: mezz'ora per capire se il progetto ha senso per entrambi.
         </p>
 
         <Link

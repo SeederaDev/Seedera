@@ -23,7 +23,9 @@ const CHAT: Bolla[] = [
   { from: "cliente", text: "Voglio essere primo su questa parola chiave su Google.", larghezza: "76.1%" },
   { from: "seedera", text: "Perché vuoi più visibilità su quella parola?", larghezza: "62.6%" },
   { from: "cliente", text: "Perché voglio più traffico. Più lead. Più clienti", larghezza: "66.1%" },
-  { from: "seedera", text: "Il tuo obiettivo non è il traffico è la conversione", larghezza: "62.6%" },
+  /* La virgola manca nel Figma ma senza si legge come una frase sola e il
+     senso si ribalta. Le bolle restano senza punto finale: e' una chat. */
+  { from: "seedera", text: "Il tuo obiettivo non è il traffico, è la conversione", larghezza: "62.6%" },
   {
     from: "seedera",
     text: "Quella keyword porta volume ad alta dispersione. Una strategia diversa porta il triplo dei lead a un quinto del costo",
@@ -33,7 +35,7 @@ const CHAT: Bolla[] = [
 ];
 
 const INTRO =
-  "Ogni soluzione sbagliata nasce da una domanda sbagliata. Prima di proporre qualsiasi cosa, usiamo un metodo di diagnosi che fa emergere il bisogno reale, non la richiesta apparente.";
+  "Prima di proporre qualsiasi cosa facciamo emergere il bisogno che sta sotto la richiesta. Di solito la conversazione va più o meno così.";
 
 export default function Diagnostico() {
   const sectionRef = useRef<HTMLElement>(null);

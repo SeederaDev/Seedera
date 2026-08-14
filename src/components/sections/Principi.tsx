@@ -19,22 +19,22 @@ const PRINCIPI: Principio[] = [
   {
     title: "La domanda prima della risposta",
     description:
-      "Ogni soluzione sbagliata nasce da una domanda sbagliata. Prima chiediamo. Poi costruiamo.",
+      "Una soluzione sbagliata quasi sempre risponde benissimo a una domanda sbagliata. Per questo si comincia da lì.",
   },
   {
-    title: "Sistemi, non deliverable",
+    title: "Sistemi che restano",
     description:
-      "Non consegniamo file. Costruiamo capacità che restano nell'organizzazione dopo che usciamo.",
+      "Quello che consegniamo deve funzionare anche il giorno dopo che siamo usciti, senza di noi.",
   },
   {
     title: "Operatori, non consulenti",
     description:
-      "Non consigliamo dall'esterno. Operiamo dall'interno, condividendo gli obiettivi.",
+      "Stiamo dentro i processi e rispondiamo agli stessi numeri delle persone che ci lavorano.",
   },
   {
     title: "Franchezza operativa",
     description:
-      "Ti diciamo quando stai chiedendo la cosa sbagliata. Non per difficoltà. Per rispetto.",
+      "Se stai chiedendo la cosa sbagliata te lo diciamo subito. Costa una conversazione scomoda e fa risparmiare mesi.",
   },
 ];
 
