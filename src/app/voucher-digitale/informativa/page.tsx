@@ -122,7 +122,7 @@ export default function InformativaVoucherPage() {
           >
             <p
               className="leading-relaxed"
-              style={{ color: "var(--color-grey)", marginBottom: "40px" }}
+              style={{ color: "#5a5a5a", marginBottom: "40px" }}
             >
               Questa informativa riguarda i dati e i documenti inviati con il
               modulo di candidatura al Bando Voucher Doppia Transizione

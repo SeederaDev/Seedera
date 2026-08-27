@@ -19,10 +19,17 @@ const ACCEPT = "application/pdf,image/jpeg,image/png";
 
 const PASSI = ["Impresa", "Legale rappresentante", "Documenti", "Progetto e invio"];
 
+/* Il grigio di sistema del sito (#ccc) su bianco non si legge: per i testi
+   secondari di questa pagina si usa un grigio che regge il contrasto. */
+const GRIGIO_TESTO = "#5a5a5a";
+/* Il token --color-light-grey non esiste nel sito: con una variabile
+   inesistente la dichiarazione border decade e i campi restano senza bordo. */
+const BORDO_CAMPO = "#c9c9c9";
+
 interface Offerta {
   intestatario: string;
   referente: string | null;
-  righe: { descrizione: string; importo_cent: number; opzionale: boolean }[];
+  righe: { descrizione: string; dettaglio: string | null; importo_cent: number; opzionale: boolean }[];
   totale_cent: number;
   contributo_cent: number;
   a_carico_cent: number;
@@ -45,33 +52,56 @@ const etichettaPill = {
   lineHeight: "20px",
 } as const;
 
+/* Campi da modulo, non da manifesto: etichetta sopra, input compatto.
+   16px fissi sull'input: sotto quella soglia iOS zooma la pagina. */
+const stileEtichetta = {
+  display: "block",
+  fontSize: "13px",
+  fontWeight: 500,
+  color: "var(--color-black)",
+  marginBottom: "4px",
+} as const;
+
 const stileCampo = {
-  padding: "16px 20px",
-  fontSize: "var(--font-h4)",
-  borderColor: "var(--color-light-grey)",
+  width: "100%",
+  padding: "10px 12px",
+  fontSize: "16px",
+  borderRadius: "8px",
+  border: `1px solid ${BORDO_CAMPO}`,
+  backgroundColor: "#fff",
   color: "var(--color-black)",
 } as const;
 
 function Campo({
   nome,
-  placeholder,
+  etichetta,
+  esempio,
   tipo = "text",
   obbligatorio = false,
+  larga = false,
 }: {
   nome: string;
-  placeholder: string;
+  etichetta: string;
+  esempio?: string;
   tipo?: string;
   obbligatorio?: boolean;
+  larga?: boolean;
 }) {
   return (
-    <input
-      type={tipo}
-      name={nome}
-      placeholder={obbligatorio ? `${placeholder} *` : placeholder}
-      required={obbligatorio}
-      className="w-full border-b bg-transparent outline-none transition-colors duration-300 focus:border-[var(--color-yellow)]"
-      style={stileCampo}
-    />
+    <label className={larga ? "md:col-span-2" : undefined}>
+      <span style={stileEtichetta}>
+        {etichetta}
+        {obbligatorio && <span aria-hidden="true"> *</span>}
+      </span>
+      <input
+        type={tipo}
+        name={nome}
+        placeholder={esempio}
+        required={obbligatorio}
+        className="outline-none transition-colors duration-200 focus:border-[var(--color-black)]"
+        style={stileCampo}
+      />
+    </label>
   );
 }
 
@@ -92,7 +122,7 @@ function Blocco({
           {etichetta}
         </span>
       </div>
-      <div className="request-col flex flex-col" style={{ gap: "4px" }}>
+      <div className="request-col grid grid-cols-1 md:grid-cols-2" style={{ gap: "14px" }}>
         {children}
       </div>
     </div>
@@ -102,30 +132,44 @@ function Blocco({
 function CampoFile({
   nome,
   etichetta,
+  aiuto,
   obbligatorio = false,
   disabilitato = false,
 }: {
   nome: string;
   etichetta: string;
+  aiuto?: string;
   obbligatorio?: boolean;
   disabilitato?: boolean;
 }) {
   return (
     <label
-      className="w-full border-b bg-transparent transition-colors duration-300 cursor-pointer"
-      style={{ ...stileCampo, opacity: disabilitato ? 0.4 : 1 }}
+      className="md:col-span-2 block cursor-pointer transition-opacity duration-200"
+      style={{
+        border: `1px dashed ${BORDO_CAMPO}`,
+        borderRadius: "8px",
+        padding: "12px 14px",
+        backgroundColor: "#fff",
+        opacity: disabilitato ? 0.45 : 1,
+      }}
     >
-      <span className="block mb-1" style={{ color: "var(--color-black)" }}>
+      <span style={stileEtichetta}>
         {etichetta}
-        {obbligatorio ? " *" : ""}
+        {obbligatorio && <span aria-hidden="true"> *</span>}
       </span>
+      {aiuto && (
+        <span className="block" style={{ fontSize: "13px", color: GRIGIO_TESTO, marginBottom: "6px" }}>
+          {aiuto}
+        </span>
+      )}
       <input
         type="file"
         name={nome}
         accept={ACCEPT}
         required={obbligatorio && !disabilitato}
         disabled={disabilitato}
-        className="block w-full text-sm"
+        className="block w-full"
+        style={{ fontSize: "14px" }}
       />
     </label>
   );
@@ -185,12 +229,30 @@ function RiepilogoOfferta({
                         style={{ marginTop: "5px" }}
                       />
                       <span>
-                        {r.descrizione}{" "}
+                        <span className="font-medium">{r.descrizione}</span>{" "}
                         <em style={{ fontSize: "13px" }}>(opzionale: puoi toglierla)</em>
+                        {r.dettaglio && (
+                          <span
+                            className="block leading-relaxed"
+                            style={{ fontSize: "14px", marginTop: "2px" }}
+                          >
+                            {r.dettaglio}
+                          </span>
+                        )}
                       </span>
                     </label>
                   ) : (
-                    <span>{r.descrizione}</span>
+                    <span>
+                      <span className="font-medium">{r.descrizione}</span>
+                      {r.dettaglio && (
+                        <span
+                          className="block leading-relaxed"
+                          style={{ fontSize: "14px", marginTop: "2px" }}
+                        >
+                          {r.dettaglio}
+                        </span>
+                      )}
+                    </span>
                   )}
                   <span
                     className="font-medium whitespace-nowrap"
@@ -344,12 +406,12 @@ export default function VoucherDigitalePage() {
         <section
           className="relative w-full flex items-end"
           style={{
-            height: "350px",
+            height: "210px",
             backgroundColor: "var(--color-yellow)",
             paddingTop: "80px",
           }}
         >
-          <div className="container-content pb-10">
+          <div className="container-content pb-6">
             <h1 className="text-h1 text-black font-normal uppercase select-none">
               Voucher digitale 2026
             </h1>
@@ -371,7 +433,7 @@ export default function VoucherDigitalePage() {
         <section className="bg-white">
           <div
             className="container-content"
-            style={{ paddingTop: "60px", paddingBottom: "40px" }}
+            style={{ paddingTop: "36px", paddingBottom: "28px" }}
           >
             <div className="flex flex-col md:flex-row md:items-start">
               <div className="shrink-0 mb-6 md:mb-0">
@@ -384,7 +446,7 @@ export default function VoucherDigitalePage() {
               </div>
               <div className="request-col">
                 <h2
-                  className="text-h2 font-medium leading-[1.2]"
+                  className="text-h3 font-medium leading-[1.3]"
                   style={{ color: "var(--color-black)" }}
                 >
                   La Camera di Commercio Frosinone–Latina finanzia la
@@ -394,7 +456,7 @@ export default function VoucherDigitalePage() {
                 </h2>
                 <p
                   className="leading-relaxed"
-                  style={{ color: "var(--color-grey)", marginTop: "20px" }}
+                  style={{ color: GRIGIO_TESTO, marginTop: "14px" }}
                 >
                   Le domande partono il 25 settembre 2026 e valgono in ordine di
                   arrivo: prima riceviamo i documenti, prima sei in fila.
@@ -411,7 +473,7 @@ export default function VoucherDigitalePage() {
               {/* Indicatore dei passi */}
               <ol
                 className="flex flex-wrap"
-                style={{ gap: "10px", marginBottom: "50px" }}
+                style={{ gap: "8px", marginBottom: "28px" }}
               >
                 {PASSI.map((nome, i) => (
                   <li
@@ -420,11 +482,11 @@ export default function VoucherDigitalePage() {
                     style={{
                       borderRadius: "5px",
                       border: "1px solid",
-                      borderColor: i === passo ? "var(--color-black)" : "var(--color-light-grey)",
+                      borderColor: i === passo ? "var(--color-black)" : BORDO_CAMPO,
                       backgroundColor: i === passo ? "var(--color-yellow)" : "transparent",
-                      color: i <= passo ? "var(--color-black)" : "var(--color-grey)",
-                      padding: "5px 12px",
-                      fontSize: "13px",
+                      color: i <= passo ? "var(--color-black)" : GRIGIO_TESTO,
+                      padding: "4px 10px",
+                      fontSize: "12px",
                     }}
                   >
                     {i + 1}. {nome}
@@ -435,8 +497,8 @@ export default function VoucherDigitalePage() {
               <form
                 onSubmit={handleSubmit}
                 noValidate
-                className="request-form flex flex-col"
-                style={{ gap: "60px" }}
+                className="flex flex-col"
+                style={{ gap: "28px" }}
               >
                 {/* Honeypot: gli umani non lo vedono, i bot lo compilano. */}
                 <input
@@ -451,68 +513,85 @@ export default function VoucherDigitalePage() {
                 {/* I passi restano montati (hidden) cosi' input e file non si perdono. */}
                 <div ref={el => { passiRef.current[0] = el; }} hidden={passo !== 0}>
                   <Blocco etichetta="Impresa">
-                    <Campo nome="ragione_sociale" placeholder="Ragione sociale" obbligatorio />
-                    <Campo nome="piva" placeholder="Partita IVA" obbligatorio />
-                    <Campo nome="referente" placeholder="Nome e cognome del referente" obbligatorio />
-                    <Campo nome="email" placeholder="E-mail" tipo="email" obbligatorio />
-                    <Campo nome="telefono" placeholder="Telefono" tipo="tel" />
-                    <Campo nome="pec" placeholder="PEC aziendale" tipo="email" />
+                    <Campo nome="ragione_sociale" etichetta="Ragione sociale" esempio="Es. Farma Store S.r.l." obbligatorio />
+                    <Campo nome="piva" etichetta="Partita IVA" esempio="11 cifre" obbligatorio />
+                    <Campo nome="referente" etichetta="Referente (nome e cognome)" obbligatorio />
+                    <Campo nome="email" etichetta="E-mail" tipo="email" obbligatorio />
+                    <Campo nome="telefono" etichetta="Telefono" tipo="tel" />
+                    <Campo nome="pec" etichetta="PEC aziendale" tipo="email" />
                   </Blocco>
                 </div>
 
                 <div ref={el => { passiRef.current[1] = el; }} hidden={passo !== 1}>
                   <Blocco etichetta="Legale rappresentante">
-                    <Campo nome="rap_nome" placeholder="Nome" obbligatorio />
-                    <Campo nome="rap_cognome" placeholder="Cognome" obbligatorio />
-                    <Campo nome="rap_codice_fiscale" placeholder="Codice fiscale" obbligatorio />
-                    <Campo nome="rap_data_nascita" placeholder="Data di nascita" tipo="date" />
-                    <Campo nome="rap_luogo_nascita" placeholder="Luogo di nascita" />
-                    <Campo nome="rap_residenza_via" placeholder="Residenza: via e numero" />
-                    <Campo nome="rap_residenza_comune" placeholder="Residenza: comune" />
-                    <Campo nome="rap_residenza_cap" placeholder="Residenza: CAP" />
-                    <Campo nome="rap_residenza_provincia" placeholder="Residenza: provincia" />
+                    <Campo nome="rap_nome" etichetta="Nome" obbligatorio />
+                    <Campo nome="rap_cognome" etichetta="Cognome" obbligatorio />
+                    <Campo nome="rap_codice_fiscale" etichetta="Codice fiscale" esempio="16 caratteri" obbligatorio larga />
+                    <Campo nome="rap_data_nascita" etichetta="Data di nascita" tipo="date" />
+                    <Campo nome="rap_luogo_nascita" etichetta="Luogo di nascita" />
+                    <Campo
+                      nome="rap_residenza_via"
+                      etichetta="Indirizzo di residenza"
+                      esempio="Es. Via Roma 1, 03100 Frosinone (FR)"
+                      larga
+                    />
                   </Blocco>
                 </div>
 
                 <div ref={el => { passiRef.current[2] = el; }} hidden={passo !== 2}>
                   <Blocco etichetta="Documenti">
-                    <CampoFile nome="visura" etichetta="Visura camerale recente" obbligatorio />
+                    <CampoFile
+                      nome="visura"
+                      etichetta="Visura camerale recente"
+                      aiuto="PDF o foto leggibile, massimo 20 MB"
+                      obbligatorio
+                    />
                     <CampoFile
                       nome="polizza"
                       etichetta="Polizza catastrofale con quietanza"
+                      aiuto="Deve riportare la quietanza di pagamento"
                       disabilitato={polizzaMancante}
                     />
                     <label
-                      className="flex items-center gap-3"
-                      style={{ padding: "8px 20px", color: "var(--color-grey)" }}
+                      className="md:col-span-2 flex items-start gap-2 cursor-pointer"
+                      style={{ fontSize: "14px", color: "var(--color-black)" }}
                     >
                       <input
                         type="checkbox"
                         checked={polizzaMancante}
                         onChange={(e) => setPolizzaMancante(e.target.checked)}
+                        style={{ marginTop: "3px" }}
                       />
-                      Non ho ancora la polizza catastrofale (ti aiutiamo noi: è
-                      obbligatoria per legge e senza la domanda non parte)
+                      <span>
+                        Non ho ancora la polizza catastrofale{" "}
+                        <span style={{ color: GRIGIO_TESTO }}>
+                          (ti aiutiamo noi: è obbligatoria per legge e senza la
+                          domanda non parte)
+                        </span>
+                      </span>
                     </label>
-                    <CampoFile nome="parita_genere" etichetta="Certificazione parità di genere (se posseduta)" />
-                    <CampoFile nome="rating_legalita" etichetta="Rating di legalità (se posseduto)" />
+                    <CampoFile nome="parita_genere" etichetta="Certificazione parità di genere (solo se posseduta)" />
+                    <CampoFile nome="rating_legalita" etichetta="Rating di legalità (solo se posseduto)" />
                   </Blocco>
                 </div>
 
                 <div ref={el => { passiRef.current[3] = el; }} hidden={passo !== 3}>
                   <Blocco etichetta="Progetto">
-                    <textarea
-                      name="note_esigenze"
-                      placeholder="Cosa vorresti digitalizzare? Due righe bastano."
-                      rows={4}
-                      className="w-full border-b bg-transparent outline-none resize-none transition-colors duration-300 focus:border-[var(--color-yellow)]"
-                      style={stileCampo}
-                    />
+                    <label className="md:col-span-2">
+                      <span style={stileEtichetta}>Cosa vorresti digitalizzare?</span>
+                      <textarea
+                        name="note_esigenze"
+                        placeholder="Due righe bastano."
+                        rows={4}
+                        className="outline-none resize-none transition-colors duration-200 focus:border-[var(--color-black)]"
+                        style={stileCampo}
+                      />
+                    </label>
                     <label
-                      className="flex items-start gap-3"
-                      style={{ padding: "16px 20px", color: "var(--color-black)" }}
+                      className="md:col-span-2 flex items-start gap-2 cursor-pointer"
+                      style={{ fontSize: "14px", color: "var(--color-black)" }}
                     >
-                      <input type="checkbox" name="consenso" required style={{ marginTop: "5px" }} />
+                      <input type="checkbox" name="consenso" required style={{ marginTop: "3px" }} />
                       <span>
                         Autorizzo il trattamento dei dati e dei documenti
                         inviati per la preparazione della domanda di contributo,
@@ -540,7 +619,7 @@ export default function VoucherDigitalePage() {
                       className="font-medium tracking-wide uppercase transition-all duration-300"
                       style={{
                         borderRadius: "5px",
-                        border: "2px solid var(--color-light-grey)",
+                        border: `2px solid ${BORDO_CAMPO}`,
                         padding: "12px 20px",
                         fontSize: "var(--font-btn)",
                         color: "var(--color-black)",
