@@ -465,8 +465,11 @@ export default function VoucherDigitalePage() {
                   Come funziona
                 </span>
               </div>
+              {/* Non e' un titolo da manifesto ma una frase lunga che spiega il
+                  bando: alla taglia h3 occupava mezza pagina e si leggeva a
+                  fatica. Un gradino sotto, con interlinea piu' aperta. */}
               <h2
-                className="text-h3 font-medium leading-[1.3]"
+                className="text-h4 font-medium leading-[1.35]"
                 style={{ color: "var(--color-black)" }}
               >
                 La Camera di Commercio Frosinone–Latina finanzia la
