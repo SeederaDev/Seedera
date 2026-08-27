@@ -22,11 +22,18 @@ const PASSI = ["Impresa", "Legale rappresentante", "Documenti", "Progetto e invi
 interface Offerta {
   intestatario: string;
   referente: string | null;
-  righe: { descrizione: string; importo_cent: number }[];
+  righe: { descrizione: string; importo_cent: number; opzionale: boolean }[];
   totale_cent: number;
   contributo_cent: number;
   a_carico_cent: number;
 }
+
+/* Stessa regola del backend (bando art.3): 70%, tetto 10.000 €. */
+const contributoSu = (totaleCent: number) => {
+  const contributo = Math.min(Math.round(totaleCent * 0.7), 1_000_000);
+  return { contributo, aCarico: totaleCent - contributo };
+};
+const MIN_INVESTIMENTO_CENT = 400_000;
 
 const euro = (cent: number) =>
   new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(cent / 100);
@@ -124,7 +131,20 @@ function CampoFile({
   );
 }
 
-function RiepilogoOfferta({ offerta }: { offerta: Offerta }) {
+function RiepilogoOfferta({
+  offerta,
+  scelte,
+  cambiaScelta,
+}: {
+  offerta: Offerta;
+  scelte: boolean[];
+  cambiaScelta: (indice: number, tenuta: boolean) => void;
+}) {
+  const totale = offerta.righe.reduce(
+    (somma, riga, i) => somma + (scelte[i] ? riga.importo_cent : 0),
+    0,
+  );
+  const { contributo, aCarico } = contributoSu(totale);
   return (
     <section style={{ backgroundColor: "var(--color-yellow)" }}>
       <div
@@ -153,22 +173,50 @@ function RiepilogoOfferta({ offerta }: { offerta: Offerta }) {
                   style={{
                     padding: "10px 0",
                     borderBottom: "1px solid rgba(0,0,0,0.25)",
+                    opacity: scelte[i] ? 1 : 0.45,
                   }}
                 >
-                  <span>{r.descrizione}</span>
-                  <span className="font-medium whitespace-nowrap">{euro(r.importo_cent)}</span>
+                  {r.opzionale ? (
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={scelte[i]}
+                        onChange={(e) => cambiaScelta(i, e.target.checked)}
+                        style={{ marginTop: "5px" }}
+                      />
+                      <span>
+                        {r.descrizione}{" "}
+                        <em style={{ fontSize: "13px" }}>(opzionale: puoi toglierla)</em>
+                      </span>
+                    </label>
+                  ) : (
+                    <span>{r.descrizione}</span>
+                  )}
+                  <span
+                    className="font-medium whitespace-nowrap"
+                    style={{ textDecoration: scelte[i] ? "none" : "line-through" }}
+                  >
+                    {euro(r.importo_cent)}
+                  </span>
                 </li>
               ))}
               <li className="flex justify-between gap-6 font-medium" style={{ padding: "10px 0" }}>
                 <span>Totale progetto</span>
-                <span className="whitespace-nowrap">{euro(offerta.totale_cent)}</span>
+                <span className="whitespace-nowrap">{euro(totale)}</span>
               </li>
             </ul>
             <p className="leading-relaxed">
               Con il voucher, il contributo camerale copre{" "}
-              <strong>{euro(offerta.contributo_cent)}</strong>: a carico tuo
-              restano <strong>{euro(offerta.a_carico_cent)}</strong>.
+              <strong>{euro(contributo)}</strong>: a carico tuo restano{" "}
+              <strong>{euro(aCarico)}</strong>.
             </p>
+            {totale < MIN_INVESTIMENTO_CENT && (
+              <p className="leading-relaxed font-medium" style={{ marginTop: "8px" }}>
+                Attenzione: sotto i 4.000&nbsp;€ di investimento il bando non
+                ammette la domanda. Rimetti una voce o scrivici per rimodulare
+                la proposta.
+              </p>
+            )}
             <p className="leading-relaxed" style={{ marginTop: "8px", fontSize: "14px" }}>
               Il contributo (70% della spesa, massimo 10.000&nbsp;€) è concesso
               dalla Camera di Commercio in ordine di arrivo delle domande, fino
@@ -190,6 +238,7 @@ export default function VoucherDigitalePage() {
   const [polizzaMancante, setPolizzaMancante] = useState(false);
   const [offerta, setOfferta] = useState<Offerta | null>(null);
   const [tokenOfferta, setTokenOfferta] = useState<string>("");
+  const [scelte, setScelte] = useState<boolean[]>([]);
   const passiRef = useRef<Array<HTMLDivElement | null>>([]);
 
   /* ?o=TOKEN: si carica l'offerta e la si mostra in cima. Un token morto
@@ -200,7 +249,12 @@ export default function VoucherDigitalePage() {
     setTokenOfferta(token);
     fetch(`${OFFERTA_ENDPOINT}/${encodeURIComponent(token)}`)
       .then(res => (res.ok ? res.json() : null))
-      .then(dati => { if (dati) setOfferta(dati); })
+      .then(dati => {
+        if (dati) {
+          setOfferta(dati);
+          setScelte(dati.righe.map(() => true)); // si parte con tutto incluso
+        }
+      })
       .catch(() => {});
   }, []);
 
@@ -249,6 +303,10 @@ export default function VoucherDigitalePage() {
     dati.set("consenso", dati.get("consenso") === "on" ? "true" : "false");
     dati.set("polizza_mancante", polizzaMancante ? "true" : "false");
     if (tokenOfferta) dati.set("offerta", tokenOfferta);
+    if (offerta) {
+      const tenute = offerta.righe.map((_, i) => i).filter(i => scelte[i]);
+      dati.set("offerta_selezione", JSON.stringify(tenute));
+    }
 
     for (const [campo, valore] of dati.entries()) {
       if (valore instanceof File && valore.size > MAX_FILE) {
@@ -299,7 +357,15 @@ export default function VoucherDigitalePage() {
         </section>
 
         {/* ── Riepilogo offerta (solo con link personale) ── */}
-        {offerta && <RiepilogoOfferta offerta={offerta} />}
+        {offerta && (
+          <RiepilogoOfferta
+            offerta={offerta}
+            scelte={scelte}
+            cambiaScelta={(i, tenuta) =>
+              setScelte(s => s.map((v, j) => (j === i ? tenuta : v)))
+            }
+          />
+        )}
 
         {/* ── Intro ── */}
         <section className="bg-white">
