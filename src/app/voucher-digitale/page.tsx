@@ -484,6 +484,56 @@ export default function VoucherDigitalePage() {
                 Le domande partono il 25 settembre 2026 e valgono in ordine di
                 arrivo: prima riceviamo i documenti, prima sei in fila.
               </p>
+
+              {/* Chi arriva qui non sa cosa comporta compilare: il modulo non e'
+                  la domanda, e' l'inizio della pratica. Il seguito — chi
+                  prepara, chi firma, chi si fa vivo — va detto prima, non dopo
+                  l'invio. */}
+              <ol
+                className="flex flex-col"
+                style={{ marginTop: "44px", gap: "24px", listStyle: "none" }}
+              >
+                {[
+                  {
+                    titolo: "Compili il modulo qui sotto",
+                    testo:
+                      "Ti chiediamo solo quello che non possiamo ricavare da soli: i dati dell'impresa, quelli di chi la rappresenta e i documenti che il bando richiede. Il resto lo ricostruiamo noi dalla visura.",
+                  },
+                  {
+                    titolo: "Prepariamo la documentazione",
+                    testo:
+                      "Mettiamo insieme la pratica e scriviamo il progetto nella forma che il bando chiede. Se manca qualcosa te lo chiediamo noi, un pezzo per volta.",
+                  },
+                  {
+                    titolo: "Firmi digitalmente, poi si invia",
+                    testo:
+                      "Quando la documentazione è pronta ti contattiamo noi: i moduli vanno firmati con la firma digitale del legale rappresentante, ed è l'unico passaggio che non possiamo fare al posto tuo.",
+                  },
+                ].map(passo => (
+                  <li key={passo.titolo}>
+                    <span
+                      className="block font-medium"
+                      style={{ color: "var(--color-black)", fontSize: "18px" }}
+                    >
+                      {passo.titolo}
+                    </span>
+                    <span
+                      className="block leading-relaxed"
+                      style={{ color: GRIGIO_TESTO, marginTop: "6px" }}
+                    >
+                      {passo.testo}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+
+              <p
+                className="leading-relaxed"
+                style={{ color: GRIGIO_TESTO, marginTop: "24px" }}
+              >
+                Fino ad allora non devi fare altro: ti scriviamo noi appena la
+                pratica è pronta.
+              </p>
             </div>
           </div>
         </section>
