@@ -24,7 +24,14 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      # Gli endpoint del backend proprietario (repo SeederaDev/seedera-backend)
+      # sono letti da process.env alla build: il sito e' un export statico, e
+      # senza queste due variabili i form ricadono sul mailto invece di inviare.
       - run: npm run build
+        env:
+          NEXT_PUBLIC_FORM_ENDPOINT: https://api.seedera.it/api/lead
+          NEXT_PUBLIC_VOUCHER_ENDPOINT: https://api.seedera.it/api/voucher/onboarding
 
       # Marca quale commit e' online: permette di verificare che Plesk abbia
       # davvero deployato con un curl su /version.txt, senza aprire il pannello.
