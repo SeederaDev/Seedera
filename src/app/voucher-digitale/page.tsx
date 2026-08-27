@@ -26,6 +26,21 @@ const GRIGIO_TESTO = "#5a5a5a";
    inesistente la dichiarazione border decade e i campi restano senza bordo. */
 const BORDO_CAMPO = "#c9c9c9";
 
+/* Il resto del sito impagina in due colonne (etichetta a sinistra, testo a
+   destra con `.request-col`): va bene per una pagina che si legge, non per un
+   modulo da compilare, che finiva spinto a destra con mezzo schermo vuoto.
+   Qui la colonna sta al centro e il contenuto la segue tutto, dall'intestazione
+   al messaggio finale. */
+/* `width: 100%` non e' ridondante: dentro un contenitore flex i margini
+   automatici annullano lo stretch, e senza larghezza il blocco si stringe sul
+   proprio contenuto (i pulsanti finivano in mezzo alla pagina). */
+const colonna = {
+  width: "100%",
+  maxWidth: "760px",
+  marginLeft: "auto",
+  marginRight: "auto",
+} as const;
+
 interface Offerta {
   intestatario: string;
   referente: string | null;
@@ -113,8 +128,8 @@ function Blocco({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col md:flex-row md:items-start">
-      <div className="shrink-0 mb-6 md:mb-0">
+    <div style={colonna}>
+      <div style={{ marginBottom: "20px" }}>
         <span
           className="inline-flex items-center border border-black text-black tracking-wide uppercase"
           style={etichettaPill}
@@ -122,7 +137,7 @@ function Blocco({
           {etichetta}
         </span>
       </div>
-      <div className="request-col grid grid-cols-1 md:grid-cols-2" style={{ gap: "14px" }}>
+      <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: "16px" }}>
         {children}
       </div>
     </div>
@@ -193,10 +208,13 @@ function RiepilogoOfferta({
     <section style={{ backgroundColor: "var(--color-yellow)" }}>
       <div
         className="container-content"
-        style={{ paddingTop: "50px", paddingBottom: "50px" }}
+        style={{
+          paddingTop: "clamp(44px, 6vw, 64px)",
+          paddingBottom: "clamp(44px, 6vw, 64px)",
+        }}
       >
-        <div className="flex flex-col md:flex-row md:items-start">
-          <div className="shrink-0 mb-6 md:mb-0">
+        <div style={colonna}>
+          <div style={{ marginBottom: "20px" }}>
             <span
               className="inline-flex items-center border border-black text-black tracking-wide uppercase"
               style={etichettaPill}
@@ -204,7 +222,7 @@ function RiepilogoOfferta({
               La tua offerta
             </span>
           </div>
-          <div className="request-col" style={{ color: "var(--color-black)" }}>
+          <div style={{ color: "var(--color-black)" }}>
             <h2 className="text-h3 font-medium" style={{ marginBottom: "16px" }}>
               Proposta riservata a {offerta.intestatario}
               {offerta.referente ? `, c.a. ${offerta.referente}` : ""}
@@ -433,10 +451,10 @@ export default function VoucherDigitalePage() {
         <section className="bg-white">
           <div
             className="container-content"
-            style={{ paddingTop: "36px", paddingBottom: "28px" }}
+            style={{ paddingTop: "clamp(48px, 7vw, 88px)", paddingBottom: "0" }}
           >
-            <div className="flex flex-col md:flex-row md:items-start">
-              <div className="shrink-0 mb-6 md:mb-0">
+            <div style={colonna}>
+              <div style={{ marginBottom: "20px" }}>
                 <span
                   className="inline-flex items-center border border-black text-black tracking-wide uppercase"
                   style={etichettaPill}
@@ -444,36 +462,40 @@ export default function VoucherDigitalePage() {
                   Come funziona
                 </span>
               </div>
-              <div className="request-col">
-                <h2
-                  className="text-h3 font-medium leading-[1.3]"
-                  style={{ color: "var(--color-black)" }}
-                >
-                  La Camera di Commercio Frosinone–Latina finanzia la
-                  digitalizzazione con un contributo a fondo perduto fino a
-                  10.000&nbsp;€ (70% della spesa). Compila i dati e carica i
-                  documenti: ti aiutiamo a preparare e presentare la domanda.
-                </h2>
-                <p
-                  className="leading-relaxed"
-                  style={{ color: GRIGIO_TESTO, marginTop: "14px" }}
-                >
-                  Le domande partono il 25 settembre 2026 e valgono in ordine di
-                  arrivo: prima riceviamo i documenti, prima sei in fila.
-                </p>
-              </div>
+              <h2
+                className="text-h3 font-medium leading-[1.3]"
+                style={{ color: "var(--color-black)" }}
+              >
+                La Camera di Commercio Frosinone–Latina finanzia la
+                digitalizzazione con un contributo a fondo perduto fino a
+                10.000&nbsp;€ (70% della spesa). Compila i dati e carica i
+                documenti: ti aiutiamo a preparare e presentare la domanda.
+              </h2>
+              <p
+                className="leading-relaxed"
+                style={{ color: GRIGIO_TESTO, marginTop: "16px" }}
+              >
+                Le domande partono il 25 settembre 2026 e valgono in ordine di
+                arrivo: prima riceviamo i documenti, prima sei in fila.
+              </p>
             </div>
           </div>
         </section>
 
         {/* ── Percorso a passi ── */}
         {status !== "sent" ? (
-          <section className="bg-white" style={{ paddingBottom: "120px" }}>
+          <section
+            className="bg-white"
+            style={{
+              paddingTop: "clamp(44px, 6vw, 72px)",
+              paddingBottom: "clamp(80px, 10vw, 128px)",
+            }}
+          >
             <div className="container-content">
               {/* Indicatore dei passi */}
               <ol
                 className="flex flex-wrap"
-                style={{ gap: "8px", marginBottom: "28px" }}
+                style={{ ...colonna, gap: "8px", marginBottom: "36px" }}
               >
                 {PASSI.map((nome, i) => (
                   <li
@@ -498,7 +520,7 @@ export default function VoucherDigitalePage() {
                 onSubmit={handleSubmit}
                 noValidate
                 className="flex flex-col"
-                style={{ gap: "28px" }}
+                style={{ gap: "40px" }}
               >
                 {/* Honeypot: gli umani non lo vedono, i bot lo compilano. */}
                 <input
@@ -513,7 +535,7 @@ export default function VoucherDigitalePage() {
                 {/* I passi restano montati (hidden) cosi' input e file non si perdono. */}
                 <div ref={el => { passiRef.current[0] = el; }} hidden={passo !== 0}>
                   <Blocco etichetta="Impresa">
-                    <Campo nome="ragione_sociale" etichetta="Ragione sociale" esempio="Es. Farma Store S.r.l." obbligatorio />
+                    <Campo nome="ragione_sociale" etichetta="Ragione sociale" obbligatorio />
                     <Campo nome="piva" etichetta="Partita IVA" esempio="11 cifre" obbligatorio />
                     <Campo nome="referente" etichetta="Referente (nome e cognome)" obbligatorio />
                     <Campo nome="email" etichetta="E-mail" tipo="email" obbligatorio />
@@ -611,7 +633,7 @@ export default function VoucherDigitalePage() {
                 </div>
 
                 {/* ── Navigazione fra i passi ── */}
-                <div className="request-col flex items-stretch" style={{ gap: "10px" }}>
+                <div className="flex items-stretch" style={{ ...colonna, gap: "10px" }}>
                   {passo > 0 && (
                     <button
                       type="button"
@@ -668,8 +690,8 @@ export default function VoucherDigitalePage() {
                 {status === "error" && (
                   <p
                     role="status"
-                    className="request-col leading-relaxed"
-                    style={{ color: "var(--color-red)" }}
+                    className="leading-relaxed"
+                    style={{ ...colonna, color: "var(--color-red)" }}
                   >
                     {avviso ?? `Invio non riuscito. Scrivici direttamente a ${CONTACT_EMAIL}.`}
                   </p>
@@ -678,12 +700,18 @@ export default function VoucherDigitalePage() {
             </div>
           </section>
         ) : (
-          <section className="bg-white" style={{ paddingBottom: "120px" }}>
+          <section
+            className="bg-white"
+            style={{
+              paddingTop: "clamp(44px, 6vw, 72px)",
+              paddingBottom: "clamp(80px, 10vw, 128px)",
+            }}
+          >
             <div className="container-content">
               <p
                 role="status"
                 className="text-h3 font-medium leading-relaxed"
-                style={{ color: "var(--color-black)" }}
+                style={{ ...colonna, color: "var(--color-black)" }}
               >
                 Ricevuto. Controlliamo i documenti e ti ricontattiamo noi entro
                 un giorno lavorativo per i passi successivi.
