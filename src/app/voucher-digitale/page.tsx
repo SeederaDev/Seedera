@@ -177,14 +177,17 @@ function CampoFile({
           {aiuto}
         </span>
       )}
+      {/* Il testo del sito e' bianco per impostazione, e le sezioni chiare non
+          lo ridichiarano: senza questo colore il nome del file scelto restava
+          bianco su bianco e il caricamento sembrava non essere avvenuto. */}
       <input
         type="file"
         name={nome}
         accept={ACCEPT}
         required={obbligatorio && !disabilitato}
         disabled={disabilitato}
-        className="block w-full"
-        style={{ fontSize: "14px" }}
+        className="campo-file block w-full"
+        style={{ fontSize: "14px", color: "var(--color-black)" }}
       />
     </label>
   );

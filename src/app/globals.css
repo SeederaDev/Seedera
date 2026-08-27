@@ -384,3 +384,26 @@ body {
     grid-row: var(--riga);
   }
 }
+
+/* ---- Caricamento documenti (voucher) ----
+   Il pulsante nativo del campo file arriva col grigio di sistema, che qui
+   stona e su alcuni browser resta poco leggibile. Lo si porta al bordo e al
+   raggio degli altri controlli della pagina; il nome del file accanto lo
+   colora il componente. */
+.campo-file::file-selector-button {
+  margin-right: 10px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-black);
+  border-radius: 5px;
+  background-color: transparent;
+  color: var(--color-black);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.campo-file::file-selector-button:hover {
+  background-color: var(--color-yellow);
+}
