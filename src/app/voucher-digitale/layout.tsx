@@ -1,14 +1,28 @@
 import type { Metadata } from "next";
+import { BANDI } from "@/lib/bandi";
+
+/* Pagina pilastro: raccoglie e linka le pagine delle singole camere. Il numero
+   nel testo si aggiorna da solo col censimento, cosi' la descrizione non
+   diventa una promessa vecchia. */
+const quante = BANDI.length;
 
 export const metadata: Metadata = {
-  title: "Voucher digitale 2026",
+  /* Il template va ridichiarato qui: un titolo dichiarato come stringa in un
+     layout intermedio non lo propaga ai figli, e le pagine delle camere
+     uscivano senza il suffisso del sito che tutte le altre hanno. */
+  title: {
+    default: "Voucher digitali 2026 delle Camere di Commercio",
+    template: "%s | Seedera",
+  },
   description:
-    "Candidatura al voucher digitale della Camera di Commercio Frosinone-Latina: fino a 10.000 € a fondo perduto. Carica i documenti: ti aiutiamo a preparare e presentare la domanda.",
+    `Contributi a fondo perduto per la digitalizzazione delle PMI: ${quante} bandi camerali `
+    + "seguiti, con date, percentuali e tetti aggiornati. Prepariamo e presentiamo la domanda per te.",
   alternates: { canonical: "/voucher-digitale" },
   openGraph: {
-    title: "Voucher digitale 2026 | Seedera",
+    title: "Voucher digitali 2026 delle Camere di Commercio | Seedera",
     description:
-      "Fino a 10.000 € a fondo perduto per la digitalizzazione. Carica i documenti: ti aiutiamo a preparare e presentare la domanda.",
+      "Contributi a fondo perduto per la digitalizzazione delle PMI. Trova il bando della tua camera "
+      + "e candidati: prepariamo e presentiamo la domanda per te.",
     url: "/voucher-digitale",
     type: "website",
   },

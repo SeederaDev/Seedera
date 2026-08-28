@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SITE } from "@/lib/seo";
 import { PROJECTS } from "./portfolio/[slug]/projectsData";
+import { BANDI } from "@/lib/bandi";
 
 /* Con output: export queste route vanno dichiarate statiche a mano. */
 export const dynamic = "force-static";
@@ -21,11 +22,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
+  /* Una voce per ogni bando pubblicabile, piu' la pagina pilastro che le
+     raccoglie. I bandi non censiti non sono in BANDI, quindi non finiscono in
+     mappa: una pagina che non esiste non si dichiara. */
+  const voucher: MetadataRoute.Sitemap = [
+    { url: `${SITE.url}/voucher-digitale`, changeFrequency: "weekly", priority: 0.9 },
+    ...BANDI.map((b) => ({
+      url: `${SITE.url}/voucher-digitale/${b.slug}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    })),
+  ];
+
   const progetti: MetadataRoute.Sitemap = PROJECTS.map((p) => ({
     url: `${SITE.url}/portfolio/${p.slug}`,
     changeFrequency: "yearly",
     priority: 0.6,
   }));
 
-  return [...fisse, ...progetti];
+  return [...fisse, ...voucher, ...progetti];
 }

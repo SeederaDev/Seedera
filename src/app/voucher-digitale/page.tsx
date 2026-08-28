@@ -1,884 +1,147 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { BANDI, ordinaPerPriorita, statoBando, euroTondo, percento, dataIt, PROVINCE } from "@/lib/bandi";
+import { OFFERTA_ENDPOINT } from "@/lib/api";
+import { Etichetta, GRIGIO_TESTO, BORDO_CAMPO, colonna, stileCampo, stileEtichetta } from "@/components/voucher/campi";
 
-/* Endpoint del backend proprietario (repo seedera-backend). Con
-   output: 'export' non esistono API route: senza la variabile il modulo
-   avvisa e rimanda alla mail. */
-const VOUCHER_ENDPOINT = process.env.NEXT_PUBLIC_VOUCHER_ENDPOINT ?? "";
-/* L'endpoint delle offerte vive accanto a quello dell'onboarding. */
-const OFFERTA_ENDPOINT = VOUCHER_ENDPOINT.replace("/voucher/onboarding", "/offerta");
-const CONTACT_EMAIL = "info@seedera.it";
-
-const MAX_FILE = 20 * 1024 * 1024;
-
-/* Il bando ammette solo PDF e scansioni. */
-const ACCEPT = "application/pdf,image/jpeg,image/png";
-
-const PASSI = ["Impresa", "Legale rappresentante", "Documenti", "Progetto e invio"];
-
-/* Il grigio di sistema del sito (#ccc) su bianco non si legge: per i testi
-   secondari di questa pagina si usa un grigio che regge il contrasto. */
-const GRIGIO_TESTO = "#5a5a5a";
-/* Il token --color-light-grey non esiste nel sito: con una variabile
-   inesistente la dichiarazione border decade e i campi restano senza bordo. */
-const BORDO_CAMPO = "#c9c9c9";
-
-/* Il resto del sito impagina in due colonne (etichetta a sinistra, testo a
-   destra con `.request-col`): va bene per una pagina che si legge, non per un
-   modulo da compilare, che finiva spinto a destra con mezzo schermo vuoto.
-   Qui la colonna sta al centro e il contenuto la segue tutto, dall'intestazione
-   al messaggio finale. */
-/* `width: 100%` non e' ridondante: dentro un contenitore flex i margini
-   automatici annullano lo stretch, e senza larghezza il blocco si stringe sul
-   proprio contenuto (i pulsanti finivano in mezzo alla pagina). */
-const colonna = {
-  width: "100%",
-  maxWidth: "760px",
-  marginLeft: "auto",
-  marginRight: "auto",
-} as const;
-
-interface Offerta {
-  intestatario: string;
-  referente: string | null;
-  righe: { descrizione: string; dettaglio: string | null; importo_cent: number; opzionale: boolean }[];
-  totale_lordo_cent?: number;
-  sconto_cent?: number;
-  sconto_tipo?: "percento" | "importo" | null;
-  sconto_valore?: number | null;
-  totale_cent: number;
-  contributo_cent: number;
-  a_carico_cent: number;
-}
-
-/* Stessa regola del backend (src/dominio/contributo.js): lo sconto si applica
-   al totale delle voci scelte, non scende sotto zero, e il contributo si
-   calcola sul netto. Serve qui perche' il cliente puo' togliere voci
-   opzionali e i conti cambiano senza ricaricare la pagina. */
-const scontoSu = (
-  totaleCent: number,
-  tipo: Offerta["sconto_tipo"],
-  valore: Offerta["sconto_valore"],
-) => {
-  const v = Number(valore);
-  if ((tipo !== "percento" && tipo !== "importo") || !Number.isFinite(v) || v <= 0) return 0;
-  const grezzo = tipo === "percento"
-    ? Math.round(totaleCent * (Math.min(v, 100) / 100))
-    : Math.round(v);
-  return Math.min(grezzo, totaleCent);
+const ETICHETTA_STATO: Record<string, string> = {
+  in_apertura: "apre a breve",
+  aperto: "domande aperte",
+  chiuso: "chiuso",
+  esaurito: "fondi esauriti",
+  da_definire: "date da definire",
 };
 
-/* Stessa regola del backend (bando art.3): 70%, tetto 10.000 €. */
-const contributoSu = (totaleCent: number) => {
-  const contributo = Math.min(Math.round(totaleCent * 0.7), 1_000_000);
-  return { contributo, aCarico: totaleCent - contributo };
-};
-const MIN_INVESTIMENTO_CENT = 400_000;
+export default function IndiceVoucher() {
+  const [oggi, setOggi] = useState(() => new Date().toISOString().slice(0, 10));
+  const [provincia, setProvincia] = useState("");
+  useEffect(() => setOggi(new Date().toISOString().slice(0, 10)), []);
 
-const euro = (cent: number) =>
-  // useGrouping "always": in italiano il default raggruppa solo da cinque cifre,
-  // e in colonna "12.000,00" accanto a "1800,00" si legge male.
-  new Intl.NumberFormat("it-IT", {
-    style: "currency",
-    currency: "EUR",
-    useGrouping: "always",
-  }).format(cent / 100);
-
-const etichettaPill = {
-  borderRadius: "5px",
-  padding: "5px 10px",
-  fontSize: "14px",
-  lineHeight: "20px",
-} as const;
-
-/* Campi da modulo, non da manifesto: etichetta sopra, input compatto.
-   16px fissi sull'input: sotto quella soglia iOS zooma la pagina. */
-const stileEtichetta = {
-  display: "block",
-  fontSize: "13px",
-  fontWeight: 500,
-  color: "var(--color-black)",
-  marginBottom: "4px",
-} as const;
-
-const stileCampo = {
-  width: "100%",
-  padding: "10px 12px",
-  fontSize: "16px",
-  borderRadius: "8px",
-  border: `1px solid ${BORDO_CAMPO}`,
-  backgroundColor: "#fff",
-  color: "var(--color-black)",
-} as const;
-
-function Campo({
-  nome,
-  etichetta,
-  esempio,
-  tipo = "text",
-  obbligatorio = false,
-  larga = false,
-}: {
-  nome: string;
-  etichetta: string;
-  esempio?: string;
-  tipo?: string;
-  obbligatorio?: boolean;
-  larga?: boolean;
-}) {
-  return (
-    <label className={larga ? "md:col-span-2" : undefined}>
-      <span style={stileEtichetta}>
-        {etichetta}
-        {obbligatorio && <span aria-hidden="true"> *</span>}
-      </span>
-      <input
-        type={tipo}
-        name={nome}
-        placeholder={esempio}
-        required={obbligatorio}
-        className="outline-none transition-colors duration-200 focus:border-[var(--color-black)]"
-        style={stileCampo}
-      />
-    </label>
-  );
-}
-
-function Blocco({
-  etichetta,
-  children,
-}: {
-  etichetta: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div style={colonna}>
-      <div style={{ marginBottom: "20px" }}>
-        <span
-          className="inline-flex items-center border border-black text-black tracking-wide uppercase"
-          style={etichettaPill}
-        >
-          {etichetta}
-        </span>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: "16px" }}>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function CampoFile({
-  nome,
-  etichetta,
-  aiuto,
-  obbligatorio = false,
-  disabilitato = false,
-}: {
-  nome: string;
-  etichetta: string;
-  aiuto?: string;
-  obbligatorio?: boolean;
-  disabilitato?: boolean;
-}) {
-  return (
-    <label
-      className="md:col-span-2 block cursor-pointer transition-opacity duration-200"
-      style={{
-        border: `1px dashed ${BORDO_CAMPO}`,
-        borderRadius: "8px",
-        padding: "12px 14px",
-        backgroundColor: "#fff",
-        opacity: disabilitato ? 0.45 : 1,
-      }}
-    >
-      <span style={stileEtichetta}>
-        {etichetta}
-        {obbligatorio && <span aria-hidden="true"> *</span>}
-      </span>
-      {aiuto && (
-        <span className="block" style={{ fontSize: "13px", color: GRIGIO_TESTO, marginBottom: "6px" }}>
-          {aiuto}
-        </span>
-      )}
-      {/* Il testo del sito e' bianco per impostazione, e le sezioni chiare non
-          lo ridichiarano: senza questo colore il nome del file scelto restava
-          bianco su bianco e il caricamento sembrava non essere avvenuto. */}
-      <input
-        type="file"
-        name={nome}
-        accept={ACCEPT}
-        required={obbligatorio && !disabilitato}
-        disabled={disabilitato}
-        className="campo-file block w-full"
-        style={{ fontSize: "14px", color: "var(--color-black)" }}
-      />
-    </label>
-  );
-}
-
-function RiepilogoOfferta({
-  offerta,
-  scelte,
-  cambiaScelta,
-}: {
-  offerta: Offerta;
-  scelte: boolean[];
-  cambiaScelta: (indice: number, tenuta: boolean) => void;
-}) {
-  const lordo = offerta.righe.reduce(
-    (somma, riga, i) => somma + (scelte[i] ? riga.importo_cent : 0),
-    0,
-  );
-  const sconto = scontoSu(lordo, offerta.sconto_tipo, offerta.sconto_valore);
-  const totale = lordo - sconto;
-  const { contributo, aCarico } = contributoSu(totale);
-  return (
-    <section style={{ backgroundColor: "var(--color-yellow)" }}>
-      <div
-        className="container-content"
-        style={{
-          paddingTop: "clamp(44px, 6vw, 64px)",
-          paddingBottom: "clamp(44px, 6vw, 64px)",
-        }}
-      >
-        <div style={colonna}>
-          <div style={{ marginBottom: "20px" }}>
-            <span
-              className="inline-flex items-center border border-black text-black tracking-wide uppercase"
-              style={etichettaPill}
-            >
-              La tua offerta
-            </span>
-          </div>
-          <div style={{ color: "var(--color-black)" }}>
-            <h2 className="text-h3 font-medium" style={{ marginBottom: "16px" }}>
-              Proposta riservata a {offerta.intestatario}
-              {offerta.referente ? `, c.a. ${offerta.referente}` : ""}
-            </h2>
-            <ul style={{ marginBottom: "16px" }}>
-              {offerta.righe.map((r, i) => (
-                <li
-                  key={i}
-                  className="flex justify-between gap-6"
-                  style={{
-                    padding: "10px 0",
-                    borderBottom: "1px solid rgba(0,0,0,0.25)",
-                    opacity: scelte[i] ? 1 : 0.45,
-                  }}
-                >
-                  {r.opzionale ? (
-                    <label className="flex items-start gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={scelte[i]}
-                        onChange={(e) => cambiaScelta(i, e.target.checked)}
-                        style={{ marginTop: "5px" }}
-                      />
-                      <span>
-                        <span className="font-medium">{r.descrizione}</span>{" "}
-                        <em style={{ fontSize: "13px" }}>(opzionale: puoi toglierla)</em>
-                        {r.dettaglio && (
-                          <span
-                            className="block leading-relaxed"
-                            style={{ fontSize: "14px", marginTop: "2px" }}
-                          >
-                            {r.dettaglio}
-                          </span>
-                        )}
-                      </span>
-                    </label>
-                  ) : (
-                    <span>
-                      <span className="font-medium">{r.descrizione}</span>
-                      {r.dettaglio && (
-                        <span
-                          className="block leading-relaxed"
-                          style={{ fontSize: "14px", marginTop: "2px" }}
-                        >
-                          {r.dettaglio}
-                        </span>
-                      )}
-                    </span>
-                  )}
-                  <span
-                    className="font-medium whitespace-nowrap"
-                    style={{ textDecoration: scelte[i] ? "none" : "line-through" }}
-                  >
-                    {euro(r.importo_cent)}
-                  </span>
-                </li>
-              ))}
-              {sconto > 0 && (
-                <>
-                  <li className="flex justify-between gap-6" style={{ padding: "10px 0" }}>
-                    <span>Totale di listino</span>
-                    <span className="whitespace-nowrap" style={{ textDecoration: "line-through" }}>
-                      {euro(lordo)}
-                    </span>
-                  </li>
-                  <li className="flex justify-between gap-6 font-medium" style={{ padding: "10px 0" }}>
-                    <span>
-                      Sconto riservato
-                      {offerta.sconto_tipo === "percento" ? ` (${offerta.sconto_valore}%)` : ""}
-                    </span>
-                    <span className="whitespace-nowrap">−{euro(sconto)}</span>
-                  </li>
-                </>
-              )}
-              <li className="flex justify-between gap-6 font-medium" style={{ padding: "10px 0" }}>
-                <span>Totale progetto</span>
-                <span className="whitespace-nowrap">{euro(totale)}</span>
-              </li>
-            </ul>
-            <p className="leading-relaxed">
-              Con il voucher, il contributo camerale copre{" "}
-              <strong>{euro(contributo)}</strong>: a carico tuo restano{" "}
-              <strong>{euro(aCarico)}</strong>.
-            </p>
-            {totale < MIN_INVESTIMENTO_CENT && (
-              <p className="leading-relaxed font-medium" style={{ marginTop: "8px" }}>
-                Attenzione: sotto i 4.000&nbsp;€ di investimento il bando non
-                ammette la domanda. Rimetti una voce o scrivici per rimodulare
-                la proposta.
-              </p>
-            )}
-            <p className="leading-relaxed" style={{ marginTop: "8px", fontSize: "14px" }}>
-              Il contributo (70% della spesa, massimo 10.000&nbsp;€) è concesso
-              dalla Camera di Commercio in ordine di arrivo delle domande, fino
-              a esaurimento fondi.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-export default function VoucherDigitalePage() {
-  const [passo, setPasso] = useState(0);
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
-    "idle",
-  );
-  const [avviso, setAvviso] = useState<string | null>(null);
-  const [polizzaMancante, setPolizzaMancante] = useState(false);
-  const [offerta, setOfferta] = useState<Offerta | null>(null);
-  const [tokenOfferta, setTokenOfferta] = useState<string>("");
-  const [scelte, setScelte] = useState<boolean[]>([]);
-  const passiRef = useRef<Array<HTMLDivElement | null>>([]);
-  /* "Avanti" e "Invia la candidatura" stanno nello stesso punto: arrivando
-     all'ultimo passo il pulsante cambia mestiere sotto il dito, e un secondo
-     click involontario spedirebbe la candidatura. Per mezzo secondo l'invio
-     non si prende. */
-  const cambioPasso = useRef(0);
-
-  /* ?o=TOKEN: si carica l'offerta e la si mostra in cima. Un token morto
-     non deve rompere la pagina: semplicemente niente riepilogo. */
+  /* Le offerte mandate ai clienti prima che esistessero le pagine per camera
+     puntano tutte qui. Il token vale ancora: si chiede all'API di quale bando
+     e' e si porta la persona sulla sua pagina, col token appresso. Senza
+     questo passaggio ogni link gia' in giro finirebbe su un elenco. */
   useEffect(() => {
     const token = new URLSearchParams(window.location.search).get("o");
     if (!token || !OFFERTA_ENDPOINT) return;
-    setTokenOfferta(token);
     fetch(`${OFFERTA_ENDPOINT}/${encodeURIComponent(token)}`)
       .then(res => (res.ok ? res.json() : null))
-      .then(dati => {
-        if (dati) {
-          setOfferta(dati);
-          setScelte(dati.righe.map(() => true)); // si parte con tutto incluso
-        }
+      .then(offerta => {
+        const slug = offerta?.bando_slug ?? BANDI[0]?.slug;
+        if (slug) window.location.replace(`/voucher-digitale/${slug}?o=${encodeURIComponent(token)}`);
       })
       .catch(() => {});
   }, []);
 
-  /* Primo campo non compilato bene di un passo, o null se il passo e' a posto. */
-  const campoDaSistemare = (indice: number) => {
-    const contenitore = passiRef.current[indice];
-    if (!contenitore) return null;
-    const campi = contenitore.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
-      "input, textarea",
-    );
-    for (const campo of campi) {
-      if (!campo.checkValidity()) return campo;
-    }
-    return null;
-  };
+  const elenco = useMemo(() => ordinaPerPriorita(BANDI, oggi), [oggi]);
+  const province = useMemo(() => PROVINCE(BANDI), []);
 
-  /* L'etichetta che la persona vede, per dire *quale* campo manca invece di un
-     generico "compila i campi". */
-  const etichettaDi = (campo: HTMLInputElement | HTMLTextAreaElement) =>
-    campo.closest("label")?.querySelector("span")?.textContent?.replace(" *", "").trim()
-    ?? campo.getAttribute("aria-label")
-    ?? "un campo";
-
-  /* Il segnale nativo del browser (reportValidity) non compare se il campo e'
-     ancora dentro un passo nascosto: si fa vedere il passo, e solo dopo il
-     render si punta il campo. Senza questo, premendo Invia non succedeva
-     niente di visibile. */
-  const segnalaCampo = (indice: number, campo: HTMLInputElement | HTMLTextAreaElement) => {
-    setPasso(indice);
-    setAvviso(`Manca ancora qualcosa in “${etichettaDi(campo)}”: ${campo.validationMessage}`);
-    requestAnimationFrame(() => {
-      campo.focus();
-      campo.reportValidity();
-    });
-  };
-
-  const passoValido = (indice: number) => {
-    const campo = campoDaSistemare(indice);
-    if (!campo) return true;
-    segnalaCampo(indice, campo);
-    return false;
-  };
-
-  const avanti = () => {
-    if (!passoValido(passo)) return;
-    setAvviso(null);
-    cambioPasso.current = Date.now();
-    setPasso(p => Math.min(p + 1, PASSI.length - 1));
-  };
-  const indietro = () => setPasso(p => Math.max(p - 1, 0));
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (status === "sending") return;
-    if (Date.now() - cambioPasso.current < 500) return; // click di rimbalzo
-    setAvviso(null);
-
-    // Si controlla dal primo passo: chi ha saltato qualcosa torna li', col
-    // campo puntato, invece di leggere un errore generico in fondo.
-    for (let i = 0; i < PASSI.length; i++) {
-      if (!passoValido(i)) return;
-    }
-
-    if (!VOUCHER_ENDPOINT) {
-      setStatus("error");
-      setAvviso(
-        `Il modulo non è ancora attivo: scrivici a ${CONTACT_EMAIL} e ti mandiamo tutto noi.`,
-      );
-      return;
-    }
-
-    const form = e.currentTarget;
-    const dati = new FormData(form);
-    dati.set("consenso", dati.get("consenso") === "on" ? "true" : "false");
-    dati.set("polizza_mancante", polizzaMancante ? "true" : "false");
-    if (tokenOfferta) dati.set("offerta", tokenOfferta);
-    if (offerta) {
-      const tenute = offerta.righe.map((_, i) => i).filter(i => scelte[i]);
-      dati.set("offerta_selezione", JSON.stringify(tenute));
-    }
-
-    for (const [campo, valore] of dati.entries()) {
-      if (valore instanceof File && valore.size > MAX_FILE) {
-        setStatus("error");
-        setAvviso(
-          `Il file di "${campo}" supera i 20 MB: comprimilo o scansiona a risoluzione più bassa.`,
-        );
-        return;
-      }
-    }
-
-    setStatus("sending");
-    try {
-      const res = await fetch(VOUCHER_ENDPOINT, { method: "POST", body: dati });
-      if (!res.ok) {
-        const corpo = await res.json().catch(() => null);
-        // Solo il messaggio scritto dal nostro backend e' in italiano e dice
-        // qualcosa di utile: si marca per non confonderlo con gli errori
-        // tecnici del browser ("Failed to fetch"), che non si mostrano.
-        throw new Error(corpo?.errore ? `NOSTRO:${corpo.errore}` : `HTTP ${res.status}`);
-      }
-      setStatus("sent");
-      setAvviso(null);
-      // Sopra sparisce tutto: senza questo si resterebbe a meta' pagina, dove
-      // ora non c'e' piu' niente.
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err) {
-      setStatus("error");
-      const nostro = err instanceof Error && err.message.startsWith("NOSTRO:")
-        ? err.message.slice("NOSTRO:".length)
-        : null;
-      setAvviso(
-        nostro ??
-          `Invio non riuscito: controlla la connessione e riprova. Se insiste, scrivici a ${CONTACT_EMAIL} e ti seguiamo noi.`,
-      );
-    }
+  const vaiAllaProvincia = (sigla: string) => {
+    setProvincia(sigla);
+    const bando = BANDI.find(b =>
+      (b.province ?? "").split(",").map(p => p.trim().toUpperCase()).includes(sigla));
+    if (bando) window.location.href = `/voucher-digitale/${bando.slug}`;
   };
 
   return (
     <>
       <Navbar />
       <main>
-        {/* ── Hero ── */}
         <section
           className="relative w-full flex items-end"
-          style={{
-            height: "210px",
-            backgroundColor: "var(--color-yellow)",
-            paddingTop: "80px",
-          }}
+          style={{ height: "210px", backgroundColor: "var(--color-yellow)", paddingTop: "80px" }}
         >
           <div className="container-content pb-6">
             <h1 className="text-h1 text-black font-normal uppercase select-none">
-              Voucher digitale 2026
+              Voucher digitali 2026
             </h1>
           </div>
         </section>
 
-        {/* ── Riepilogo offerta (solo con link personale) ── */}
-        {/* A candidatura inviata resta solo la conferma: l'offerta, la
-            spiegazione e il modulo hanno finito il loro lavoro, e lasciarli
-            sotto fa sembrare che ci sia ancora qualcosa da fare. */}
-        {offerta && status !== "sent" && (
-          <RiepilogoOfferta
-            offerta={offerta}
-            scelte={scelte}
-            cambiaScelta={(i, tenuta) =>
-              setScelte(s => s.map((v, j) => (j === i ? tenuta : v)))
-            }
-          />
-        )}
-
-        {/* ── Intro ── */}
-        {status !== "sent" && (
         <section className="bg-white">
           <div
             className="container-content"
-            style={{ paddingTop: "clamp(48px, 7vw, 88px)", paddingBottom: "0" }}
+            style={{ paddingTop: "clamp(48px, 7vw, 88px)", paddingBottom: "clamp(80px, 10vw, 128px)" }}
           >
             <div style={colonna}>
               <div style={{ marginBottom: "20px" }}>
-                <span
-                  className="inline-flex items-center border border-black text-black tracking-wide uppercase"
-                  style={etichettaPill}
-                >
-                  Di cosa parliamo
-                </span>
+                <Etichetta>Di cosa parliamo</Etichetta>
               </div>
-              {/* Corpo normale, non un titolo: qui si spiega il bando, e la
-                  pagina e' un modulo da compilare, non un manifesto. */}
               <p className="leading-relaxed" style={{ color: "var(--color-black)" }}>
-                La Camera di Commercio Frosinone–Latina finanzia la
-                digitalizzazione con un contributo a fondo perduto fino a
-                10.000&nbsp;€ (70% della spesa).
+                Le Camere di Commercio finanziano a fondo perduto la digitalizzazione
+                delle piccole e medie imprese. Ogni camera ha il suo bando, con le sue
+                date, la sua percentuale e il suo tetto: qui sotto ci sono quelli che
+                seguiamo, con lo stato di oggi.
               </p>
-              <p
-                className="leading-relaxed"
-                style={{ color: "var(--color-black)", marginTop: "12px" }}
-              >
-                Lo sportello apre il 25 settembre 2026 e le domande valgono in
-                ordine di arrivo: vince il dito più veloce.
+              <p className="leading-relaxed" style={{ color: "var(--color-black)", marginTop: "12px" }}>
+                Prepariamo e presentiamo la domanda per te. L&rsquo;unico passaggio che
+                resta a te è la firma digitale del legale rappresentante.
               </p>
 
-              {/* Chi arriva qui non sa cosa comporta compilare: il modulo non e'
-                  la domanda, e' l'inizio della pratica. Il seguito — chi
-                  prepara, chi firma, chi invia — va detto prima. */}
-              <div style={{ marginTop: "48px", marginBottom: "24px" }}>
-                <span
-                  className="inline-flex items-center border border-black text-black tracking-wide uppercase"
-                  style={etichettaPill}
-                >
-                  Come funziona
-                </span>
-              </div>
-              <ol
-                className="flex flex-col"
-                style={{ gap: "24px", listStyle: "none" }}
-              >
-                {[
-                  {
-                    titolo: "Compili il modulo qui sotto",
-                    testo:
-                      "Ti chiediamo solo quello che non possiamo ricavare da soli: i dati dell'impresa, quelli di chi la rappresenta e i documenti che il bando richiede. Il resto lo ricostruiamo noi dalla visura.",
-                  },
-                  {
-                    titolo: "Prepariamo la documentazione",
-                    testo:
-                      "Mettiamo insieme la pratica e scriviamo il progetto nella forma che il bando chiede. Se manca qualcosa te lo chiediamo noi, un pezzo per volta.",
-                  },
-                  {
-                    titolo: "Firmi digitalmente, carichiamo i moduli",
-                    testo:
-                      "Quando la documentazione è pronta ti contattiamo noi: i moduli vanno firmati con la firma digitale del legale rappresentante, ed è l'unico passaggio che non possiamo fare al posto tuo. Fino ad allora non devi fare altro: ti scriviamo noi appena la pratica è pronta.",
-                  },
-                  {
-                    titolo: "Il 25 settembre inviamo",
-                    testo:
-                      "Appena lo sportello apre la domanda parte, con la pratica già pronta e firmata.",
-                  },
-                ].map((passo, i) => (
-                  <li key={passo.titolo} className="flex" style={{ gap: "12px" }}>
-                    <span
-                      aria-hidden="true"
-                      className="shrink-0 font-medium"
-                      style={{ color: "var(--color-black)", fontSize: "18px" }}
-                    >
-                      {i + 1}.
-                    </span>
-                    <span className="block">
-                      <span
-                        className="block font-medium"
-                        style={{ color: "var(--color-black)", fontSize: "18px" }}
+              {province.length > 0 && (
+                <label style={{ display: "block", marginTop: "32px", maxWidth: "360px" }}>
+                  <span style={stileEtichetta}>Cerca la tua provincia</span>
+                  <select
+                    value={provincia}
+                    onChange={e => e.target.value && vaiAllaProvincia(e.target.value)}
+                    style={stileCampo}
+                  >
+                    <option value="">Scegli la provincia della sede…</option>
+                    {province.map(p => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
+
+              <ul className="flex flex-col" style={{ gap: "12px", marginTop: "40px" }}>
+                {elenco.map(b => {
+                  const { stato, giorni } = statoBando(b, oggi);
+                  const spento = stato === "chiuso" || stato === "esaurito";
+                  return (
+                    <li key={b.slug}>
+                      <a
+                        href={`/voucher-digitale/${b.slug}`}
+                        className="block transition-colors duration-200 hover:bg-[var(--color-yellow)]"
+                        style={{
+                          border: `1px solid ${BORDO_CAMPO}`,
+                          borderRadius: "8px",
+                          padding: "16px 18px",
+                          color: "var(--color-black)",
+                          opacity: spento ? 0.55 : 1,
+                        }}
                       >
-                        {passo.titolo}
-                      </span>
-                      <span
-                        className="block leading-relaxed"
-                        style={{ color: GRIGIO_TESTO, marginTop: "6px" }}
-                      >
-                        {passo.testo}
-                      </span>
-                    </span>
-                  </li>
-                ))}
-              </ol>
+                        <span className="flex flex-wrap items-baseline justify-between gap-2">
+                          <span className="font-medium" style={{ fontSize: "18px" }}>{b.camera}</span>
+                          <span style={{ fontSize: "13px", color: GRIGIO_TESTO }}>
+                            {ETICHETTA_STATO[stato]}
+                            {giorni != null && ` · ${giorni} giorni`}
+                          </span>
+                        </span>
+                        <span className="block" style={{ fontSize: "14px", color: GRIGIO_TESTO, marginTop: "4px" }}>
+                          {percento(b.percentuale)} fino a {euroTondo(b.tetto_cent)}
+                          {b.province && ` · ${b.province}`}
+                          {stato === "in_apertura" && b.apertura && ` · apre il ${dataIt(b.apertura)}`}
+                          {stato === "aperto" && b.chiusura && ` · entro il ${dataIt(b.chiusura)}`}
+                        </span>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              {elenco.length === 0 && (
+                <p className="leading-relaxed" style={{ color: GRIGIO_TESTO, marginTop: "32px" }}>
+                  Nessun bando pubblicato in questo momento. Scrivici e ti diciamo
+                  cosa è aperto nella tua provincia.
+                </p>
+              )}
             </div>
           </div>
         </section>
-        )}
-
-        {/* ── Percorso a passi ── */}
-        {status !== "sent" ? (
-          <section
-            className="bg-white"
-            style={{
-              paddingTop: "clamp(44px, 6vw, 72px)",
-              paddingBottom: "clamp(80px, 10vw, 128px)",
-            }}
-          >
-            <div className="container-content">
-              {/* Indicatore dei passi */}
-              <ol
-                className="flex flex-wrap"
-                style={{ ...colonna, gap: "8px", marginBottom: "36px" }}
-              >
-                {PASSI.map((nome, i) => (
-                  <li
-                    key={nome}
-                    className="flex items-center uppercase tracking-wide"
-                    style={{
-                      borderRadius: "5px",
-                      border: "1px solid",
-                      borderColor: i === passo ? "var(--color-black)" : BORDO_CAMPO,
-                      backgroundColor: i === passo ? "var(--color-yellow)" : "transparent",
-                      color: i <= passo ? "var(--color-black)" : GRIGIO_TESTO,
-                      padding: "4px 10px",
-                      fontSize: "12px",
-                    }}
-                  >
-                    {/* Senza numero: sopra "Come funziona" ne ha gia' una da 1
-                        a 4, e due sequenze numerate diverse nella stessa
-                        pagina si leggono come la stessa cosa. */}
-                    {nome}
-                  </li>
-                ))}
-              </ol>
-
-              <form
-                onSubmit={handleSubmit}
-                noValidate
-                className="flex flex-col"
-                style={{ gap: "40px" }}
-              >
-                {/* Honeypot: gli umani non lo vedono, i bot lo compilano. */}
-                <input
-                  type="text"
-                  name="sito_web"
-                  tabIndex={-1}
-                  autoComplete="off"
-                  aria-hidden="true"
-                  className="absolute -left-[9999px] h-0 w-0 opacity-0"
-                />
-
-                {/* I passi restano montati (hidden) cosi' input e file non si perdono. */}
-                <div ref={el => { passiRef.current[0] = el; }} hidden={passo !== 0}>
-                  <Blocco etichetta="Impresa">
-                    <Campo nome="ragione_sociale" etichetta="Ragione sociale" obbligatorio />
-                    <Campo nome="piva" etichetta="Partita IVA" esempio="11 cifre" obbligatorio />
-                    <Campo nome="referente" etichetta="Referente (nome e cognome)" obbligatorio />
-                    <Campo nome="email" etichetta="E-mail" tipo="email" obbligatorio />
-                    <Campo nome="telefono" etichetta="Telefono" tipo="tel" />
-                    <Campo nome="pec" etichetta="PEC aziendale" tipo="email" />
-                  </Blocco>
-                </div>
-
-                <div ref={el => { passiRef.current[1] = el; }} hidden={passo !== 1}>
-                  <Blocco etichetta="Legale rappresentante">
-                    <Campo nome="rap_nome" etichetta="Nome" obbligatorio />
-                    <Campo nome="rap_cognome" etichetta="Cognome" obbligatorio />
-                    <Campo nome="rap_codice_fiscale" etichetta="Codice fiscale" esempio="16 caratteri" obbligatorio larga />
-                    <Campo nome="rap_data_nascita" etichetta="Data di nascita" tipo="date" />
-                    <Campo nome="rap_luogo_nascita" etichetta="Luogo di nascita" />
-                    <Campo
-                      nome="rap_residenza_via"
-                      etichetta="Indirizzo di residenza"
-                      esempio="Es. Via Roma 1, 03100 Frosinone (FR)"
-                      larga
-                    />
-                  </Blocco>
-                </div>
-
-                <div ref={el => { passiRef.current[2] = el; }} hidden={passo !== 2}>
-                  <Blocco etichetta="Documenti">
-                    <CampoFile
-                      nome="visura"
-                      etichetta="Visura camerale recente"
-                      aiuto="PDF o foto leggibile, massimo 20 MB"
-                      obbligatorio
-                    />
-                    <CampoFile
-                      nome="polizza"
-                      etichetta="Polizza catastrofale"
-                      aiuto="Obbligatoria per legge per le imprese, salvo i casi di esenzione previsti"
-                      disabilitato={polizzaMancante}
-                    />
-                    <label
-                      className="md:col-span-2 flex items-start gap-2 cursor-pointer"
-                      style={{ fontSize: "14px", color: "var(--color-black)" }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={polizzaMancante}
-                        onChange={(e) => setPolizzaMancante(e.target.checked)}
-                        style={{ marginTop: "3px" }}
-                      />
-                      <span>
-                        Non ce l&rsquo;ho ancora{" "}
-                        <span style={{ color: GRIGIO_TESTO }}>
-                          (ti aiutiamo noi a stipularla: senza, la domanda non
-                          parte)
-                        </span>
-                      </span>
-                    </label>
-                    <CampoFile nome="parita_genere" etichetta="Certificazione parità di genere (solo se posseduta)" />
-                    <CampoFile nome="rating_legalita" etichetta="Rating di legalità (solo se posseduto)" />
-                  </Blocco>
-                </div>
-
-                <div ref={el => { passiRef.current[3] = el; }} hidden={passo !== 3}>
-                  <Blocco etichetta="Progetto">
-                    <label className="md:col-span-2">
-                      <span style={stileEtichetta}>Cosa vorresti digitalizzare?</span>
-                      <textarea
-                        name="note_esigenze"
-                        placeholder="Due righe bastano."
-                        rows={4}
-                        className="outline-none resize-none transition-colors duration-200 focus:border-[var(--color-black)]"
-                        style={stileCampo}
-                      />
-                    </label>
-                    <label
-                      className="md:col-span-2 flex items-start gap-2 cursor-pointer"
-                      style={{ fontSize: "14px", color: "var(--color-black)" }}
-                    >
-                      <input type="checkbox" name="consenso" required style={{ marginTop: "3px" }} />
-                      <span>
-                        Autorizzo il trattamento dei dati e dei documenti
-                        inviati per la preparazione della domanda di contributo,
-                        come da{" "}
-                        <a
-                          href="/voucher-digitale/informativa"
-                          className="underline"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          informativa privacy
-                        </a>
-                        . *
-                      </span>
-                    </label>
-                  </Blocco>
-                </div>
-
-                {/* ── Navigazione fra i passi ── */}
-                <div className="flex items-stretch" style={{ ...colonna, gap: "10px" }}>
-                  {passo > 0 && (
-                    <button
-                      type="button"
-                      onClick={indietro}
-                      className="font-medium tracking-wide uppercase transition-all duration-300"
-                      style={{
-                        borderRadius: "5px",
-                        border: `2px solid ${BORDO_CAMPO}`,
-                        padding: "12px 20px",
-                        fontSize: "var(--font-btn)",
-                        color: "var(--color-black)",
-                        backgroundColor: "transparent",
-                      }}
-                    >
-                      ← Indietro
-                    </button>
-                  )}
-                  {passo < PASSI.length - 1 ? (
-                    <button
-                      type="button"
-                      onClick={avanti}
-                      className="font-medium tracking-wide uppercase transition-all duration-300 hover:bg-[var(--color-yellow)]"
-                      style={{
-                        borderRadius: "5px",
-                        border: "2px solid var(--color-yellow)",
-                        padding: "12px 20px",
-                        fontSize: "var(--font-btn)",
-                        color: "var(--color-black)",
-                        backgroundColor: "transparent",
-                      }}
-                    >
-                      Avanti →
-                    </button>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={status === "sending"}
-                      className="font-medium tracking-wide uppercase transition-all duration-300 hover:bg-[var(--color-yellow)]"
-                      style={{
-                        borderRadius: "5px",
-                        border: "2px solid var(--color-yellow)",
-                        padding: "12px 20px",
-                        fontSize: "var(--font-btn)",
-                        color: "var(--color-black)",
-                        backgroundColor: "transparent",
-                      }}
-                    >
-                      {status === "sending" ? "Invio in corso…" : "Invia la candidatura"}
-                    </button>
-                  )}
-                </div>
-
-                {/* ── Avvisi: campo da sistemare, oppure invio non riuscito ── */}
-                {(status === "error" || avviso) && (
-                  <p
-                    role="status"
-                    className="leading-relaxed"
-                    style={{ ...colonna, color: "var(--color-red)" }}
-                  >
-                    {avviso ?? `Invio non riuscito. Scrivici direttamente a ${CONTACT_EMAIL}.`}
-                  </p>
-                )}
-              </form>
-            </div>
-          </section>
-        ) : (
-          <section
-            className="bg-white"
-            style={{
-              paddingTop: "clamp(44px, 6vw, 72px)",
-              paddingBottom: "clamp(80px, 10vw, 128px)",
-            }}
-          >
-            <div className="container-content">
-              <p
-                role="status"
-                className="text-h3 font-medium leading-relaxed"
-                style={{ ...colonna, color: "var(--color-black)" }}
-              >
-                Ricevuto. Controlliamo i documenti e ti ricontattiamo noi entro
-                un giorno lavorativo per i passi successivi.
-              </p>
-            </div>
-          </section>
-        )}
       </main>
       <Footer />
     </>

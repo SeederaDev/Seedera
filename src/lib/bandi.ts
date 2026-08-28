@@ -76,6 +76,15 @@ export const euro = (cent: number) =>
   new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", useGrouping: "always" })
     .format(cent / 100);
 
+/* Nei titoli e nelle frasi discorsive i centesimi sono rumore: i contributi
+   camerali sono sempre cifre tonde, e "fino a 10.000,00 €" si legge peggio di
+   "fino a 10.000 €". Dove si parla di soldi dovuti (il riepilogo dell'offerta)
+   si continua a usare euro(), centesimi compresi. */
+export const euroTondo = (cent: number) =>
+  new Intl.NumberFormat("it-IT", {
+    style: "currency", currency: "EUR", useGrouping: "always", maximumFractionDigits: 0,
+  }).format(cent / 100);
+
 /* "2026-11-10" -> "10/11/2026". In pagina le date si leggono all'italiana. */
 export const dataIt = (iso: string | null) => (iso ? iso.split("-").reverse().join("/") : "");
 

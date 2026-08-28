@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { statoBando, bandoPerProvincia, ordinaPerPriorita, euro, PROVINCE, type Bando } from "./bandi";
+import { statoBando, bandoPerProvincia, ordinaPerPriorita, euro, euroTondo, PROVINCE, type Bando } from "./bandi";
 
 const bando = (p: Partial<Bando>): Bando => ({
   slug: "bari", camera: "CCIAA di Bari", province: "BA", nome: "V", link: null,
@@ -73,5 +73,15 @@ describe("PROVINCE", () => {
 describe("euro", () => {
   it("raggruppa le migliaia anche sotto i 10.000", () => {
     expect(euro(800_000)).toContain("8.000");
+  });
+});
+
+describe("euroTondo", () => {
+  it("toglie i centesimi dove sono rumore", () => {
+    expect(euroTondo(1_000_000)).toContain("10.000");
+    expect(euroTondo(1_000_000)).not.toContain(",00");
+  });
+  it("arrotonda invece di troncare", () => {
+    expect(euroTondo(199_990)).toContain("2.000");
   });
 });
