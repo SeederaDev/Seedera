@@ -462,36 +462,38 @@ export default function VoucherDigitalePage() {
                   className="inline-flex items-center border border-black text-black tracking-wide uppercase"
                   style={etichettaPill}
                 >
-                  Come funziona
+                  Di cosa parliamo
                 </span>
               </div>
-              {/* Non e' un titolo da manifesto ma una frase lunga che spiega il
-                  bando: alla taglia h3 occupava mezza pagina e si leggeva a
-                  fatica. Un gradino sotto, con interlinea piu' aperta. */}
-              <h2
-                className="text-h4 font-medium leading-[1.35]"
-                style={{ color: "var(--color-black)" }}
-              >
+              {/* Corpo normale, non un titolo: qui si spiega il bando, e la
+                  pagina e' un modulo da compilare, non un manifesto. */}
+              <p className="leading-relaxed" style={{ color: "var(--color-black)" }}>
                 La Camera di Commercio Frosinone–Latina finanzia la
                 digitalizzazione con un contributo a fondo perduto fino a
-                10.000&nbsp;€ (70% della spesa). Compila i dati e carica i
-                documenti: ti aiutiamo a preparare e presentare la domanda.
-              </h2>
+                10.000&nbsp;€ (70% della spesa).
+              </p>
               <p
                 className="leading-relaxed"
-                style={{ color: GRIGIO_TESTO, marginTop: "16px" }}
+                style={{ color: "var(--color-black)", marginTop: "12px" }}
               >
-                Le domande partono il 25 settembre 2026 e valgono in ordine di
-                arrivo: prima riceviamo i documenti, prima sei in fila.
+                Lo sportello apre il 25 settembre 2026 e le domande valgono in
+                ordine di arrivo: vince il dito più veloce.
               </p>
 
               {/* Chi arriva qui non sa cosa comporta compilare: il modulo non e'
                   la domanda, e' l'inizio della pratica. Il seguito — chi
-                  prepara, chi firma, chi si fa vivo — va detto prima, non dopo
-                  l'invio. */}
+                  prepara, chi firma, chi invia — va detto prima. */}
+              <div style={{ marginTop: "48px", marginBottom: "24px" }}>
+                <span
+                  className="inline-flex items-center border border-black text-black tracking-wide uppercase"
+                  style={etichettaPill}
+                >
+                  Come funziona
+                </span>
+              </div>
               <ol
                 className="flex flex-col"
-                style={{ marginTop: "44px", gap: "24px", listStyle: "none" }}
+                style={{ gap: "24px", listStyle: "none" }}
               >
                 {[
                   {
@@ -505,35 +507,41 @@ export default function VoucherDigitalePage() {
                       "Mettiamo insieme la pratica e scriviamo il progetto nella forma che il bando chiede. Se manca qualcosa te lo chiediamo noi, un pezzo per volta.",
                   },
                   {
-                    titolo: "Firmi digitalmente, poi si invia",
+                    titolo: "Firmi digitalmente, carichiamo i moduli",
                     testo:
-                      "Quando la documentazione è pronta ti contattiamo noi: i moduli vanno firmati con la firma digitale del legale rappresentante, ed è l'unico passaggio che non possiamo fare al posto tuo.",
+                      "Quando la documentazione è pronta ti contattiamo noi: i moduli vanno firmati con la firma digitale del legale rappresentante, ed è l'unico passaggio che non possiamo fare al posto tuo. Fino ad allora non devi fare altro: ti scriviamo noi appena la pratica è pronta.",
                   },
-                ].map(passo => (
-                  <li key={passo.titolo}>
+                  {
+                    titolo: "Il 25 settembre inviamo",
+                    testo:
+                      "Appena lo sportello apre la domanda parte, con la pratica già pronta e firmata.",
+                  },
+                ].map((passo, i) => (
+                  <li key={passo.titolo} className="flex" style={{ gap: "12px" }}>
                     <span
-                      className="block font-medium"
+                      aria-hidden="true"
+                      className="shrink-0 font-medium"
                       style={{ color: "var(--color-black)", fontSize: "18px" }}
                     >
-                      {passo.titolo}
+                      {i + 1}.
                     </span>
-                    <span
-                      className="block leading-relaxed"
-                      style={{ color: GRIGIO_TESTO, marginTop: "6px" }}
-                    >
-                      {passo.testo}
+                    <span className="block">
+                      <span
+                        className="block font-medium"
+                        style={{ color: "var(--color-black)", fontSize: "18px" }}
+                      >
+                        {passo.titolo}
+                      </span>
+                      <span
+                        className="block leading-relaxed"
+                        style={{ color: GRIGIO_TESTO, marginTop: "6px" }}
+                      >
+                        {passo.testo}
+                      </span>
                     </span>
                   </li>
                 ))}
               </ol>
-
-              <p
-                className="leading-relaxed"
-                style={{ color: GRIGIO_TESTO, marginTop: "24px" }}
-              >
-                Fino ad allora non devi fare altro: ti scriviamo noi appena la
-                pratica è pronta.
-              </p>
             </div>
           </div>
         </section>
@@ -567,7 +575,10 @@ export default function VoucherDigitalePage() {
                       fontSize: "12px",
                     }}
                   >
-                    {i + 1}. {nome}
+                    {/* Senza numero: sopra "Come funziona" ne ha gia' una da 1
+                        a 4, e due sequenze numerate diverse nella stessa
+                        pagina si leggono come la stessa cosa. */}
+                    {nome}
                   </li>
                 ))}
               </ol>
