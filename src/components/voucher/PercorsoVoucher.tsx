@@ -9,6 +9,7 @@ import Testata from "./Testata";
 import ComeFunziona from "./ComeFunziona";
 import RiepilogoOfferta from "./RiepilogoOfferta";
 import ModuloOnboarding from "./ModuloOnboarding";
+import Preventivatore from "./Preventivatore";
 import FAQ from "./FAQ";
 import { colonna } from "./campi";
 
@@ -82,6 +83,14 @@ export default function PercorsoVoucher({ bando }: { bando: Bando }) {
               />
             )}
             <ComeFunziona bando={bando} oggi={oggi} />
+
+            {/* Senza un'offerta in mano non ha senso chiedere subito visure e
+                codici fiscali: prima si dice quanto costa e quanto ne copre il
+                contributo, poi si compila. Con il token, il preventivo esiste
+                gia' e si va dritti alla candidatura. */}
+            {!offerta && !tokenOfferta ? (
+              <Preventivatore bando={bando} />
+            ) : (
             <ModuloOnboarding
               bando={bando}
               offerta={offerta}
@@ -94,6 +103,7 @@ export default function PercorsoVoucher({ bando }: { bando: Bando }) {
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
             />
+            )}
             <FAQ bando={bando} />
           </>
         )}
