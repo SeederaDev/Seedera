@@ -42,6 +42,31 @@ export default function PaginaPratica() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /* Cio' che il cliente deve avere, non mandare: una conferma basta a toglierci
+     dall'attesa, e la verifica resta comunque nostra. */
+  const conferma = async (voceId: string) => {
+    if (!token) return;
+    setErrore(null);
+    setCaricando(voceId);
+    try {
+      const res = await fetch(`${PRATICA_ENDPOINT}/${encodeURIComponent(token)}/conferma`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ voce: voceId }),
+      });
+      if (!res.ok) {
+        const corpo = await res.json().catch(() => null);
+        setErrore(corpo?.errore ?? "Non siamo riusciti a registrare la conferma: riprova fra un momento.");
+        return;
+      }
+      leggi(token);
+    } catch {
+      setErrore(`Non siamo riusciti a registrare la conferma: controlla la connessione, oppure scrivici a ${CONTACT_EMAIL}.`);
+    } finally {
+      setCaricando(null);
+    }
+  };
+
   const carica = async (voceId: string) => {
     const input = fileRef.current[voceId];
     const file = input?.files?.[0];
@@ -132,22 +157,38 @@ export default function PaginaPratica() {
                               </span>
                             )}
                             <div className="flex flex-wrap items-center" style={{ gap: "10px", marginTop: "10px" }}>
-                              <input
-                                type="file"
-                                accept={ACCEPT}
-                                ref={el => { fileRef.current[v.id] = el; }}
-                                className="campo-file"
-                                style={{ fontSize: "14px", color: "var(--color-black)" }}
-                              />
-                              <button
-                                type="button"
-                                onClick={() => carica(v.id)}
-                                disabled={caricando === v.id}
-                                className="font-medium tracking-wide uppercase transition-all duration-300 hover:bg-[var(--color-yellow)] disabled:opacity-40"
-                                style={{ ...stilePulsante, padding: "8px 14px" }}
-                              >
-                                {caricando === v.id ? "Carico…" : "Invia"}
-                              </button>
+                              {v.si_carica ? (
+                                <>
+                                  <input
+                                    type="file"
+                                    accept={ACCEPT}
+                                    ref={el => { fileRef.current[v.id] = el; }}
+                                    className="campo-file"
+                                    style={{ fontSize: "14px", color: "var(--color-black)" }}
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => carica(v.id)}
+                                    disabled={caricando === v.id}
+                                    className="font-medium tracking-wide uppercase transition-all duration-300 hover:bg-[var(--color-yellow)] disabled:opacity-40"
+                                    style={{ ...stilePulsante, padding: "8px 14px" }}
+                                  >
+                                    {caricando === v.id ? "Carico…" : "Invia"}
+                                  </button>
+                                </>
+                              ) : (
+                                /* Questa non si manda: si ha. Al cliente si chiede
+                                   di confermarlo, e a noi basta per andare avanti. */
+                                <button
+                                  type="button"
+                                  onClick={() => conferma(v.id)}
+                                  disabled={caricando === v.id}
+                                  className="font-medium tracking-wide uppercase transition-all duration-300 hover:bg-[var(--color-yellow)] disabled:opacity-40"
+                                  style={{ ...stilePulsante, padding: "8px 14px" }}
+                                >
+                                  {caricando === v.id ? "Confermo…" : "Ce l'ho"}
+                                </button>
+                              )}
                             </div>
                           </li>
                         ))}

@@ -6,6 +6,10 @@ export interface VocePratica {
   id: string;
   nome: string;
   descrizione: string | null;
+  /* Alcune cose si mandano (la polizza, i report), altre si hanno soltanto
+     (SPID, firma digitale, PEC). Offrire un caricamento per la PEC non
+     significa niente, e chiederlo fa perdere fiducia nel resto della pagina. */
+  si_carica: boolean;
 }
 
 export interface Pratica {
