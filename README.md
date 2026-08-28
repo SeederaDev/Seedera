@@ -66,6 +66,24 @@ Tailwind. Dalla 8.5.26 pero' la build fallisce con
 puo' risollevarla**, quindi se la build si rompe con quell'errore la prima cosa
 da guardare e' `node_modules/postcss/package.json`.
 
+### iCloud duplica i file, e la build muore
+
+Il Desktop sta in iCloud Drive, che ogni tanto duplica file e cartelle
+aggiungendo " 2" al nome. Dentro `node_modules` questo produce errori senza
+senso — `Cannot find type definition file for 'chai 2'` — e dentro `.next`
+manda in 500 pagine che funzionavano.
+
+La cura:
+
+```bash
+find . -name "* 2" -o -name "* 2.*"        # per vedere il danno
+rm -rf node_modules && npm ci              # per rifarlo pulito
+xattr -w com.apple.fileprovider.ignore#P 1 node_modules   # perche' non si ripeta
+```
+
+L'ultimo comando dice a iCloud di lasciare stare quella cartella, ed e' gia'
+stato dato su questa macchina: va ridato dopo ogni `rm -rf node_modules`.
+
 ### Test
 
 `npm test` (vitest) copre la logica pura in `src/lib` e i componenti del
