@@ -730,8 +730,8 @@ export default function VoucherDigitalePage() {
                     />
                     <CampoFile
                       nome="polizza"
-                      etichetta="Polizza catastrofale con quietanza"
-                      aiuto="Deve riportare la quietanza di pagamento"
+                      etichetta="Polizza catastrofale"
+                      aiuto="Obbligatoria per legge per le imprese, salvo i casi di esenzione previsti"
                       disabilitato={polizzaMancante}
                     />
                     <label
@@ -745,10 +745,10 @@ export default function VoucherDigitalePage() {
                         style={{ marginTop: "3px" }}
                       />
                       <span>
-                        Non ho ancora la polizza catastrofale{" "}
+                        Non ce l&rsquo;ho ancora{" "}
                         <span style={{ color: GRIGIO_TESTO }}>
-                          (ti aiutiamo noi: è obbligatoria per legge e senza la
-                          domanda non parte)
+                          (ti aiutiamo noi a stipularla: senza, la domanda non
+                          parte)
                         </span>
                       </span>
                     </label>
