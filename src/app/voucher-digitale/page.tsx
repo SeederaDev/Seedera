@@ -45,10 +45,31 @@ interface Offerta {
   intestatario: string;
   referente: string | null;
   righe: { descrizione: string; dettaglio: string | null; importo_cent: number; opzionale: boolean }[];
+  totale_lordo_cent?: number;
+  sconto_cent?: number;
+  sconto_tipo?: "percento" | "importo" | null;
+  sconto_valore?: number | null;
   totale_cent: number;
   contributo_cent: number;
   a_carico_cent: number;
 }
+
+/* Stessa regola del backend (src/dominio/contributo.js): lo sconto si applica
+   al totale delle voci scelte, non scende sotto zero, e il contributo si
+   calcola sul netto. Serve qui perche' il cliente puo' togliere voci
+   opzionali e i conti cambiano senza ricaricare la pagina. */
+const scontoSu = (
+  totaleCent: number,
+  tipo: Offerta["sconto_tipo"],
+  valore: Offerta["sconto_valore"],
+) => {
+  const v = Number(valore);
+  if ((tipo !== "percento" && tipo !== "importo") || !Number.isFinite(v) || v <= 0) return 0;
+  const grezzo = tipo === "percento"
+    ? Math.round(totaleCent * (Math.min(v, 100) / 100))
+    : Math.round(v);
+  return Math.min(grezzo, totaleCent);
+};
 
 /* Stessa regola del backend (bando art.3): 70%, tetto 10.000 €. */
 const contributoSu = (totaleCent: number) => {
@@ -202,10 +223,12 @@ function RiepilogoOfferta({
   scelte: boolean[];
   cambiaScelta: (indice: number, tenuta: boolean) => void;
 }) {
-  const totale = offerta.righe.reduce(
+  const lordo = offerta.righe.reduce(
     (somma, riga, i) => somma + (scelte[i] ? riga.importo_cent : 0),
     0,
   );
+  const sconto = scontoSu(lordo, offerta.sconto_tipo, offerta.sconto_valore);
+  const totale = lordo - sconto;
   const { contributo, aCarico } = contributoSu(totale);
   return (
     <section style={{ backgroundColor: "var(--color-yellow)" }}>
@@ -283,6 +306,23 @@ function RiepilogoOfferta({
                   </span>
                 </li>
               ))}
+              {sconto > 0 && (
+                <>
+                  <li className="flex justify-between gap-6" style={{ padding: "10px 0" }}>
+                    <span>Totale di listino</span>
+                    <span className="whitespace-nowrap" style={{ textDecoration: "line-through" }}>
+                      {euro(lordo)}
+                    </span>
+                  </li>
+                  <li className="flex justify-between gap-6 font-medium" style={{ padding: "10px 0" }}>
+                    <span>
+                      Sconto riservato
+                      {offerta.sconto_tipo === "percento" ? ` (${offerta.sconto_valore}%)` : ""}
+                    </span>
+                    <span className="whitespace-nowrap">−{euro(sconto)}</span>
+                  </li>
+                </>
+              )}
               <li className="flex justify-between gap-6 font-medium" style={{ padding: "10px 0" }}>
                 <span>Totale progetto</span>
                 <span className="whitespace-nowrap">{euro(totale)}</span>
@@ -323,6 +363,11 @@ export default function VoucherDigitalePage() {
   const [tokenOfferta, setTokenOfferta] = useState<string>("");
   const [scelte, setScelte] = useState<boolean[]>([]);
   const passiRef = useRef<Array<HTMLDivElement | null>>([]);
+  /* "Avanti" e "Invia la candidatura" stanno nello stesso punto: arrivando
+     all'ultimo passo il pulsante cambia mestiere sotto il dito, e un secondo
+     click involontario spedirebbe la candidatura. Per mezzo secondo l'invio
+     non si prende. */
+  const cambioPasso = useRef(0);
 
   /* ?o=TOKEN: si carica l'offerta e la si mostra in cima. Un token morto
      non deve rompere la pagina: semplicemente niente riepilogo. */
@@ -341,36 +386,64 @@ export default function VoucherDigitalePage() {
       .catch(() => {});
   }, []);
 
-  const passoValido = (indice: number) => {
+  /* Primo campo non compilato bene di un passo, o null se il passo e' a posto. */
+  const campoDaSistemare = (indice: number) => {
     const contenitore = passiRef.current[indice];
-    if (!contenitore) return true;
+    if (!contenitore) return null;
     const campi = contenitore.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
       "input, textarea",
     );
     for (const campo of campi) {
-      if (!campo.checkValidity()) {
-        campo.reportValidity();
-        return false;
-      }
+      if (!campo.checkValidity()) return campo;
     }
-    return true;
+    return null;
+  };
+
+  /* L'etichetta che la persona vede, per dire *quale* campo manca invece di un
+     generico "compila i campi". */
+  const etichettaDi = (campo: HTMLInputElement | HTMLTextAreaElement) =>
+    campo.closest("label")?.querySelector("span")?.textContent?.replace(" *", "").trim()
+    ?? campo.getAttribute("aria-label")
+    ?? "un campo";
+
+  /* Il segnale nativo del browser (reportValidity) non compare se il campo e'
+     ancora dentro un passo nascosto: si fa vedere il passo, e solo dopo il
+     render si punta il campo. Senza questo, premendo Invia non succedeva
+     niente di visibile. */
+  const segnalaCampo = (indice: number, campo: HTMLInputElement | HTMLTextAreaElement) => {
+    setPasso(indice);
+    setAvviso(`Manca ancora qualcosa in “${etichettaDi(campo)}”: ${campo.validationMessage}`);
+    requestAnimationFrame(() => {
+      campo.focus();
+      campo.reportValidity();
+    });
+  };
+
+  const passoValido = (indice: number) => {
+    const campo = campoDaSistemare(indice);
+    if (!campo) return true;
+    segnalaCampo(indice, campo);
+    return false;
   };
 
   const avanti = () => {
-    if (passoValido(passo)) setPasso(p => Math.min(p + 1, PASSI.length - 1));
+    if (!passoValido(passo)) return;
+    setAvviso(null);
+    cambioPasso.current = Date.now();
+    setPasso(p => Math.min(p + 1, PASSI.length - 1));
   };
   const indietro = () => setPasso(p => Math.max(p - 1, 0));
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (status === "sending") return;
+    if (Date.now() - cambioPasso.current < 500) return; // click di rimbalzo
     setAvviso(null);
 
+    // Si controlla dal primo passo: chi ha saltato qualcosa torna li', col
+    // campo puntato, invece di leggere un errore generico in fondo.
     for (let i = 0; i < PASSI.length; i++) {
-      if (!passoValido(i)) {
-        setPasso(i);
-        return;
-      }
+      if (!passoValido(i)) return;
     }
 
     if (!VOUCHER_ENDPOINT) {
@@ -406,15 +479,24 @@ export default function VoucherDigitalePage() {
       const res = await fetch(VOUCHER_ENDPOINT, { method: "POST", body: dati });
       if (!res.ok) {
         const corpo = await res.json().catch(() => null);
-        throw new Error(corpo?.errore ?? `HTTP ${res.status}`);
+        // Solo il messaggio scritto dal nostro backend e' in italiano e dice
+        // qualcosa di utile: si marca per non confonderlo con gli errori
+        // tecnici del browser ("Failed to fetch"), che non si mostrano.
+        throw new Error(corpo?.errore ? `NOSTRO:${corpo.errore}` : `HTTP ${res.status}`);
       }
       setStatus("sent");
+      setAvviso(null);
+      // Sopra sparisce tutto: senza questo si resterebbe a meta' pagina, dove
+      // ora non c'e' piu' niente.
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       setStatus("error");
+      const nostro = err instanceof Error && err.message.startsWith("NOSTRO:")
+        ? err.message.slice("NOSTRO:".length)
+        : null;
       setAvviso(
-        err instanceof Error && !err.message.startsWith("HTTP")
-          ? err.message
-          : `Invio non riuscito. Scrivici direttamente a ${CONTACT_EMAIL}.`,
+        nostro ??
+          `Invio non riuscito: controlla la connessione e riprova. Se insiste, scrivici a ${CONTACT_EMAIL} e ti seguiamo noi.`,
       );
     }
   };
@@ -440,7 +522,10 @@ export default function VoucherDigitalePage() {
         </section>
 
         {/* ── Riepilogo offerta (solo con link personale) ── */}
-        {offerta && (
+        {/* A candidatura inviata resta solo la conferma: l'offerta, la
+            spiegazione e il modulo hanno finito il loro lavoro, e lasciarli
+            sotto fa sembrare che ci sia ancora qualcosa da fare. */}
+        {offerta && status !== "sent" && (
           <RiepilogoOfferta
             offerta={offerta}
             scelte={scelte}
@@ -451,6 +536,7 @@ export default function VoucherDigitalePage() {
         )}
 
         {/* ── Intro ── */}
+        {status !== "sent" && (
         <section className="bg-white">
           <div
             className="container-content"
@@ -545,6 +631,7 @@ export default function VoucherDigitalePage() {
             </div>
           </div>
         </section>
+        )}
 
         {/* ── Percorso a passi ── */}
         {status !== "sent" ? (
@@ -753,8 +840,8 @@ export default function VoucherDigitalePage() {
                   )}
                 </div>
 
-                {/* ── Errori ── */}
-                {status === "error" && (
+                {/* ── Avvisi: campo da sistemare, oppure invio non riuscito ── */}
+                {(status === "error" || avviso) && (
                   <p
                     role="status"
                     className="leading-relaxed"
