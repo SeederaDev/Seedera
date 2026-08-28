@@ -79,7 +79,13 @@ const contributoSu = (totaleCent: number) => {
 const MIN_INVESTIMENTO_CENT = 400_000;
 
 const euro = (cent: number) =>
-  new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(cent / 100);
+  // useGrouping "always": in italiano il default raggruppa solo da cinque cifre,
+  // e in colonna "12.000,00" accanto a "1800,00" si legge male.
+  new Intl.NumberFormat("it-IT", {
+    style: "currency",
+    currency: "EUR",
+    useGrouping: "always",
+  }).format(cent / 100);
 
 const etichettaPill = {
   borderRadius: "5px",
