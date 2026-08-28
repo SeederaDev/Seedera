@@ -34,3 +34,40 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+---
+
+## Note di questo progetto
+
+### I bandi voucher arrivano a build-time
+
+Il sito e' un **export statico** (`output: 'export'`): niente API route, niente
+dati letti a runtime. Il censimento dei bandi camerali sta in
+`src/dati/bandi.json` ed e' committato; si aggiorna con:
+
+```bash
+npm run bandi            # legge http://localhost:3001/api/bandi/pubblici
+BANDI_API=https://api.seedera.it/api/bandi/pubblici npm run bandi
+```
+
+L'API restituisce **solo i bandi pubblicabili**, cioe' quelli di cui il pannello
+conosce percentuale, tetto, spesa minima e voci ammissibili. Un bando senza quei
+dati non ha pagina: meglio nessuna pagina che una con dei numeri inventati.
+Dopo aver corretto un bando nel pannello va rilanciato lo script e ripubblicato
+il sito, altrimenti la pagina resta indietro.
+
+### `postcss` e' fissato a 8.5.6, di proposito
+
+`postcss` non e' una nostra dipendenza diretta: arriva sollevato dall'albero di
+Tailwind. Dalla 8.5.26 pero' la build fallisce con
+`Invalid dangling combinator in selector` su `src/components/Cursor.css:4`
+(`@media (pointer: fine) { * { … } }`), che e' CSS valido. Il pin nelle
+`devDependencies` blocca la versione che funziona; **qualunque `npm install`
+puo' risollevarla**, quindi se la build si rompe con quell'errore la prima cosa
+da guardare e' `node_modules/postcss/package.json`.
+
+### Test
+
+`npm test` (vitest) copre la logica pura in `src/lib` e i componenti del
+percorso voucher. Non copre il rendering delle pagine: quello si verifica con
+`npm run build` e a browser aperto.
