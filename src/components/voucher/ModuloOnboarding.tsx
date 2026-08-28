@@ -22,7 +22,7 @@ export default function ModuloOnboarding({
   offerta: Offerta | null;
   tokenOfferta: string;
   scelte: boolean[];
-  inviato: () => void;
+  inviato: (tokenPratica: string | null) => void;
 }) {
   const [passo, setPasso] = useState(0);
   const [status, setStatus] = useState<"idle" | "sending" | "error">("idle");
@@ -128,9 +128,12 @@ export default function ModuloOnboarding({
         // tecnici del browser ("Failed to fetch"), che non si mostrano.
         throw new Error(corpo?.errore ? `NOSTRO:${corpo.errore}` : `HTTP ${res.status}`);
       }
+      const corpo = await res.json().catch(() => null);
       setStatus("idle");
       setAvviso(null);
-      inviato();
+      // Il token della pratica torna dall'invio: e' il link con cui il cliente
+      // seguira' la domanda, e il momento in cui glielo si da' e' questo.
+      inviato(corpo?.token_stato ?? null);
     } catch (err) {
       setStatus("error");
       const nostro = err instanceof Error && err.message.startsWith("NOSTRO:")

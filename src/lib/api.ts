@@ -6,6 +6,7 @@
 export const VOUCHER_ENDPOINT = process.env.NEXT_PUBLIC_VOUCHER_ENDPOINT ?? "";
 export const OFFERTA_ENDPOINT = VOUCHER_ENDPOINT.replace("/voucher/onboarding", "/offerta");
 export const PREVENTIVO_ENDPOINT = VOUCHER_ENDPOINT.replace("/voucher/onboarding", "/preventivo");
+export const PRATICA_ENDPOINT = VOUCHER_ENDPOINT.replace("/voucher/onboarding", "/pratica");
 export const CONTACT_EMAIL = "info@seedera.it";
 
 export interface RigaOfferta {

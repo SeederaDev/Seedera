@@ -23,6 +23,7 @@ export default function PercorsoVoucher({ bando }: { bando: Bando }) {
   const [tokenOfferta, setTokenOfferta] = useState("");
   const [scelte, setScelte] = useState<boolean[]>([]);
   const [inviato, setInviato] = useState(false);
+  const [tokenPratica, setTokenPratica] = useState<string | null>(null);
   /* La data si legge nel browser, non alla build: le pagine sono statiche e
      "mancano 12 giorni" diventerebbe falso il giorno dopo la pubblicazione.
      Finche' non e' nota si usa la data del build, cosi' il primo render del
@@ -62,14 +63,29 @@ export default function PercorsoVoucher({ bando }: { bando: Bando }) {
             style={{ paddingTop: "clamp(44px, 6vw, 72px)", paddingBottom: "clamp(80px, 10vw, 128px)" }}
           >
             <div className="container-content">
-              <p
-                role="status"
-                className="text-h3 font-medium leading-relaxed"
-                style={{ ...colonna, color: "var(--color-black)" }}
-              >
-                Ricevuto. Controlliamo i documenti e ti ricontattiamo noi entro un
-                giorno lavorativo per i passi successivi.
-              </p>
+              <div style={colonna}>
+                <p
+                  role="status"
+                  className="text-h3 font-medium leading-relaxed"
+                  style={{ color: "var(--color-black)" }}
+                >
+                  Ricevuto. Controlliamo i documenti e ti ricontattiamo noi entro un
+                  giorno lavorativo per i passi successivi.
+                </p>
+                {/* Il link va dato adesso, mentre la persona e' ancora qui: e'
+                    l'unico modo che ha di sapere a che punto siamo senza
+                    telefonare, e glielo rimandiamo comunque via mail. */}
+                {tokenPratica && (
+                  <p className="leading-relaxed" style={{ color: "var(--color-black)", marginTop: "24px" }}>
+                    Da qui puoi seguire la pratica e caricare i documenti che
+                    mancano:{" "}
+                    <a href={`/pratica?p=${encodeURIComponent(tokenPratica)}`} className="underline">
+                      apri la tua pratica
+                    </a>
+                    . Salvati questo indirizzo: e&rsquo; tuo e resta valido.
+                  </p>
+                )}
+              </div>
             </div>
           </section>
         ) : (
@@ -96,7 +112,8 @@ export default function PercorsoVoucher({ bando }: { bando: Bando }) {
               offerta={offerta}
               tokenOfferta={tokenOfferta}
               scelte={scelte}
-              inviato={() => {
+              inviato={(token) => {
+                setTokenPratica(token);
                 setInviato(true);
                 // Sopra sparisce tutto: senza questo si resterebbe a meta'
                 // pagina, dove ora non c'e' piu' niente.
