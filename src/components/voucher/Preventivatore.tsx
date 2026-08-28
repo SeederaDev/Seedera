@@ -151,9 +151,13 @@ export default function Preventivatore({ bando }: { bando: Bando }) {
                   {DIMENSIONI.map(d => {
                     const scelto = risposte.dimensione === d.valore;
                     return (
+                      /* Il radio e' nascosto (sr-only) e la scelta si vede
+                         sulla label: senza `focus-within` chi naviga da tastiera
+                         non vedrebbe *dove* si trova, perche' il contorno del
+                         fuoco starebbe su un elemento invisibile. */
                       <label
                         key={d.valore}
-                        className="cursor-pointer transition-colors duration-200"
+                        className="cursor-pointer transition-colors duration-200 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--color-black)]"
                         style={{
                           border: `1px solid ${scelto ? "var(--color-black)" : BORDO_CAMPO}`,
                           backgroundColor: scelto ? "var(--color-yellow)" : "#fff",

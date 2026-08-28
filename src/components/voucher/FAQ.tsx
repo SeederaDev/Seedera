@@ -18,8 +18,12 @@ export function domande(bando: Bando) {
     },
     {
       q: "Chi può partecipare?",
-      a: `Le micro, piccole e medie imprese in regola con l'iscrizione e il diritto annuale, `
-        + `con sede o unita' locale nel territorio di ${bando.camera}`
+      /* Il nome della camera dopo una preposizione produce frasi sgrammaticate
+         (le sigle camerali non reggono "di"), e le forme sono troppo diverse per
+         indovinare l'articolo: si mette il nome davanti, e la preposizione
+         sparisce. */
+      a: `${bando.camera}. Le micro, piccole e medie imprese in regola con l'iscrizione `
+        + `e il diritto annuale, con sede o unità locale nel suo territorio`
         + `${bando.province ? ` (province: ${bando.province})` : ""}.`,
     },
     {

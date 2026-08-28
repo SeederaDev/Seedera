@@ -67,7 +67,7 @@ export default function ComeFunziona({ bando, oggi }: { bando: Bando; oggi: stri
           {stato === "in_apertura" && bando.apertura && (
             <p className="leading-relaxed" style={{ color: "var(--color-black)", marginTop: "12px" }}>
               Lo sportello apre il {dataIt(bando.apertura)} e le domande valgono in
-              ordine di arrivo: vince il dito piu&rsquo; veloce.
+              ordine di arrivo: vince il dito più veloce.
             </p>
           )}
 
