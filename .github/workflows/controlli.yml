@@ -1,0 +1,39 @@
+name: Controlli
+
+# Dal 29/08/2026 il sito **non** e' piu' un export statico committato sul ramo
+# `deploy`: e' un processo Node sul VPS, aggiornato con scripts/deploy-vps.sh.
+# Qui resta la verifica — test e build — che deve passare prima di mettere
+# online. Il ramo `deploy` e il lavoro che ci committava sopra sono spariti:
+# se lo stai cercando, e' questo il posto dove era.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: controlli-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verifica:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm test
+
+      # La build legge i contenuti dall'API: senza, `prebuild` la ferma. In CI
+      # non c'e' un backend raggiungibile, quindi si compila senza il passo di
+      # controllo — cio' che qui interessa e' che il codice compili, non che il
+      # sito sia pieno. La build vera, con i contenuti, la fa deploy-vps.sh.
+      - run: npx next build
+        env:
+          API_BASE: http://127.0.0.1:1

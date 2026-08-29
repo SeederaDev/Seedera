@@ -55,6 +55,23 @@ Sono spariti `npm run bandi` e `src/dati/bandi.json`: erano il prezzo
 dell'export statico — un file da scaricare e committare a mano, col rischio di
 pubblicare una pagina con dati vecchi.
 
+### Come si mette online
+
+```bash
+ssh seedera-plesk 'bash /var/www/vhosts/seedera.it/httpdocs/app/scripts/deploy-vps.sh'
+```
+
+**Il ramo `deploy` non esiste piu'.** Fino al 29/08/2026 GitHub Actions
+costruiva l'export e lo committava li', Plesk faceva `git pull` e serviva i
+file. Ora il sito e' un processo Node come l'API, e il workflow
+(`.github/workflows/controlli.yml`, prima `deploy-staging.yml`) fa solo i
+controlli: test e build. Chi cerca il vecchio meccanismo lo trova spiegato li'.
+
+`npm run build` passa da `prebuild`, che si ferma se l'API non risponde: un
+sito costruito senza contenuti e' peggio di uno vecchio che funziona. In CI la
+build si lancia con `npx next build`, saltando quel controllo — li' interessa
+che il codice compili, non che il sito sia pieno.
+
 **Il prezzo della scelta, dichiarato:** il sito ha ora una dipendenza a runtime
 dal backend. Se l'API non risponde, una pagina gia' resa continua a servirsi
 dalla cache, ma una pagina mai resa esce vuota. La build fallisce apposta se
