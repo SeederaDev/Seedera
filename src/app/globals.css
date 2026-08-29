@@ -407,3 +407,62 @@ body {
 .campo-file::file-selector-button:hover {
   background-color: var(--color-yellow);
 }
+
+/* ── Il corpo di un articolo ───────────────────────────────────────────────
+   Testo da leggere, non un modulo da compilare: riga di 65-75 caratteri, spazio
+   sopra i titoletti piu' che sotto, e nessuna decorazione che rubi l'occhio.
+   L'HTML lo produce src/lib/blog.ts, che ammette solo i tag qui sotto. */
+.corpo-articolo {
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--color-black);
+  max-width: 68ch;
+}
+.corpo-articolo > :first-child { margin-top: 0; }
+.corpo-articolo p { margin: 0 0 1.35em; }
+.corpo-articolo h2,
+.corpo-articolo h3,
+.corpo-articolo h4 {
+  font-weight: 400;
+  line-height: 1.2;
+  margin: 2.1em 0 0.6em;
+}
+.corpo-articolo h2 { font-size: 27px; }
+.corpo-articolo h3 { font-size: 22px; }
+.corpo-articolo h4 { font-size: 19px; }
+.corpo-articolo ul,
+.corpo-articolo ol { margin: 0 0 1.35em; padding-left: 1.4em; }
+.corpo-articolo li { margin-bottom: 0.45em; }
+.corpo-articolo a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.corpo-articolo a:hover { text-decoration-thickness: 2px; }
+.corpo-articolo blockquote {
+  margin: 0 0 1.35em;
+  padding-left: 1.1em;
+  border-left: 1px solid #d4d4d4;
+  color: #5a5a5a;
+}
+.corpo-articolo code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.87em;
+  background: #f3f3f3;
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+.corpo-articolo pre {
+  background: #f3f3f3;
+  border-radius: 8px;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  margin: 0 0 1.35em;
+}
+.corpo-articolo pre code { background: none; padding: 0; font-size: 0.85em; }
+.corpo-articolo img { max-width: 100%; border-radius: 8px; }
+.corpo-articolo hr { border: 0; border-top: 1px solid #e4e4e4; margin: 2.2em 0; }
+/* Le tabelle non devono spingere la pagina in orizzontale. */
+.corpo-articolo table { width: 100%; border-collapse: collapse; margin: 0 0 1.35em; font-size: 16px; }
+.corpo-articolo th, .corpo-articolo td { text-align: left; padding: 0.5em 0.7em; border-bottom: 1px solid #e4e4e4; }

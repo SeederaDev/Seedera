@@ -20,6 +20,7 @@ const NAV_ITEMS = [
 const MENU_PAGES = [
   { label: "Home", href: "/" },
   { label: "Portfolio", href: "/portfolio" },
+  { label: "Blog", href: "/blog" },
   /* pagina persone nascosta: qui stava "Chi siamo" → /persone */
   { label: "Apri una conversazione", href: "/parliamo" },
 ];

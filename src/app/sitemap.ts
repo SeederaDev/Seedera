@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE } from "@/lib/seo";
-import { bandiPubblici, progetti } from "@/lib/contenuti";
+import { bandiPubblici, progetti, articoli } from "@/lib/contenuti";
 
 /* Le schede progetto arrivano dalla stessa sorgente di generateStaticParams,
    cosi' non si pubblica un progetto dimenticandosi la mappa. */
@@ -8,6 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const fisse: MetadataRoute.Sitemap = [
     { url: `${SITE.url}/`, changeFrequency: "monthly", priority: 1 },
     { url: `${SITE.url}/portfolio`, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${SITE.url}/blog`, changeFrequency: "weekly", priority: 0.8 },
     /* pagina persone nascosta: fuori dalla mappa finche' non torna online */
     { url: `${SITE.url}/parliamo`, changeFrequency: "yearly", priority: 0.7 },
     {
@@ -37,5 +38,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...fisse, ...voucher, ...schede];
+  /* Solo gli articoli visibili: le bozze e i programmati non escono dall'API,
+     quindi non si dichiara al motore una pagina che risponde 404. */
+  const blog: MetadataRoute.Sitemap = (await articoli()).map((a) => ({
+    url: `${SITE.url}/blog/${a.slug}`,
+    lastModified: a.pubblicato_il ?? undefined,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
+  return [...fisse, ...voucher, ...schede, ...blog];
 }
