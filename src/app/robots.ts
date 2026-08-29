@@ -1,9 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE } from "@/lib/seo";
 
-/* Con output: export queste route vanno dichiarate statiche a mano. */
-export const dynamic = "force-static";
-
 /* Export statico: questo file diventa /robots.txt a build time.
    Lo staging non si blocca da qui (stesso file su entrambi gli host): va
    escluso a livello di server, oppure ci pensa il canonical. */

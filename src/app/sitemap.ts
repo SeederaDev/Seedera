@@ -3,9 +3,6 @@ import { SITE } from "@/lib/seo";
 import { PROJECTS } from "./portfolio/[slug]/projectsData";
 import { BANDI } from "@/lib/bandi";
 
-/* Con output: export queste route vanno dichiarate statiche a mano. */
-export const dynamic = "force-static";
-
 /* Export statico: questo file diventa /sitemap.xml a build time. Le schede
    progetto arrivano dalla stessa sorgente di generateStaticParams, cosi'
    non si aggiunge un progetto dimenticandosi la mappa. */
