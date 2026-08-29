@@ -10,6 +10,8 @@
  * l'indirizzo dell'API non finisce nel browser.
  */
 
+import type { Bando } from "./bandi";
+
 const API = process.env.API_BASE ?? "http://127.0.0.1:3001";
 
 /* Un'ora e' lungo di proposito: le pagine non si rigenerano a orologio ma
@@ -66,6 +68,11 @@ export interface PersonaPubblica {
   colonna: 1 | 2 | 3;
   riga: number;
 }
+
+/* L'API restituisce `{ generato_il, bandi }`: qui esce l'elenco, che e' cio'
+   che serve alle pagine. */
+export const bandiPubblici = async (): Promise<Bando[]> =>
+  (await leggi<{ bandi: Bando[] }>("/api/bandi/pubblici", "bandi", { bandi: [] })).bandi;
 
 export const articoli = () => leggi<Articolo[]>("/api/blog", "blog", []);
 export const articolo = (slug: string) =>

@@ -1,12 +1,12 @@
 import type { MetadataRoute } from "next";
 import { SITE } from "@/lib/seo";
 import { PROJECTS } from "./portfolio/[slug]/projectsData";
-import { BANDI } from "@/lib/bandi";
+import { bandiPubblici } from "@/lib/contenuti";
 
 /* Export statico: questo file diventa /sitemap.xml a build time. Le schede
    progetto arrivano dalla stessa sorgente di generateStaticParams, cosi'
    non si aggiunge un progetto dimenticandosi la mappa. */
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const fisse: MetadataRoute.Sitemap = [
     { url: `${SITE.url}/`, changeFrequency: "monthly", priority: 1 },
     { url: `${SITE.url}/portfolio`, changeFrequency: "monthly", priority: 0.8 },
@@ -20,11 +20,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   /* Una voce per ogni bando pubblicabile, piu' la pagina pilastro che le
-     raccoglie. I bandi non censiti non sono in BANDI, quindi non finiscono in
+     raccoglie. I bandi non censiti non escono dall'API, quindi non finiscono in
      mappa: una pagina che non esiste non si dichiara. */
   const voucher: MetadataRoute.Sitemap = [
     { url: `${SITE.url}/voucher-digitale`, changeFrequency: "weekly", priority: 0.9 },
-    ...BANDI.map((b) => ({
+    ...(await bandiPubblici()).map((b) => ({
       url: `${SITE.url}/voucher-digitale/${b.slug}`,
       changeFrequency: "weekly" as const,
       priority: 0.8,

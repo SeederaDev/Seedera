@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "bandi": "node scripts/scarica-bandi.mjs",
     "test": "vitest run"
   },
   "dependencies": {

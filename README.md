@@ -39,22 +39,27 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## Note di questo progetto
 
-### I bandi voucher arrivano a build-time
+### Il sito e' servito da Node, non esportato
 
-Il sito e' un **export statico** (`output: 'export'`): niente API route, niente
-dati letti a runtime. Il censimento dei bandi camerali sta in
-`src/dati/bandi.json` ed e' committato; si aggiorna con:
+Dal 29/08/2026 niente piu' `output: 'export'`. Le pagine leggono i contenuti
+dall'API in `src/lib/contenuti.ts`, con la cache di Next a etichette: una pagina
+si rigenera quando quel contenuto cambia, non a orologio, perche' il pannello
+invalida l'etichetta appena si pubblica.
 
 ```bash
-npm run bandi            # legge http://localhost:3001/api/bandi/pubblici
-BANDI_API=https://api.seedera.it/api/bandi/pubblici npm run bandi
+API_BASE=http://127.0.0.1:3001 npm run dev     # sviluppo
+API_BASE=https://api.seedera.it npm run build  # e poi `npm start`
 ```
 
-L'API restituisce **solo i bandi pubblicabili**, cioe' quelli di cui il pannello
-conosce percentuale, tetto, spesa minima e voci ammissibili. Un bando senza quei
-dati non ha pagina: meglio nessuna pagina che una con dei numeri inventati.
-Dopo aver corretto un bando nel pannello va rilanciato lo script e ripubblicato
-il sito, altrimenti la pagina resta indietro.
+Sono spariti `npm run bandi` e `src/dati/bandi.json`: erano il prezzo
+dell'export statico — un file da scaricare e committare a mano, col rischio di
+pubblicare una pagina con dati vecchi.
+
+**Il prezzo della scelta, dichiarato:** il sito ha ora una dipendenza a runtime
+dal backend. Se l'API non risponde, una pagina gia' resa continua a servirsi
+dalla cache, ma una pagina mai resa esce vuota. La build fallisce apposta se
+l'API non risponde: pubblicare un sito con le pagine vuote e' peggio che non
+pubblicare.
 
 ### `postcss` e' fissato a 8.5.6, di proposito
 

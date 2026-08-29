@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { bandoPerSlug, euroTondo, percento, dataIt } from "@/lib/bandi";
+import { bandiPubblici } from "@/lib/contenuti";
 
 /* Ogni camera ha titolo, descrizione e canonical propri, costruiti sui suoi
    numeri: sono l'unica cosa che distingue in SERP 39 pagine con la stessa
@@ -10,7 +11,7 @@ export async function generateMetadata({
   params: Promise<{ camera: string }>;
 }): Promise<Metadata> {
   const { camera } = await params;
-  const b = bandoPerSlug(camera);
+  const b = bandoPerSlug(await bandiPubblici(), camera);
   if (!b) return {};
 
   /* Corto di proposito: il titolo deve reggere nella SERP (~60 caratteri col

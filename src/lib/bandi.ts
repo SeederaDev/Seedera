@@ -1,10 +1,10 @@
-import dati from "@/dati/bandi.json";
+/* I bandi camerali: qui stanno solo le regole, i dati arrivano dall'API
+   (src/lib/contenuti.ts). Fino al 29/08/2026 il censimento era un file JSON da
+   scaricare e committare a mano — il prezzo dell'export statico — con il
+   rischio di pubblicare una pagina con dati vecchi. Ora si legge, e basta.
 
-/* Il censimento dei bandi camerali, scaricato a build-time da
-   `npm run bandi` (GET /api/bandi/pubblici del backend) e committato: il sito
-   e' un export statico, i dati devono essere gia' dentro l'HTML. Qui ci sono
-   solo i bandi **pubblicabili** — quelli di cui conosciamo i parametri
-   economici. Gli altri non hanno pagina, ed e' voluto. */
+   L'API restituisce solo i bandi **pubblicabili**: quelli di cui il pannello
+   conosce i parametri economici. Gli altri non hanno pagina, ed e' voluto. */
 
 export interface Bando {
   slug: string;
@@ -21,8 +21,6 @@ export interface Bando {
   voci_ammissibili: string[];
   testo_pubblico: string | null;
 }
-
-export const BANDI = dati as Bando[];
 
 export type Stato = "in_apertura" | "aperto" | "chiuso" | "esaurito" | "da_definire";
 
@@ -57,7 +55,7 @@ export function ordinaPerPriorita(elenco: Bando[], oggi: string): Bando[] {
   });
 }
 
-export const bandoPerSlug = (slug: string) => BANDI.find(b => b.slug === slug);
+export const bandoPerSlug = (elenco: Bando[], slug: string) => elenco.find(b => b.slug === slug);
 
 const sigle = (b: Bando) =>
   (b.province ?? "").split(",").map(p => p.trim().toUpperCase()).filter(Boolean);
@@ -67,7 +65,7 @@ export function bandoPerProvincia(elenco: Bando[], sigla: string): Bando | undef
   return elenco.find(b => sigle(b).includes(s));
 }
 
-export const PROVINCE = (elenco: Bando[] = BANDI) =>
+export const PROVINCE = (elenco: Bando[]) =>
   [...new Set(elenco.flatMap(sigle))].sort();
 
 export const euro = (cent: number) =>
