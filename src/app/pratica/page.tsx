@@ -7,7 +7,7 @@ import { PRATICA_ENDPOINT, CONTACT_EMAIL } from "@/lib/api";
 import {
   Etichetta, GRIGIO_TESTO, BORDO_CAMPO, colonna, stilePulsante, ACCEPT, MAX_FILE,
 } from "@/components/voucher/campi";
-import { etichettaStato, messaggioAssenza, dataIt, type Pratica } from "./pratica-logica";
+import { etichettaStato, messaggioAssenza, dataIt, segnoVoce, type Pratica } from "./pratica-logica";
 
 /**
  * La pagina che il cliente apre dal link che gli abbiamo mandato. Il token sta
@@ -140,24 +140,58 @@ export default function PaginaPratica() {
 
                   {pratica.serve_a_te.length > 0 && (
                     <div style={{ marginTop: "48px" }}>
-                      <div style={{ marginBottom: "20px" }}><Etichetta>Serve a te</Etichetta></div>
+                      <div style={{ marginBottom: "20px" }}><Etichetta>Quello che serve a te</Etichetta></div>
                       <ul className="flex flex-col" style={{ gap: "12px" }}>
-                        {pratica.serve_a_te.map(v => (
+                        {pratica.serve_a_te.map(v => {
+                          /* Una fonte sola per lo stato del riquadro: l'etichetta
+                             e il corpo leggevano `v.stato` per conto proprio e
+                             potevano contraddirsi ("Da mandare" sopra, "lo
+                             abbiamo ricevuto" sotto) appena il campo arrivava
+                             mancante o con un valore inatteso. */
+                          const segno = segnoVoce(v.stato, v.si_carica);
+                          const fatto = segno.tono !== "aperto";
+                          return (
                           <li
                             key={v.id}
                             style={{
-                              border: `1px solid ${BORDO_CAMPO}`, borderRadius: "8px",
-                              padding: "14px 16px", color: "var(--color-black)",
+                              /* Il riquadro non sparisce quando lo mandi: cambia
+                                 aspetto. Vederlo svanire dopo un click sembra di
+                                 aver perso qualcosa, e non dice se e' andata bene. */
+                              border: `1px solid ${fatto ? "rgba(0,0,0,.18)" : BORDO_CAMPO}`,
+                              borderRadius: "8px",
+                              padding: "14px 16px",
+                              color: "var(--color-black)",
+                              backgroundColor: fatto ? "rgba(0,0,0,.03)" : "#fff",
                             }}
                           >
-                            <span className="block font-medium">{v.nome}</span>
+                            <div className="flex flex-wrap items-baseline" style={{ gap: "10px" }}>
+                              <span className="font-medium">{v.nome}</span>
+                              <span style={{
+                                fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.04em",
+                                borderRadius: "5px", padding: "3px 8px",
+                                border: "1px solid",
+                                borderColor: segno.tono === "aperto" ? "var(--color-black)" : "rgba(0,0,0,.25)",
+                                backgroundColor: segno.tono === "fatto" ? "var(--color-yellow)" : "transparent",
+                                color: segno.tono === "aperto" ? "var(--color-black)" : GRIGIO_TESTO,
+                              }}>
+                                {segno.etichetta}
+                              </span>
+                            </div>
                             {v.descrizione && (
                               <span className="block leading-relaxed" style={{ color: GRIGIO_TESTO, fontSize: "14px", marginTop: "2px" }}>
                                 {v.descrizione}
                               </span>
                             )}
                             <div className="flex flex-wrap items-center" style={{ gap: "10px", marginTop: "10px" }}>
-                              {v.si_carica ? (
+                              {fatto ? (
+                                <span style={{ color: GRIGIO_TESTO, fontSize: "14px" }}>
+                                  {segno.tono === "fatto"
+                                    ? "Verificato: non devi fare altro."
+                                    : v.si_carica
+                                      ? "Lo abbiamo ricevuto. Se hai mandato il file sbagliato, scrivici e lo sostituiamo."
+                                      : "Registrato. Se cambia qualcosa, scrivici."}
+                                </span>
+                              ) : v.si_carica ? (
                                 <>
                                   <input
                                     type="file"
@@ -191,7 +225,8 @@ export default function PaginaPratica() {
                               )}
                             </div>
                           </li>
-                        ))}
+                        );
+                        })}
                       </ul>
                     </div>
                   )}

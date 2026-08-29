@@ -10,6 +10,21 @@ export interface VocePratica {
      (SPID, firma digitale, PEC). Offrire un caricamento per la PEC non
      significa niente, e chiederlo fa perdere fiducia nel resto della pagina. */
   si_carica: boolean;
+  /* `da_fare` tocca ancora a lui, `in_corso` l'ha mandata e la controlliamo noi,
+     `pronto` e' a posto. Il riquadro resta sempre: cambia lo stato. */
+  stato: "da_fare" | "in_corso" | "pronto" | "non_applicabile";
+}
+
+/** Cosa dice il riquadro di una voce, secondo il suo stato. */
+export function segnoVoce(stato: VocePratica["stato"], si_carica: boolean) {
+  if (stato === "pronto") return { etichetta: "A posto", tono: "fatto" as const };
+  if (stato === "in_corso") {
+    return {
+      etichetta: si_carica ? "Ricevuto, lo stiamo controllando" : "Confermato, grazie",
+      tono: "ricevuto" as const,
+    };
+  }
+  return { etichetta: si_carica ? "Da mandare" : "Da confermare", tono: "aperto" as const };
 }
 
 export interface Pratica {
