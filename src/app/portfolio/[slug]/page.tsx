@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import ProjectDetailClient from "./ProjectDetailClient";
-import { PROJECTS } from "./projectsData";
+import { progetti } from "@/lib/contenuti";
 
-export function generateStaticParams() {
-  return PROJECTS.map((p) => ({ slug: p.slug }));
+export async function generateStaticParams() {
+  return (await progetti()).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({
@@ -12,29 +13,46 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const project = PROJECTS.find((p) => p.slug === slug);
+  const project = (await progetti()).find((p) => p.slug === slug);
   if (!project) return { title: "Progetto" };
 
+  const descrizione = project.descrizione ?? "";
   return {
-    title: project.client,
-    description: project.description.slice(0, 160),
+    title: project.cliente,
+    description: descrizione.slice(0, 160),
     alternates: { canonical: `/portfolio/${project.slug}` },
     openGraph: {
-      title: `${project.client} | Seedera`,
-      description: project.description.slice(0, 200),
+      title: `${project.cliente} | Seedera`,
+      description: descrizione.slice(0, 200),
       url: `/portfolio/${project.slug}`,
       type: "article",
-      images: [project.thumbnail],
+      images: [project.copertina],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${project.client} | Seedera`,
-      description: project.description.slice(0, 200),
-      images: [project.thumbnail],
+      title: `${project.cliente} | Seedera`,
+      description: descrizione.slice(0, 200),
+      images: [project.copertina],
     },
   };
 }
 
-export default function ProjectDetailPage() {
-  return <ProjectDetailClient />;
+export default async function ProjectDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const elenco = await progetti();
+  const project = elenco.find((p) => p.slug === slug);
+  /* Uno slug che non esiste e' un 404, non il primo progetto dell'elenco:
+     prima ogni indirizzo sbagliato mostrava Zentro con l'URL altrui. */
+  if (!project) notFound();
+
+  return (
+    <ProjectDetailClient
+      project={project}
+      altri={elenco.filter((p) => p.slug !== slug)}
+    />
+  );
 }

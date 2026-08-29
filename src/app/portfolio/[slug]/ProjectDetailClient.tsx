@@ -4,29 +4,14 @@ import { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useParams } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { PROJECTS, isVideo } from "./projectsData";
-import type { ProjectDetail } from "./projectsData";
+import { isVideo } from "@/lib/progetti";
+import type { Progetto } from "@/lib/contenuti";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* ── Data ── */
-interface SimilarProject {
-  category: string;
-  name: string;
-  image: string;
-  slug: string;
-}
-
-export const SIMILAR_PROJECTS: SimilarProject[] = PROJECTS.map((p) => ({
-  category: p.tags[0] || p.category,
-  name: p.client,
-  image: p.thumbnail,
-  slug: p.slug,
-}));
 
 /* ── Drag cursor ── */
 function DragCursor() {
@@ -114,7 +99,7 @@ function DragCursor() {
 }
 
 /* ── Similar projects carousel ── */
-function SimilarCarousel() {
+function SimilarCarousel({ altri }: { altri: Progetto[] }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const dragState = useRef({
@@ -238,7 +223,7 @@ function SimilarCarousel() {
           onMouseEnter={handleCursorShow}
           onMouseLeave={handleCursorHide}
         >
-          {SIMILAR_PROJECTS.map((project, i) => (
+          {altri.map((project, i) => (
             <article
               key={i}
               className="shrink-0"
@@ -252,8 +237,8 @@ function SimilarCarousel() {
                 style={{ aspectRatio: "3 / 4", maxHeight: "65vh" }}
               >
                 <img
-                  src={project.image}
-                  alt={project.name}
+                  src={project.copertina}
+                  alt={project.cliente}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out scale-[1.15] group-hover:scale-100 will-change-transform"
                   draggable={false}
                 />
@@ -266,7 +251,7 @@ function SimilarCarousel() {
                   color: "var(--color-middle-grey)",
                 }}
               >
-                {project.category}
+                {project.tag[0] || project.categoria}
               </p>
 
               <h3
@@ -283,7 +268,7 @@ function SimilarCarousel() {
                   onMouseEnter={handleCursorHide}
                   onMouseLeave={handleCursorShow}
                 >
-                  {project.name}
+                  {project.cliente}
                 </Link>
               </h3>
             </article>
@@ -295,12 +280,14 @@ function SimilarCarousel() {
 }
 
 /* ── Project Detail Page ── */
-export default function ProjectDetailClient() {
-  const params = useParams();
-  const slug = params.slug as string;
+export default function ProjectDetailClient({
+  project,
+  altri,
+}: {
+  project: Progetto;
+  altri: Progetto[];
+}) {
   const sectionRef = useRef<HTMLDivElement>(null);
-
-  const project = PROJECTS.find((p) => p.slug === slug) || PROJECTS[0];
 
   /* GSAP: text reveal animation */
   useGSAP(
@@ -365,10 +352,10 @@ export default function ProjectDetailClient() {
         >
           <div className="container-content pb-10">
             <h1 className="text-h1 text-black font-normal uppercase select-none">
-              {project.client}
+              {project.cliente}
             </h1>
             <div className="flex flex-wrap gap-2 mt-4">
-              {project.tags.map((tag, i) => (
+              {project.tag.map((tag, i) => (
                 <span
                   key={i}
                   className="inline-flex items-center border border-black text-black font-medium tracking-wide uppercase"
@@ -411,7 +398,7 @@ export default function ProjectDetailClient() {
               {/* Text reveal */}
               <div className="flex-1 detail-intro-text">
                 <h2 className="text-h2 font-medium leading-[1.2]">
-                  {project.description.split(" ").map((word, wi) => (
+                  {(project.descrizione ?? "").split(" ").map((word, wi) => (
                     <span key={wi} className="inline-block mr-[0.3em]">
                       {word.split("").map((char, ci) => (
                         <span
@@ -455,7 +442,7 @@ export default function ProjectDetailClient() {
                 ) : (
                   <img
                     src={src}
-                    alt={`${project.client} - immagine ${i + 1}`}
+                    alt={`${project.cliente} - immagine ${i + 1}`}
                     className="w-full h-auto"
                   />
                 )}
@@ -465,7 +452,7 @@ export default function ProjectDetailClient() {
         </section>
 
         {/* ── Similar projects carousel ── */}
-        <SimilarCarousel />
+        <SimilarCarousel altri={altri} />
       </main>
       <Footer />
     </>

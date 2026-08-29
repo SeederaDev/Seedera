@@ -11,8 +11,10 @@ import StartupStudio from "@/components/sections/StartupStudio";
 import Contatti from "@/components/sections/Contatti";
 import Partnership from "@/components/sections/Partnership";
 import Footer from "@/components/Footer";
+import { progetti } from "@/lib/contenuti";
 
-export default function Home() {
+export default async function Home() {
+  const elenco = await progetti();
   return (
     <>
       <Navbar />
@@ -24,7 +26,7 @@ export default function Home() {
         <Services />
         <SistemaOperativo />
         <Marquee />
-        <Projects />
+        <Projects progetti={elenco} />
         <StartupStudio />
         <Contatti />
         <Partnership />

@@ -1,39 +1,27 @@
 "use client";
 
-import { useRef, useEffect } from "react";
-import Link from "next/link";
+import { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Link from "next/link";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import type { Progetto } from "@/lib/contenuti";
+import { categorie } from "@/lib/progetti";
 
 gsap.registerPlugin(ScrollTrigger);
 
 /* ── Data ── */
-/* In home va una selezione, non il catalogo: quello sta in /portfolio.
-   L'elenco e' per slug e in ordine di apparizione, cosi' si cambia la
-   vetrina senza toccare l'ordine del portfolio.
-   quinte-parallele non e' ancora fra i progetti: appena la scheda esiste
-   entra da sola al suo posto, qui non c'e' altro da fare. */
-const IN_HOME = [
-  "zentro",
-  "suoni-oltre-confine",
-  "replase",
-  "quinte-parallele",
-  "il-trust-in-italia",
-];
+const INTRO_TITLE = "Non un catalogo di lavori. Una raccolta di problemi risolti.";
 
-/** La vetrina: gli slug scelti, nell'ordine scelto, saltando quelli che in
- *  banca dati non ci sono (ancora). */
-const vetrina = (progetti: Progetto[]) =>
-  IN_HOME.map((slug) => progetti.find((p) => p.slug === slug)).filter(
-    (p) => p !== undefined,
-  );
+const INTRO_BODY =
+  "Ogni progetto qui dentro è cominciato con una domanda scomoda: qual è davvero il problema? Le risposte hanno preso forme molto diverse — una piattaforma, un'identità, un sistema di gestione, la comunicazione di un festival — perché la forma la decide il problema, non il nostro listino.";
 
-const INTRO_TEXT =
-  "Di ogni progetto qui sotto si vede il risultato. La parte che conta però viene prima: il problema che c'era, e come ci siamo accorti di qual era davvero.";
+const INTRO_CLOSING =
+  "Quello che non vedi, guardando le immagini, è la parte che conta di più: il momento in cui il team del cliente ha smesso di avere bisogno di noi.";
 
-/* ── Rolling text effect on hover (CSS translateY approach) ── */
+/* ── Rolling text effect on hover ── */
 function RollingText({ text }: { text: string }) {
   const letters = text.split("");
 
@@ -75,12 +63,10 @@ function CustomCursor() {
     const cursor = cursorRef.current;
     if (!cursor) return;
 
-    // Start hidden
     gsap.set(cursor, { opacity: 0, scale: 0.5, xPercent: -50, yPercent: -50 });
 
     const onMouseMove = (e: MouseEvent) => {
       mousePos.current = { x: e.clientX, y: e.clientY };
-      // Only move smoothly while visible; otherwise let gsap.set in onShow handle position
       if (isVisible.current) {
         gsap.to(cursor, {
           left: e.clientX,
@@ -94,7 +80,6 @@ function CustomCursor() {
 
     const onShow = () => {
       isVisible.current = true;
-      // Snap position instantly, start from scale 0, then grow
       gsap.set(cursor, {
         left: mousePos.current.x,
         top: mousePos.current.y,
@@ -169,11 +154,7 @@ function ProjectCard({ project, index }: { project: Progetto; index: number }) {
 
   return (
     <Link href={`/portfolio/${project.slug}`} className="block">
-      <article
-        ref={cardRef}
-        className={`project-card ${index % 2 === 1 ? "md:mt-16 lg:mt-24" : ""}`}
-      >
-        {/* Image wrapper with overflow hidden for parallax + zoom */}
+      <article ref={cardRef} className="project-card">
         <div
           className="relative overflow-hidden rounded-[10px] cursor-none group [transform:translateZ(0)]"
           style={{ aspectRatio: "4 / 3" }}
@@ -213,7 +194,7 @@ function ProjectCard({ project, index }: { project: Progetto; index: number }) {
           ))}
         </div>
 
-        {/* Client name with rolling text effect */}
+        {/* Client name with rolling text */}
         <h3
           className="uppercase tracking-wide"
           style={{ fontSize: "var(--font-h4)", color: "var(--color-black)" }}
@@ -225,41 +206,23 @@ function ProjectCard({ project, index }: { project: Progetto; index: number }) {
   );
 }
 
-/* ── Main Projects section ── */
-export default function Projects({ progetti }: { progetti: Progetto[] }) {
-  const HOMEPAGE_PROJECTS = vetrina(progetti);
+/* ── Portfolio Page ── */
+export default function PaginaPortfolio({ progetti }: { progetti: Progetto[] }) {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [activeFilter, setActiveFilter] = useState("Tutti");
 
+  const CATEGORIES = categorie(progetti);
+  const filteredProjects =
+    activeFilter === "Tutti"
+      ? progetti
+      : progetti.filter((p) => p.categoria === activeFilter);
+
+  /* GSAP animations */
   useGSAP(
     () => {
       const section = sectionRef.current;
       if (!section) return;
-
-      // Character-by-character text reveal on scroll into view
-      const chars = section.querySelectorAll<HTMLElement>(
-        ".project-intro-char",
-      );
-      if (chars.length > 0) {
-        const introContainer = section.querySelector(".project-intro-text");
-        ScrollTrigger.create({
-          trigger: introContainer,
-          start: "top 80%",
-          end: "top 20%",
-          scrub: 0.5,
-          onUpdate: (self) => {
-            const progress = self.progress;
-            const totalChars = chars.length;
-            chars.forEach((char, ci) => {
-              const charProgress = ci / totalChars;
-              if (progress > charProgress) {
-                char.style.color = "var(--color-black)";
-              } else {
-                char.style.color = "var(--color-grey)";
-              }
-            });
-          },
-        });
-      }
 
       // Parallax on project images
       const images = section.querySelectorAll<HTMLElement>(".project-img");
@@ -296,104 +259,135 @@ export default function Projects({ progetti }: { progetti: Progetto[] }) {
         });
       });
     },
-    { scope: sectionRef },
+    { scope: sectionRef, dependencies: [filteredProjects] },
   );
 
+  /* Re-trigger ScrollTrigger on filter change */
+  useEffect(() => {
+    ScrollTrigger.refresh();
+  }, [filteredProjects]);
+
   return (
-    <section
-      ref={sectionRef}
-      id="portfolio"
-      className="relative bg-white z-10"
-      aria-label="Portfolio"
-    >
-      <CustomCursor />
+    <>
+      <Navbar />
+      <main ref={sectionRef}>
+        <CustomCursor />
 
-      {/* Intro area */}
-      {/* pt ridotto da mobile: sopra chiude la fascia gialla scorrevole e i 96px
-          pieni la staccavano troppo dal portfolio. */}
-      <div className="container-content pt-14 md:pt-40 pb-16 md:pb-24">
-        {/* 464 + 896 su 1360, come studio e partnership: nel design il testo
-            parte a x=504 dell'artboard. Con lo spacer al 20% partiva a 389, e
-            la colonna piu' larga mandava a capo in punti diversi. */}
-        <div className="flex flex-col md:grid md:grid-cols-[464fr_896fr] md:items-start">
-          {/* Label pill */}
-          <div className="shrink-0 mb-6 md:mb-0">
-            <span
-              /* Nel design e' "Portfolio", non "PORTFOLIO": 55,04px di
-                 larghezza contro i 79 della versione maiuscola. */
-              className="inline-flex items-center border border-black text-black"
-              style={{
-                borderRadius: "5px",
-                padding: "5px 10px",
-                fontSize: "14px",
-                lineHeight: "20px",
-              }}
-            >
+        {/* ── Hero ── */}
+        <section
+          className="relative w-full flex items-end"
+          style={{
+            height: "350px",
+            backgroundColor: "var(--color-yellow)",
+            paddingTop: "80px",
+          }}
+        >
+          <div className="container-content pb-10">
+            <h1 className="text-h1 text-black font-normal uppercase select-none">
               Portfolio
-            </span>
+            </h1>
           </div>
+        </section>
 
-          {/* Text reveal */}
-          <div className="project-intro-text">
-            {/* Regular 48/54 come ogni altro titolo di sezione: era medium con
-                interlinea 1.2 (57,6px) contro i 54 del design, e il margine
-                finto mr-[0.3em] valeva 14,4px al posto dello spazio vero.
-                Il tracking recupera il kerning che gli inline-block azzerano. */}
-            <h2 className="text-h2 font-normal leading-[54px] tracking-[-0.002em]">
-              {INTRO_TEXT.split(" ").map((word, wi) => (
-                /* Lo spazio sta FUORI dall'inline-block: dentro non offrirebbe
-                   un punto di a capo e il titolo resterebbe una riga sola. */
-                <span key={wi}>
-                  {wi > 0 ? " " : null}
-                  <span className="inline-block">
-                  {word.split("").map((char, ci) => (
-                    <span
-                      key={ci}
-                      className="project-intro-char inline-block transition-colors duration-300 ease-out"
-                      style={{ color: "var(--color-grey)" }}
-                    >
-                      {char}
-                    </span>
-                  ))}
-                  </span>
-                </span>
+        {/* ── Intro ── */}
+        <section className="bg-white" style={{ paddingTop: "90px" }}>
+          <div className="container-content">
+            <div className="flex flex-col gap-8 md:flex-row md:gap-16">
+              <h2
+                className="text-black font-normal uppercase leading-[1.05] md:w-[46%] shrink-0"
+                style={{ fontSize: "var(--font-h3)" }}
+              >
+                {INTRO_TITLE}
+              </h2>
+              <div className="flex flex-col gap-5 max-w-[62ch]">
+                <p className="text-black/70 text-lg leading-relaxed">
+                  {INTRO_BODY}
+                </p>
+                <p className="text-black/50 leading-relaxed border-l-2 border-black/20 pl-5">
+                  {INTRO_CLOSING}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Filters ── */}
+        <section className="bg-white" style={{ paddingTop: "90px" }}>
+          <div className="container-content">
+            <div className="flex flex-wrap justify-center gap-3">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveFilter(cat)}
+                  className="uppercase tracking-wide font-medium transition-all duration-300"
+                  style={{
+                    fontSize: "var(--font-btn)",
+                    padding: "8px 18px",
+                    borderRadius: "7px",
+                    border: "1px solid var(--color-black)",
+                    backgroundColor:
+                      activeFilter === cat
+                        ? "var(--color-black)"
+                        : "transparent",
+                    color:
+                      activeFilter === cat
+                        ? "var(--color-white)"
+                        : "var(--color-black)",
+                  }}
+                >
+                  {cat}
+                </button>
               ))}
-            </h2>
+            </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-      {/* Projects grid – staggered 2 columns */}
-      <div className="container-content pb-24 md:pb-40">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[25px] ">
-          {HOMEPAGE_PROJECTS.map((project, i) => (
-            <ProjectCard key={i} project={project} index={i} />
-          ))}
-        </div>
-
-        {progetti.length > HOMEPAGE_PROJECTS.length ? (
-          <div className="mt-12 md:mt-16 flex justify-center">
-            <Link
-              href="/portfolio"
-              /* Stessa pillola del resto del sito: bordo nero, riempimento
-                 al passaggio. L'after invisibile porta il tocco a 45px. */
-              className="relative inline-flex items-center gap-3 rounded-[5px] border border-black text-black hover:bg-black hover:text-primary transition-all duration-300 after:absolute after:-inset-y-[5px] after:inset-x-0 after:content-['']"
-              style={{ padding: "8px 18px", fontSize: "15px" }}
-            >
-              Tutti i progetti
-              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <path
-                  d="M4 10h12M11 5l5 5-5 5"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+        {/* ── Projects Grid ── */}
+        <section className="bg-white" style={{ paddingTop: "50px" }}>
+          <div ref={gridRef} className="container-content pb-24 md:pb-40">
+            <div className="hidden md:grid grid-cols-2 gap-x-[25px]">
+              {/* Left column */}
+              <div className="flex flex-col" style={{ gap: "60px" }}>
+                {filteredProjects
+                  .filter((_, i) => i % 2 === 0)
+                  .map((project, i) => (
+                    <ProjectCard
+                      key={`${activeFilter}-L-${i}`}
+                      project={project}
+                      index={i * 2}
+                    />
+                  ))}
+              </div>
+              {/* Right column – offset top */}
+              <div
+                className="flex flex-col"
+                style={{ paddingTop: "200px", gap: "60px" }}
+              >
+                {filteredProjects
+                  .filter((_, i) => i % 2 === 1)
+                  .map((project, i) => (
+                    <ProjectCard
+                      key={`${activeFilter}-R-${i}`}
+                      project={project}
+                      index={i * 2 + 1}
+                    />
+                  ))}
+              </div>
+            </div>
+            {/* Mobile: single column */}
+            <div className="flex flex-col md:hidden" style={{ gap: "60px" }}>
+              {filteredProjects.map((project, i) => (
+                <ProjectCard
+                  key={`${activeFilter}-${i}`}
+                  project={project}
+                  index={i}
                 />
-              </svg>
-            </Link>
+              ))}
+            </div>
           </div>
-        ) : null}
-      </div>
-    </section>
+        </section>
+      </main>
+      <Footer />
+    </>
   );
 }

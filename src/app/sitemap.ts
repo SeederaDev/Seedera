@@ -1,11 +1,9 @@
 import type { MetadataRoute } from "next";
 import { SITE } from "@/lib/seo";
-import { PROJECTS } from "./portfolio/[slug]/projectsData";
-import { bandiPubblici } from "@/lib/contenuti";
+import { bandiPubblici, progetti } from "@/lib/contenuti";
 
-/* Export statico: questo file diventa /sitemap.xml a build time. Le schede
-   progetto arrivano dalla stessa sorgente di generateStaticParams, cosi'
-   non si aggiunge un progetto dimenticandosi la mappa. */
+/* Le schede progetto arrivano dalla stessa sorgente di generateStaticParams,
+   cosi' non si pubblica un progetto dimenticandosi la mappa. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const fisse: MetadataRoute.Sitemap = [
     { url: `${SITE.url}/`, changeFrequency: "monthly", priority: 1 },
@@ -31,11 +29,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ];
 
-  const progetti: MetadataRoute.Sitemap = PROJECTS.map((p) => ({
+  /* Solo i progetti pubblicati: non escono dall'API, quindi non si dichiara
+     una pagina che non c'e'. */
+  const schede: MetadataRoute.Sitemap = (await progetti()).map((p) => ({
     url: `${SITE.url}/portfolio/${p.slug}`,
     changeFrequency: "yearly",
     priority: 0.6,
   }));
 
-  return [...fisse, ...voucher, ...progetti];
+  return [...fisse, ...voucher, ...schede];
 }
