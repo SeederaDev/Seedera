@@ -11,6 +11,7 @@
 set -euo pipefail
 
 APP=/var/www/vhosts/seedera.it/sito
+PORTA=3020
 NODE_BIN=/opt/plesk/node/22/bin
 export PATH="$NODE_BIN:$PATH"
 
@@ -31,15 +32,24 @@ npm ci
 set -a; . "$APP/.env"; set +a
 
 echo "==> build"
+# Quale commit e' online: curl -s https://seedera.it/version.txt
+git rev-parse HEAD > public/version.txt
 npm run build
 
 echo "==> riavvio"
-# Il servizio ha Restart=always e gira con lo stesso utente dell'SSH: terminarlo
-# lo fa ripartire da solo col codice nuovo. E' la via di scorta finche' la chiave
-# API del Plesk non si rigenera (vedi doc-vps-plesk-collegare-siti nel brain).
-pkill -f "next start" || true
-sleep 2
-pgrep -f "next start" >/dev/null && echo "   sito ripartito" || {
-  echo "   il servizio non e' ripartito da solo: systemctl --user restart seedera-sito"
-  exit 1
-}
+# Il servizio (seedera-sito) ha Restart=always e gira con lo stesso utente
+# dell'SSH: terminarlo lo fa ripartire da solo col codice nuovo. Riavviarlo per
+# davvero vorrebbe root, che qui non c'e'.
+#
+# Si cerca "next-server" e non "next start": dopo l'avvio il processo si
+# rinomina, e il pattern sbagliato non trova niente, lo script dichiara il
+# riavvio riuscito e resta online il codice vecchio. `-u` limita ai propri
+# processi: sulla VPS ci sono altri Next di altri domini.
+PID=$(pgrep -u "$(id -u)" -f "next-server" | head -1)
+[ -n "$PID" ] && kill "$PID"
+for _ in $(seq 1 12); do
+  sleep 2
+  if curl -fsS -o /dev/null "http://127.0.0.1:$PORTA/"; then echo "   sito ripartito"; exit 0; fi
+done
+echo "   il sito non risponde sulla $PORTA dopo il riavvio: systemctl status seedera-sito"
+exit 1
