@@ -12,6 +12,7 @@ import ModuloOnboarding from "./ModuloOnboarding";
 import Preventivatore from "./Preventivatore";
 import FAQ from "./FAQ";
 import { colonna } from "./campi";
+import type { DocumentoRichiesto } from "@/lib/contenuti";
 
 /**
  * Il percorso completo di una camera: testata, offerta (se si arriva da un
@@ -19,7 +20,8 @@ import { colonna } from "./campi";
  * camera sia: tutto quello che mostra arriva dal bando che riceve.
  */
 export default function PercorsoVoucher(
-  { bando, preventivoAutomatico = false }: { bando: Bando; preventivoAutomatico?: boolean },
+  { bando, preventivoAutomatico = false, documenti = [] }:
+    { bando: Bando; preventivoAutomatico?: boolean; documenti?: DocumentoRichiesto[] },
 ) {
   const [offerta, setOfferta] = useState<Offerta | null>(null);
   const [tokenOfferta, setTokenOfferta] = useState("");
@@ -111,6 +113,7 @@ export default function PercorsoVoucher(
             ) : (
             <ModuloOnboarding
               bando={bando}
+              documenti={documenti}
               offerta={offerta}
               tokenOfferta={tokenOfferta}
               scelte={scelte}

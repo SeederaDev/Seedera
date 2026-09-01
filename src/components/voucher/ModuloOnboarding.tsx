@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import type { Bando } from "@/lib/bandi";
 import type { Offerta } from "@/lib/api";
 import { VOUCHER_ENDPOINT, CONTACT_EMAIL } from "@/lib/api";
+import type { DocumentoRichiesto } from "@/lib/contenuti";
 import {
   Blocco, Campo, CampoFile, BORDO_CAMPO, GRIGIO_TESTO, MAX_FILE,
   colonna, stileCampo, stileEtichetta, stilePulsante,
@@ -17,8 +18,10 @@ export default function ModuloOnboarding({
   tokenOfferta,
   scelte,
   inviato,
+  documenti = [],
 }: {
   bando: Bando;
+  documenti?: DocumentoRichiesto[];
   offerta: Offerta | null;
   tokenOfferta: string;
   scelte: boolean[];
@@ -27,7 +30,11 @@ export default function ModuloOnboarding({
   const [passo, setPasso] = useState(0);
   const [status, setStatus] = useState<"idle" | "sending" | "error">("idle");
   const [avviso, setAvviso] = useState<string | null>(null);
-  const [polizzaMancante, setPolizzaMancante] = useState(false);
+  /* Quali documenti il cliente dichiara di non avere ancora. Prima era il solo
+     `polizzaMancante`: ora l'elenco lo decide il bando, e la dichiarazione vale
+     per ognuno degli obbligatori — il Report SELFI4.0 quasi nessuno ce l'ha
+     gia', e bloccarlo sulla soglia vorrebbe dire perdere la candidatura. */
+  const [mancanti, setMancanti] = useState<Record<string, boolean>>({});
   const passiRef = useRef<Array<HTMLDivElement | null>>([]);
   /* "Avanti" e "Invia la candidatura" stanno nello stesso punto: arrivando
      all'ultimo passo il pulsante cambia mestiere sotto il dito, e un secondo
@@ -102,7 +109,11 @@ export default function ModuloOnboarding({
     const form = e.currentTarget;
     const dati = new FormData(form);
     dati.set("consenso", dati.get("consenso") === "on" ? "true" : "false");
-    dati.set("polizza_mancante", polizzaMancante ? "true" : "false");
+    for (const doc of documenti) {
+      if (doc.si_dichiara_mancante) {
+        dati.set(`${doc.campo}_mancante`, mancanti[doc.campo] ? "true" : "false");
+      }
+    }
     dati.set("bando", bando.slug);
     if (tokenOfferta) dati.set("offerta", tokenOfferta);
     if (offerta) {
@@ -207,33 +218,45 @@ export default function ModuloOnboarding({
           </div>
 
           <div ref={el => { passiRef.current[2] = el; }} hidden={passo !== 2}>
+            {/* La visura la chiediamo noi, non il bando: da li' ricostruiamo i
+                dati dell'impresa senza farglieli riscrivere. Tutto il resto lo
+                dice il bando, e arriva dall'API: un elenco scritto a mano qui
+                si scollerebbe dalla checklist, ed e' successo — il Report
+                SELFI4.0, obbligatorio, non veniva chiesto a nessuno. */}
             <Blocco etichetta="Documenti">
               <CampoFile nome="visura" etichetta="Visura camerale recente" aiuto="PDF o foto leggibile, massimo 20 MB" obbligatorio />
-              <CampoFile
-                nome="polizza"
-                etichetta="Polizza catastrofale"
-                aiuto="Obbligatoria per legge per le imprese, salvo i casi di esenzione previsti"
-                disabilitato={polizzaMancante}
-              />
-              <label
-                className="md:col-span-2 flex items-start gap-2 cursor-pointer"
-                style={{ fontSize: "14px", color: "var(--color-black)" }}
-              >
-                <input
-                  type="checkbox"
-                  checked={polizzaMancante}
-                  onChange={(e) => setPolizzaMancante(e.target.checked)}
-                  style={{ marginTop: "3px" }}
-                />
-                <span>
-                  Non ce l&rsquo;ho ancora{" "}
-                  <span style={{ color: GRIGIO_TESTO }}>
-                    (ti aiutiamo noi a stipularla: senza, la domanda non parte)
-                  </span>
-                </span>
-              </label>
-              <CampoFile nome="parita_genere" etichetta="Certificazione parità di genere (solo se posseduta)" />
-              <CampoFile nome="rating_legalita" etichetta="Rating di legalità (solo se posseduto)" />
+              {documenti.map(doc => (
+                <div key={doc.campo} className="md:col-span-2 flex flex-col" style={{ gap: "8px" }}>
+                  <CampoFile
+                    nome={doc.campo}
+                    /* L'etichetta dice gia' da sola quando il documento serve:
+                       attaccarci anche la condizione della checklist la
+                       ripeteva due volte, con parole diverse. */
+                    etichetta={doc.etichetta}
+                    aiuto={doc.aiuto ?? undefined}
+                    disabilitato={mancanti[doc.campo] === true}
+                  />
+                  {doc.si_dichiara_mancante && (
+                    <label
+                      className="flex items-start gap-2 cursor-pointer"
+                      style={{ fontSize: "14px", color: "var(--color-black)" }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={mancanti[doc.campo] === true}
+                        onChange={e => setMancanti(m => ({ ...m, [doc.campo]: e.target.checked }))}
+                        style={{ marginTop: "3px" }}
+                      />
+                      <span>
+                        Non ce l&rsquo;ho ancora{" "}
+                        <span style={{ color: GRIGIO_TESTO }}>
+                          (ti aiutiamo noi: senza, la domanda non parte)
+                        </span>
+                      </span>
+                    </label>
+                  )}
+                </div>
+              ))}
             </Blocco>
           </div>
 

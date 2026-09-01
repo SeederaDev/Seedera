@@ -52,7 +52,8 @@ export default function IndiceVoucher({ bandi }: { bandi: Bando[] }) {
       <main>
         <section
           className="relative w-full flex items-end"
-          style={{ height: "210px", backgroundColor: "var(--color-yellow)", paddingTop: "80px" }}
+          style={{ minHeight: "210px", backgroundColor: "var(--color-yellow)",
+          paddingTop: "104px", paddingBottom: "24px" }}
         >
           <div className="container-content pb-6">
             <h1 className="text-h1 text-black font-normal uppercase select-none">

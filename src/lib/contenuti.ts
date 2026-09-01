@@ -83,6 +83,25 @@ export const preventivoAutomatico = async (): Promise<boolean> =>
     "/api/configurazione", "configurazione", { preventivo_automatico: false },
   )).preventivo_automatico === true;
 
+export interface DocumentoRichiesto {
+  campo: string;
+  etichetta: string;
+  aiuto: string | null;
+  obbligatorio: boolean;
+  condizione: string | null;
+  si_dichiara_mancante: boolean;
+}
+
+/* I documenti che il bando chiede al cliente. Vengono dall'API perche' l'elenco
+   vero e' la checklist del bando: una copia qui tornerebbe a divergere, ed e'
+   cosi' che il Report SELFI4.0 — obbligatorio — era rimasto fuori dal modulo.
+   Se l'API non risponde l'elenco e' vuoto e il modulo chiede la sola visura:
+   meglio raccogliere meno che elencare documenti sbagliati. */
+export const documentiCliente = async (): Promise<DocumentoRichiesto[]> =>
+  (await leggi<{ documenti: DocumentoRichiesto[] }>(
+    "/api/documenti-cliente", "documenti", { documenti: [] },
+  )).documenti;
+
 export const articoli = () => leggi<Articolo[]>("/api/blog", "blog", []);
 export const articolo = (slug: string) =>
   leggi<Articolo | null>(`/api/blog/${encodeURIComponent(slug)}`, `blog:${slug}`, null);
