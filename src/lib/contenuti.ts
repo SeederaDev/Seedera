@@ -74,6 +74,15 @@ export interface PersonaPubblica {
 export const bandiPubblici = async (): Promise<Bando[]> =>
   (await leggi<{ bandi: Bando[] }>("/api/bandi/pubblici", "bandi", { bandi: [] })).bandi;
 
+/* Come si comporta il backend, non cosa contiene: se il preventivo lo scriviamo
+   noi, la pagina non deve prometterlo in due minuti. Il ripiego e' "lo
+   scriviamo noi" perche' e' la promessa piu' prudente: se l'API non risponde,
+   dire di meno e' meglio che dire una cosa che non manteniamo. */
+export const preventivoAutomatico = async (): Promise<boolean> =>
+  (await leggi<{ preventivo_automatico: boolean }>(
+    "/api/configurazione", "configurazione", { preventivo_automatico: false },
+  )).preventivo_automatico === true;
+
 export const articoli = () => leggi<Articolo[]>("/api/blog", "blog", []);
 export const articolo = (slug: string) =>
   leggi<Articolo | null>(`/api/blog/${encodeURIComponent(slug)}`, `blog:${slug}`, null);

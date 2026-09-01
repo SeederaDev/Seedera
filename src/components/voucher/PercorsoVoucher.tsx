@@ -18,7 +18,9 @@ import { colonna } from "./campi";
  * link personale), spiegazione, modulo, domande. Non sa niente di *quale*
  * camera sia: tutto quello che mostra arriva dal bando che riceve.
  */
-export default function PercorsoVoucher({ bando }: { bando: Bando }) {
+export default function PercorsoVoucher(
+  { bando, preventivoAutomatico = false }: { bando: Bando; preventivoAutomatico?: boolean },
+) {
   const [offerta, setOfferta] = useState<Offerta | null>(null);
   const [tokenOfferta, setTokenOfferta] = useState("");
   const [scelte, setScelte] = useState<boolean[]>([]);
@@ -105,7 +107,7 @@ export default function PercorsoVoucher({ bando }: { bando: Bando }) {
                 contributo, poi si compila. Con il token, il preventivo esiste
                 gia' e si va dritti alla candidatura. */}
             {!offerta && !tokenOfferta ? (
-              <Preventivatore bando={bando} />
+              <Preventivatore bando={bando} automatico={preventivoAutomatico} />
             ) : (
             <ModuloOnboarding
               bando={bando}

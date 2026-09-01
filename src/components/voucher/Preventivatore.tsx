@@ -4,7 +4,7 @@ import { useState } from "react";
 import { euroTondo, percento, type Bando } from "@/lib/bandi";
 import { PREVENTIVO_ENDPOINT, CONTACT_EMAIL } from "@/lib/api";
 import {
-  SETTORI, OBIETTIVI, DIMENSIONI, passoCompleto, messaggioErrore,
+  SETTORI, OBIETTIVI, DIMENSIONI, passoCompleto, messaggioErrore, esitoInvio,
   type Risposte, type Contatto,
 } from "./preventivatore-logica";
 import {
@@ -13,11 +13,22 @@ import {
 } from "./campi";
 
 /**
- * Due schermate prima del modulo: cosa serve all'impresa, e chi e'. Alla
- * risposta la pagina si riapre su `?o=<token>`, e da li' riprende il percorso
- * che esisteva gia' — riepilogo dell'offerta e candidatura.
+ * Due schermate prima del modulo: cosa serve all'impresa, e chi e'.
+ *
+ * Poi succede una di due cose, e la decide il backend. Se il preventivo si
+ * genera da solo, la pagina si riapre su `?o=<token>` e riprende il percorso
+ * che esisteva gia' — riepilogo dell'offerta e candidatura. Se invece il
+ * preventivo lo scriviamo noi (com'e' dal 01/09/2026, finche' non subentra il
+ * modello), qui si chiude con una conferma: la richiesta e' arrivata e il
+ * preventivo lo mandiamo noi.
+ *
+ * Per questo il pulsante non promette piu' di "vedere" il preventivo: la
+ * pagina non sa in quale dei due modi risponderemo, e promettere quello
+ * sbagliato e' peggio che promettere meno.
  */
-export default function Preventivatore({ bando }: { bando: Bando }) {
+export default function Preventivatore(
+  { bando, automatico = false }: { bando: Bando; automatico?: boolean },
+) {
   const [passo, setPasso] = useState(0);
   const [risposte, setRisposte] = useState<Risposte>({ obiettivi: [] });
   const [contatto, setContatto] = useState<Contatto>({});
@@ -25,6 +36,7 @@ export default function Preventivatore({ bando }: { bando: Bando }) {
   const [honeypot, setHoneypot] = useState("");
   const [invio, setInvio] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
+  const [inCarico, setInCarico] = useState(false);
 
   const commutaObiettivo = (valore: string) =>
     setRisposte(r => ({
@@ -62,15 +74,20 @@ export default function Preventivatore({ bando }: { bando: Bando }) {
         setInvio(false);
         return;
       }
-      const { token } = await res.json();
-      if (!token) {
+      const esito = esitoInvio(await res.json());
+      if (esito.tipo === "in_carico") {
+        setInCarico(true);
+        setInvio(false);
+        return;
+      }
+      if (esito.tipo === "errore") {
         // L'honeypot risponde 200 senza token: per un bot va bene cosi', per
         // una persona che ci e' finita dentro serve una via d'uscita.
         setErrore(`Non siamo riusciti a preparare il preventivo: scrivici a ${CONTACT_EMAIL}.`);
         setInvio(false);
         return;
       }
-      window.location.search = `?o=${encodeURIComponent(token)}`;
+      window.location.search = `?o=${encodeURIComponent(esito.token)}`;
     } catch (err) {
       setErrore(messaggioErrore(err, CONTACT_EMAIL));
       setInvio(false);
@@ -78,6 +95,38 @@ export default function Preventivatore({ bando }: { bando: Bando }) {
   };
 
   const completo = passoCompleto(passo, risposte, contatto);
+
+  /* Preso in carico: il modulo sparisce. Lasciarlo compilato, con un avviso
+     sopra, invita a rimandarlo — e ci arriverebbe due volte la stessa richiesta. */
+  if (inCarico) {
+    return (
+      <section
+        className="bg-white"
+        style={{ paddingTop: "clamp(44px, 6vw, 72px)", paddingBottom: "clamp(60px, 8vw, 96px)" }}
+      >
+        <div className="container-content">
+          <div style={colonna}>
+            <div style={{ marginBottom: "20px" }}>
+              <Etichetta>Quanto ti costa davvero</Etichetta>
+            </div>
+            <p
+              role="status"
+              className="text-h3 font-medium leading-relaxed"
+              style={{ color: "var(--color-black)" }}
+            >
+              Ricevuto. Prepariamo il preventivo sulla tua impresa e te lo mandiamo
+              per email entro un giorno lavorativo.
+            </p>
+            <p className="leading-relaxed" style={{ color: GRIGIO_TESTO, marginTop: "24px" }}>
+              Non devi fare altro. Se nel frattempo ti viene in mente qualcosa,
+              scrivici a{" "}
+              <a href={`mailto:${CONTACT_EMAIL}`} className="underline">{CONTACT_EMAIL}</a>.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -90,14 +139,18 @@ export default function Preventivatore({ bando }: { bando: Bando }) {
             <Etichetta>Quanto ti costa davvero</Etichetta>
           </div>
           <h2 className="text-h3 font-medium" style={{ color: "var(--color-black)", marginBottom: "12px" }}>
-            Preventivo in due minuti
+            {automatico ? "Preventivo in due minuti" : "Preventivo su misura"}
           </h2>
           <p className="leading-relaxed" style={{ color: GRIGIO_TESTO, marginBottom: "32px" }}>
             Rispondi a tre domande e ti diciamo cosa serve alla tua impresa, quanto
             costa e quanto ne copre il contributo camerale ({percento(bando.percentuale)},
-            fino a {euroTondo(bando.tetto_cent)}). Il preventivo è gratuito e senza
-            impegno: preparazione e presentazione della domanda sono incluse, e paghi
-            solo i servizi che scegli, se decidi di procedere.
+            fino a {euroTondo(bando.tetto_cent)}).{" "}
+            {automatico
+              ? "Lo vedi subito, qui."
+              : "Lo prepariamo noi e te lo mandiamo via email entro un giorno lavorativo."}{" "}
+            Il preventivo è gratuito e senza impegno: preparazione e presentazione
+            della domanda sono incluse, e paghi solo i servizi che scegli, se decidi
+            di procedere.
           </p>
 
           {passo === 0 ? (
@@ -278,7 +331,11 @@ export default function Preventivatore({ bando }: { bando: Bando }) {
               className="font-medium tracking-wide uppercase transition-all duration-300 hover:bg-[var(--color-yellow)] disabled:opacity-40"
               style={stilePulsante}
             >
-              {passo === 0 ? "Avanti →" : invio ? "Preparo il preventivo…" : "Vedi il preventivo"}
+              {passo === 0
+                ? "Avanti →"
+                : invio
+                  ? "Invio…"
+                  : automatico ? "Vedi il preventivo" : "Chiedi il preventivo"}
             </button>
           </div>
 

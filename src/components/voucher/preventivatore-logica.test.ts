@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { passoCompleto, messaggioErrore } from "./preventivatore-logica";
+import { passoCompleto, messaggioErrore, esitoInvio } from "./preventivatore-logica";
 
 describe("passoCompleto", () => {
   it("le domande vogliono settore, dimensione e almeno un obiettivo", () => {
@@ -35,5 +35,23 @@ describe("messaggioErrore", () => {
   });
   it("un 503 manda a noi, perche' il problema e' nostro", () => {
     expect(messaggioErrore({ status: 503 })).toContain("info@seedera.it");
+  });
+});
+
+/* Dal 01/09/2026 il preventivo puo' arrivare in due modi: subito, con la sua
+   offerta, oppure scritto da noi. La risposta del backend dice quale dei due,
+   e la pagina non deve leggere "nessun token" come "qualcosa e' andato storto".
+   Sono percorsi diversi, e a chi ha appena compilato va detto quale ha preso. */
+describe("esito dell'invio", () => {
+  it("col token si prosegue sull'offerta", () => {
+    expect(esitoInvio({ ok: true, token: "AB12" })).toEqual({ tipo: "offerta", token: "AB12" });
+  });
+
+  it("preso in carico: il preventivo lo scriviamo noi, e non e' un errore", () => {
+    expect(esitoInvio({ ok: true, in_carico: true })).toEqual({ tipo: "in_carico" });
+  });
+
+  it("senza token e senza presa in carico resta un errore: e' la risposta all'honeypot", () => {
+    expect(esitoInvio({ ok: true })).toEqual({ tipo: "errore" });
   });
 });

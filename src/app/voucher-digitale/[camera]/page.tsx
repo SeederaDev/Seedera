@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { bandoPerSlug } from "@/lib/bandi";
-import { bandiPubblici } from "@/lib/contenuti";
+import { bandiPubblici, preventivoAutomatico } from "@/lib/contenuti";
 import PercorsoVoucher from "@/components/voucher/PercorsoVoucher";
 
 /* Una pagina per bando **pubblicabile**: l'elenco arriva dall'API. I bandi di
@@ -18,5 +18,5 @@ export default async function PaginaCamera({
   const { camera } = await params;
   const bando = bandoPerSlug(await bandiPubblici(), camera);
   if (!bando) notFound();
-  return <PercorsoVoucher bando={bando} />;
+  return <PercorsoVoucher bando={bando} preventivoAutomatico={await preventivoAutomatico()} />;
 }

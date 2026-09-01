@@ -69,3 +69,21 @@ export function messaggioErrore(errore: unknown, contatto = "info@seedera.it"): 
   if (stato && stato >= 500) return `Problema dalla nostra parte: riprova fra poco, o scrivici a ${contatto}.`;
   return `Non siamo riusciti a inviare: controlla la connessione e riprova. Se insiste, scrivici a ${contatto}.`;
 }
+
+/* Cosa e' successo davvero all'invio. Le tre risposte possibili del backend si
+   somigliano — sono tutte `ok: true` — ma portano la persona in tre posti
+   diversi, e distinguerle qui evita che la pagina chiami "errore" un preventivo
+   che sta per arrivare. */
+export type Esito =
+  | { tipo: "offerta"; token: string }
+  | { tipo: "in_carico" }
+  | { tipo: "errore" };
+
+export function esitoInvio(dati: unknown): Esito {
+  const d = (dati ?? {}) as { token?: unknown; in_carico?: unknown };
+  if (typeof d.token === "string" && d.token) return { tipo: "offerta", token: d.token };
+  if (d.in_carico === true) return { tipo: "in_carico" };
+  /* Nessuno dei due: e' la risposta che diamo all'honeypot, e a una persona
+     finita li' dentro serve comunque una via d'uscita. */
+  return { tipo: "errore" };
+}
