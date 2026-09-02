@@ -87,6 +87,9 @@ export interface DocumentoRichiesto {
   campo: string;
   etichetta: string;
   aiuto: string | null;
+  /* Dove si ottiene, quando il cliente non ce l'ha gia': il report da compilare,
+     il modulo camerale da scaricare. */
+  link: { url: string; testo: string } | null;
   obbligatorio: boolean;
   condizione: string | null;
   si_dichiara_mancante: boolean;

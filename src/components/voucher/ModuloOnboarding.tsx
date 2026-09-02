@@ -6,7 +6,7 @@ import type { Offerta } from "@/lib/api";
 import { VOUCHER_ENDPOINT, CONTACT_EMAIL } from "@/lib/api";
 import type { DocumentoRichiesto } from "@/lib/contenuti";
 import {
-  Blocco, Campo, CampoFile, BORDO_CAMPO, GRIGIO_TESTO, MAX_FILE,
+  Blocco, Campo, CampoFile, Fisarmonica, BORDO_CAMPO, GRIGIO_TESTO, MAX_FILE,
   colonna, stileCampo, stileEtichetta, stilePulsante,
 } from "./campi";
 
@@ -28,6 +28,13 @@ export default function ModuloOnboarding({
   inviato: (tokenPratica: string | null) => void;
 }) {
   const [passo, setPasso] = useState(0);
+  /* Le sezioni aperte. Si va avanti nell'ordine, ma non sono chiuse a chiave:
+     chi vuole rileggere l'impresa mentre carica i documenti apre quella e basta,
+     senza tornare indietro e riavanzare. */
+  const [aperte, setAperte] = useState<number[]>([0]);
+  /* Le sezioni da cui si e' gia' passati con "Avanti": servono solo a scrivere
+     "compilata" accanto al titolo quando sono chiuse. */
+  const [viste, setViste] = useState<number[]>([]);
   const [status, setStatus] = useState<"idle" | "sending" | "error">("idle");
   const [avviso, setAvviso] = useState<string | null>(null);
   /* Quali documenti il cliente dichiara di non avere ancora. Prima era il solo
@@ -66,12 +73,34 @@ export default function ModuloOnboarding({
      niente di visibile. */
   const segnalaCampo = (indice: number, campo: HTMLInputElement | HTMLTextAreaElement) => {
     setPasso(indice);
+    apri(indice);
     setAvviso(`Manca ancora qualcosa in “${etichettaDi(campo)}”: ${campo.validationMessage}`);
     requestAnimationFrame(() => {
       campo.focus();
       campo.reportValidity();
     });
   };
+
+  /* Il pulsante in fondo a una sezione: controlla quella sezione, la chiude e
+     apre la prossima. Sta dentro la sezione e non in fondo al modulo perche'
+     con piu' sezioni aperte "avanti" da solo non direbbe avanti da dove. */
+  const Prosegui = ({ indice }: { indice: number }) => (
+    <div style={{ marginTop: "24px" }}>
+      <button
+        type="button"
+        onClick={() => avanti(indice)}
+        className="font-medium tracking-wide uppercase transition-all duration-300 hover:bg-[var(--color-yellow)]"
+        style={stilePulsante}
+      >
+        Avanti →
+      </button>
+    </div>
+  );
+
+  const apri = (indice: number) =>
+    setAperte(a => (a.includes(indice) ? a : [...a, indice]));
+  const commuta = (indice: number) =>
+    setAperte(a => (a.includes(indice) ? a.filter(i => i !== indice) : [...a, indice]));
 
   const passoValido = (indice: number) => {
     const campo = campoDaSistemare(indice);
@@ -80,13 +109,17 @@ export default function ModuloOnboarding({
     return false;
   };
 
-  const avanti = () => {
-    if (!passoValido(passo)) return;
+  const avanti = (indice: number) => {
+    if (!passoValido(indice)) return;
     setAvviso(null);
     cambioPasso.current = Date.now();
-    setPasso(p => Math.min(p + 1, PASSI.length - 1));
+    const prossima = Math.min(indice + 1, PASSI.length - 1);
+    setPasso(prossima);
+    setViste(v => (v.includes(indice) ? v : [...v, indice]));
+    /* La sezione finita si chiude e si apre la successiva: e' il "uno dopo
+       l'altro". Restano aperte quelle che la persona ha aperto per conto suo. */
+    setAperte(a => [...a.filter(i => i !== indice), prossima]);
   };
-  const indietro = () => setPasso(p => Math.max(p - 1, 0));
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -163,40 +196,22 @@ export default function ModuloOnboarding({
       style={{ paddingTop: "clamp(44px, 6vw, 72px)", paddingBottom: "clamp(80px, 10vw, 128px)" }}
     >
       <div className="container-content">
-        {/* Indicatore dei passi */}
-        <ol className="flex flex-wrap" style={{ ...colonna, gap: "8px", marginBottom: "36px" }}>
-          {PASSI.map((nome, i) => (
-            <li
-              key={nome}
-              className="flex items-center uppercase tracking-wide"
-              style={{
-                borderRadius: "5px",
-                border: "1px solid",
-                borderColor: i === passo ? "var(--color-black)" : BORDO_CAMPO,
-                backgroundColor: i === passo ? "var(--color-yellow)" : "transparent",
-                color: i <= passo ? "var(--color-black)" : GRIGIO_TESTO,
-                padding: "4px 10px",
-                fontSize: "12px",
-              }}
-            >
-              {/* Senza numero: sopra "Come funziona" ne ha gia' una da 1 a 4, e
-                  due sequenze numerate diverse nella stessa pagina si leggono
-                  come la stessa cosa. */}
-              {nome}
-            </li>
-          ))}
-        </ol>
-
-        <form onSubmit={handleSubmit} noValidate className="flex flex-col" style={{ gap: "40px" }}>
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col" style={{ ...colonna, gap: "12px" }}>
           {/* Honeypot: gli umani non lo vedono, i bot lo compilano. */}
           <input
             type="text" name="sito_web" tabIndex={-1} autoComplete="off" aria-hidden="true"
             className="absolute -left-[9999px] h-0 w-0 opacity-0"
           />
 
-          {/* I passi restano montati (hidden) cosi' input e file non si perdono. */}
-          <div ref={el => { passiRef.current[0] = el; }} hidden={passo !== 0}>
-            <Blocco etichetta="Impresa">
+          {/* Le sezioni restano montate (hidden) cosi' input e file non si perdono. */}
+          <Fisarmonica
+            titolo={PASSI[0]}
+            aperta={aperte.includes(0)}
+            completata={viste.includes(0)}
+            onCommuta={() => commuta(0)}
+            riferimento={el => { passiRef.current[0] = el; }}
+          >
+            <Blocco>
               <Campo nome="ragione_sociale" etichetta="Ragione sociale" obbligatorio />
               <Campo nome="piva" etichetta="Partita IVA" esempio="11 cifre" obbligatorio />
               <Campo nome="referente" etichetta="Referente (nome e cognome)" obbligatorio />
@@ -204,10 +219,17 @@ export default function ModuloOnboarding({
               <Campo nome="telefono" etichetta="Telefono" tipo="tel" />
               <Campo nome="pec" etichetta="PEC aziendale" tipo="email" />
             </Blocco>
-          </div>
+            <Prosegui indice={0} />
+          </Fisarmonica>
 
-          <div ref={el => { passiRef.current[1] = el; }} hidden={passo !== 1}>
-            <Blocco etichetta="Legale rappresentante">
+          <Fisarmonica
+            titolo={PASSI[1]}
+            aperta={aperte.includes(1)}
+            completata={viste.includes(1)}
+            onCommuta={() => commuta(1)}
+            riferimento={el => { passiRef.current[1] = el; }}
+          >
+            <Blocco>
               <Campo nome="rap_nome" etichetta="Nome" obbligatorio />
               <Campo nome="rap_cognome" etichetta="Cognome" obbligatorio />
               <Campo nome="rap_codice_fiscale" etichetta="Codice fiscale" esempio="16 caratteri" obbligatorio larga />
@@ -215,15 +237,22 @@ export default function ModuloOnboarding({
               <Campo nome="rap_luogo_nascita" etichetta="Luogo di nascita" />
               <Campo nome="rap_residenza_via" etichetta="Indirizzo di residenza" esempio="Es. Via Roma 1, 00100 Roma (RM)" larga />
             </Blocco>
-          </div>
+            <Prosegui indice={1} />
+          </Fisarmonica>
 
-          <div ref={el => { passiRef.current[2] = el; }} hidden={passo !== 2}>
+          <Fisarmonica
+            titolo={PASSI[2]}
+            aperta={aperte.includes(2)}
+            completata={viste.includes(2)}
+            onCommuta={() => commuta(2)}
+            riferimento={el => { passiRef.current[2] = el; }}
+          >
             {/* La visura la chiediamo noi, non il bando: da li' ricostruiamo i
                 dati dell'impresa senza farglieli riscrivere. Tutto il resto lo
                 dice il bando, e arriva dall'API: un elenco scritto a mano qui
                 si scollerebbe dalla checklist, ed e' successo — il Report
                 SELFI4.0, obbligatorio, non veniva chiesto a nessuno. */}
-            <Blocco etichetta="Documenti">
+            <Blocco>
               <CampoFile nome="visura" etichetta="Visura camerale recente" aiuto="PDF o foto leggibile, massimo 20 MB" obbligatorio />
               {documenti.map(doc => (
                 <div key={doc.campo} className="md:col-span-2 flex flex-col" style={{ gap: "8px" }}>
@@ -236,6 +265,20 @@ export default function ModuloOnboarding({
                     aiuto={doc.aiuto ?? undefined}
                     disabilitato={mancanti[doc.campo] === true}
                   />
+                  {/* Fuori dal riquadro di caricamento di proposito: dentro sta
+                      in una label, e un click sul link aprirebbe il selettore
+                      dei file invece del sito dove il documento si compila. */}
+                  {doc.link && (
+                    <a
+                      href={doc.link.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline"
+                      style={{ fontSize: "14px", color: "var(--color-black)" }}
+                    >
+                      {doc.link.testo} ↗
+                    </a>
+                  )}
                   {doc.si_dichiara_mancante && (
                     <label
                       className="flex items-start gap-2 cursor-pointer"
@@ -258,10 +301,17 @@ export default function ModuloOnboarding({
                 </div>
               ))}
             </Blocco>
-          </div>
+            <Prosegui indice={2} />
+          </Fisarmonica>
 
-          <div ref={el => { passiRef.current[3] = el; }} hidden={passo !== 3}>
-            <Blocco etichetta="Progetto">
+          <Fisarmonica
+            titolo={PASSI[3]}
+            aperta={aperte.includes(3)}
+            completata={viste.includes(3)}
+            onCommuta={() => commuta(3)}
+            riferimento={el => { passiRef.current[3] = el; }}
+          >
+            <Blocco>
               <label className="md:col-span-2">
                 <span style={stileEtichetta}>Cosa vorresti digitalizzare?</span>
                 <textarea
@@ -287,40 +337,18 @@ export default function ModuloOnboarding({
                 </span>
               </label>
             </Blocco>
-          </div>
-
-          {/* ── Navigazione fra i passi ── */}
-          <div className="flex items-stretch" style={{ ...colonna, gap: "10px" }}>
-            {passo > 0 && (
-              <button
-                type="button"
-                onClick={indietro}
-                className="font-medium tracking-wide uppercase transition-all duration-300"
-                style={{ ...stilePulsante, border: `2px solid ${BORDO_CAMPO}` }}
-              >
-                ← Indietro
-              </button>
-            )}
-            {passo < PASSI.length - 1 ? (
-              <button
-                type="button"
-                onClick={avanti}
-                className="font-medium tracking-wide uppercase transition-all duration-300 hover:bg-[var(--color-yellow)]"
-                style={stilePulsante}
-              >
-                Avanti →
-              </button>
-            ) : (
+            {/* L'ultima sezione non manda "avanti": manda la candidatura. */}
+            <div style={{ marginTop: "24px" }}>
               <button
                 type="submit"
                 disabled={status === "sending"}
                 className="font-medium tracking-wide uppercase transition-all duration-300 hover:bg-[var(--color-yellow)]"
                 style={stilePulsante}
               >
-                {status === "sending" ? "Invio in corso…" : "Invia la candidatura"}
+                {status === "sending" ? "Invio in corso\u2026" : "Invia la candidatura"}
               </button>
-            )}
-          </div>
+            </div>
+          </Fisarmonica>
 
           {/* ── Avvisi: campo da sistemare, oppure invio non riuscito ── */}
           {(status === "error" || avviso) && (

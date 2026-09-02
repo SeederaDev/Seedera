@@ -119,14 +119,19 @@ export function Blocco({
   etichetta,
   children,
 }: {
-  etichetta: string;
+  /* Senza etichetta il blocco e' solo la griglia dei campi: serve dentro una
+     fisarmonica, dove il titolo lo dice gia' l'intestazione e ripeterlo due
+     volte fa sembrare che siano due sezioni diverse. */
+  etichetta?: string;
   children: React.ReactNode;
 }) {
   return (
     <div style={colonna}>
-      <div style={{ marginBottom: "20px" }}>
-        <Etichetta>{etichetta}</Etichetta>
-      </div>
+      {etichetta && (
+        <div style={{ marginBottom: "20px" }}>
+          <Etichetta>{etichetta}</Etichetta>
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: "16px" }}>
         {children}
       </div>
@@ -180,5 +185,77 @@ export function CampoFile({
         style={{ fontSize: "14px", color: "var(--color-black)" }}
       />
     </label>
+  );
+}
+
+/**
+ * Una sezione che si apre e si chiude.
+ *
+ * Sostituisce i passi affiancati in cima al modulo: con quelli si vedeva dove si
+ * era, ma per rileggere un dato gia' inserito bisognava tornare indietro e poi
+ * riavanzare. Qui si va avanti nell'ordine — chi finisce una sezione apre la
+ * successiva — ma nessuna e' chiusa a chiave: si riapre quella che si vuole,
+ * quando si vuole, senza perdere il posto.
+ *
+ * Il contenuto resta **montato** anche da chiusa (`hidden`, non smontato): i
+ * file gia' scelti e i campi compilati non si perdono, ed e' la stessa ragione
+ * per cui i passi non venivano smontati prima.
+ */
+export function Fisarmonica({
+  titolo,
+  aperta,
+  completata = false,
+  onCommuta,
+  riferimento,
+  children,
+}: {
+  titolo: string;
+  aperta: boolean;
+  completata?: boolean;
+  onCommuta: () => void;
+  riferimento?: (el: HTMLDivElement | null) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <section
+      style={{
+        border: `1px solid ${aperta ? "var(--color-black)" : BORDO_CAMPO}`,
+        borderRadius: "10px",
+        transition: "border-color 200ms",
+      }}
+    >
+      <h3 style={{ margin: 0 }}>
+        <button
+          type="button"
+          onClick={onCommuta}
+          aria-expanded={aperta}
+          className="w-full flex items-center justify-between text-left transition-colors duration-200"
+          style={{
+            padding: "16px 18px",
+            background: aperta ? "var(--color-yellow)" : "transparent",
+            borderRadius: aperta ? "9px 9px 0 0" : "9px",
+            cursor: "pointer",
+            fontSize: "15px",
+            fontWeight: 500,
+            color: "var(--color-black)",
+          }}
+        >
+          <span>
+            {titolo}
+            {completata && !aperta && (
+              <span style={{ color: GRIGIO_TESTO, fontWeight: 400 }}> — compilata</span>
+            )}
+          </span>
+          {/* Il segno dice cosa succede al click, non in che stato siamo: e'
+              l'unica delle due letture che serve a chi deve decidere. */}
+          <span aria-hidden="true" style={{ fontSize: "20px", lineHeight: 1 }}>
+            {aperta ? "\u2212" : "+"}
+          </span>
+        </button>
+      </h3>
+      <div ref={riferimento} hidden={!aperta} style={{ padding: "22px 18px 24px" }}>
+        {children}
+      </div>
+    </section>
   );
 }

@@ -2,11 +2,11 @@ import { describe, it, expect } from "vitest";
 import { documentiDaChiedere } from "./documenti";
 
 const base = [
-  { campo: "polizza", etichetta: "Polizza", aiuto: null, obbligatorio: true, condizione: null, si_dichiara_mancante: true },
+  { campo: "polizza", etichetta: "Polizza", aiuto: null, link: null, obbligatorio: true, condizione: null, si_dichiara_mancante: true },
 ];
 const conExtra = [
   ...base,
-  { campo: "sustainability", etichetta: "SUSTAINability", aiuto: null, obbligatorio: false, condizione: "green", si_dichiara_mancante: false },
+  { campo: "sustainability", etichetta: "SUSTAINability", aiuto: null, link: { url: "https://esg.dintec.it", testo: "Compilalo" }, obbligatorio: false, condizione: "green", si_dichiara_mancante: false },
 ];
 
 describe("quali documenti chiedere", () => {
