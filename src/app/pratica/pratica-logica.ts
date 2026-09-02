@@ -12,7 +12,22 @@ export interface VocePratica {
   si_carica: boolean;
   /* `da_fare` tocca ancora a lui, `in_corso` l'ha mandata e la controlliamo noi,
      `pronto` e' a posto. Il riquadro resta sempre: cambia lo stato. */
-  stato: "da_fare" | "in_corso" | "pronto" | "non_applicabile";
+  stato: "da_fare" | "da_firmare" | "in_corso" | "pronto" | "non_applicabile";
+}
+
+/* Un documento che abbiamo preparato noi e che aspetta la sua firma. Sta in un
+   elenco suo perche' il gesto e' diverso da "mandaci la polizza": prima si
+   scarica, poi si firma, poi si ricarica. */
+export interface VoceDaFirmare {
+  id: string;
+  nome: string;
+  descrizione: string | null;
+  firma: string | null;
+  /* Manca quando la voce e' stata consegnata senza allegarci il file: il
+     caricamento resta possibile, il download no — e la pagina deve dirlo invece
+     di mostrare un pulsante che scarica il vuoto. */
+  documento_id: string | null;
+  consegnato_il: string | null;
 }
 
 /** Cosa dice il riquadro di una voce, secondo il suo stato. */
@@ -36,6 +51,7 @@ export interface Pratica {
   stato: string;
   prossimo_passo: string;
   serve_a_te: VocePratica[];
+  da_firmare: VoceDaFirmare[];
   stiamo_facendo: string[];
   fatte: number;
 }
@@ -65,3 +81,7 @@ export function messaggioAssenza(caso: "senza-token" | "non-valido" | "rete", co
 
 /* Le date arrivano come "2026-08-20": in pagina si leggono all'italiana. */
 export const dataIt = (iso: string | null) => (iso ? iso.split("-").reverse().join("/") : "");
+
+/** C'e' davvero un file da prendere, o la voce e' stata consegnata a vuoto. */
+export const siPuoScaricare = (v: Pick<VoceDaFirmare, "documento_id">) =>
+  Boolean(v.documento_id);

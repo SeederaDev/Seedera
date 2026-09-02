@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { etichettaStato, messaggioAssenza, dataIt, segnoVoce } from "./pratica-logica";
+import { etichettaStato, messaggioAssenza, dataIt, segnoVoce, siPuoScaricare } from "./pratica-logica";
 
 describe("etichettaStato", () => {
   it("traduce lo stato interno in qualcosa che il cliente capisce", () => {
@@ -53,5 +53,24 @@ describe("uno stato inatteso non manda in contraddizione il riquadro", () => {
     const s = segnoVoce(undefined, true);
     expect(s.tono).toBe("aperto");
     expect(s.etichetta).toBe("Da mandare");
+  });
+});
+
+/* Una voce consegnata senza il file allegato capita: si spunta la voce e ci si
+   dimentica di caricare il modulo. La pagina non deve offrire un pulsante che
+   scarica il vuoto, ma deve comunque lasciar caricare il firmato: il cliente
+   potrebbe averlo ricevuto per altra via. */
+describe("il documento da scaricare", () => {
+  const voce = (documento_id: string | null) => ({
+    id: "v1", nome: "Modulo di Domanda", descrizione: null,
+    firma: "legale_rappresentante", documento_id, consegnato_il: "2026-09-02",
+  });
+
+  it("si scarica quando il file c'e'", () => {
+    expect(siPuoScaricare(voce("doc-1"))).toBe(true);
+  });
+
+  it("non si scarica quando non c'e' niente da prendere", () => {
+    expect(siPuoScaricare(voce(null))).toBe(false);
   });
 });

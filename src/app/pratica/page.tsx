@@ -7,7 +7,7 @@ import { PRATICA_ENDPOINT, CONTACT_EMAIL } from "@/lib/api";
 import {
   Etichetta, GRIGIO_TESTO, BORDO_CAMPO, colonna, stilePulsante, ACCEPT, MAX_FILE,
 } from "@/components/voucher/campi";
-import { etichettaStato, messaggioAssenza, dataIt, segnoVoce, type Pratica } from "./pratica-logica";
+import { etichettaStato, messaggioAssenza, dataIt, segnoVoce, siPuoScaricare, type Pratica } from "./pratica-logica";
 
 /**
  * La pagina che il cliente apre dal link che gli abbiamo mandato. Il token sta
@@ -138,6 +138,73 @@ export default function PaginaPratica() {
                   <p className="leading-relaxed" style={{ color: "var(--color-black)", marginTop: "12px" }}>
                     {pratica.prossimo_passo}
                   </p>
+
+                  {/* Prima di tutto il resto: sono documenti gia' pronti, che
+                      aspettano solo la sua firma. Metterli sotto "quello che
+                      serve a te" li confonderebbe con le carte da procurarsi,
+                      che e' un lavoro diverso e piu' lungo. */}
+                  {pratica.da_firmare.length > 0 && (
+                    <div style={{ marginTop: "48px" }}>
+                      <div style={{ marginBottom: "20px" }}><Etichetta>Da firmare</Etichetta></div>
+                      <p className="leading-relaxed" style={{ color: "var(--color-black)", marginBottom: "16px" }}>
+                        Questi documenti li abbiamo preparati noi. Vanno scaricati, firmati
+                        digitalmente dal <strong>legale rappresentante</strong> e ricaricati qui:
+                        firmati da altri la domanda non è ricevibile.
+                      </p>
+                      <ul className="flex flex-col" style={{ gap: "12px" }}>
+                        {pratica.da_firmare.map(v => (
+                          <li
+                            key={v.id}
+                            style={{
+                              border: "1px solid var(--color-black)",
+                              borderRadius: "8px",
+                              padding: "14px 16px",
+                              color: "var(--color-black)",
+                              backgroundColor: "#fff",
+                            }}
+                          >
+                            <span className="font-medium">{v.nome}</span>
+                            {v.descrizione && (
+                              <span className="block leading-relaxed" style={{ color: GRIGIO_TESTO, fontSize: "14px", marginTop: "2px" }}>
+                                {v.descrizione}
+                              </span>
+                            )}
+                            <div className="flex flex-wrap items-center" style={{ gap: "10px", marginTop: "12px" }}>
+                              {siPuoScaricare(v) ? (
+                                <a
+                                  href={`${PRATICA_ENDPOINT}/${encodeURIComponent(token ?? "")}/documento/${v.documento_id}`}
+                                  className="font-medium tracking-wide uppercase transition-all duration-300 hover:bg-[var(--color-yellow)]"
+                                  style={{ ...stilePulsante, padding: "8px 14px", display: "inline-block" }}
+                                >
+                                  Scarica
+                                </a>
+                              ) : (
+                                <span style={{ color: GRIGIO_TESTO, fontSize: "14px" }}>
+                                  Il file non è ancora allegato: scrivici e te lo mandiamo.
+                                </span>
+                              )}
+                              <input
+                                type="file"
+                                accept={ACCEPT}
+                                ref={el => { fileRef.current[v.id] = el; }}
+                                className="campo-file"
+                                style={{ fontSize: "14px", color: "var(--color-black)" }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => carica(v.id)}
+                                disabled={caricando === v.id}
+                                className="font-medium tracking-wide uppercase transition-all duration-300 hover:bg-[var(--color-yellow)] disabled:opacity-40"
+                                style={{ ...stilePulsante, padding: "8px 14px" }}
+                              >
+                                {caricando === v.id ? "Carico…" : "Invia firmato"}
+                              </button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                   {pratica.serve_a_te.length > 0 && (
                     <div style={{ marginTop: "48px" }}>
