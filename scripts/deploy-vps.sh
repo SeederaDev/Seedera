@@ -18,7 +18,11 @@ export PATH="$NODE_BIN:$PATH"
 cd "$APP"
 
 echo "==> aggiorno il codice"
-GIT_SSH_COMMAND="ssh -i $HOME/.ssh/id_ed25519_deploy -o IdentitiesOnly=yes" git pull --ff-only
+# Chiave dedicata al sito: GitHub non accetta la stessa deploy key su due
+# repository, e quella di `id_ed25519_deploy` e' del backend. Via SSH e non
+# HTTPS perche' GitHub, dopo un po' di richieste anonime dallo stesso IP,
+# smette di rispondere e git chiede un utente che nessuno digitera' mai.
+GIT_SSH_COMMAND="ssh -i $HOME/.ssh/id_ed25519_sito -o IdentitiesOnly=yes" git pull --ff-only
 
 echo "==> dipendenze"
 npm ci

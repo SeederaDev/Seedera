@@ -16,9 +16,12 @@ export PATH="$NODE_BIN:$PATH"
 
 echo "==> codice in $APP"
 if [ -d "$APP/.git" ]; then
-  cd "$APP" && git fetch origin && git checkout main && git pull --ff-only
+  cd "$APP" && GIT_SSH_COMMAND="ssh -i $HOME/.ssh/id_ed25519_sito -o IdentitiesOnly=yes" \
+    git fetch origin && git checkout main && \
+    GIT_SSH_COMMAND="ssh -i $HOME/.ssh/id_ed25519_sito -o IdentitiesOnly=yes" git pull --ff-only
 else
-  git clone https://github.com/SeederaDev/Seedera.git "$APP"
+  GIT_SSH_COMMAND="ssh -i $HOME/.ssh/id_ed25519_sito -o IdentitiesOnly=yes" \
+    git clone git@github.com:SeederaDev/Seedera.git "$APP"
   cd "$APP"
 fi
 
