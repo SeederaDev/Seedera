@@ -13,6 +13,7 @@ import Preventivatore from "./Preventivatore";
 import FAQ from "./FAQ";
 import { colonna } from "./campi";
 import type { DocumentoRichiesto } from "@/lib/contenuti";
+import { documentiDaChiedere } from "@/lib/documenti";
 
 /**
  * Il percorso completo di una camera: testata, offerta (se si arriva da un
@@ -113,7 +114,7 @@ export default function PercorsoVoucher(
             ) : (
             <ModuloOnboarding
               bando={bando}
-              documenti={documenti}
+              documenti={documentiDaChiedere(offerta?.documenti, documenti)}
               offerta={offerta}
               tokenOfferta={tokenOfferta}
               scelte={scelte}

@@ -3,6 +3,8 @@
    variabile letta **alla build**, e senza di essa i moduli ricadono sulla
    mail invece di inviare. Sta in un file solo perche' tre componenti diversi
    parlano con la stessa API. */
+import type { DocumentoRichiesto } from "./contenuti";
+
 export const VOUCHER_ENDPOINT = process.env.NEXT_PUBLIC_VOUCHER_ENDPOINT ?? "";
 export const OFFERTA_ENDPOINT = VOUCHER_ENDPOINT.replace("/voucher/onboarding", "/offerta");
 export const PREVENTIVO_ENDPOINT = VOUCHER_ENDPOINT.replace("/voucher/onboarding", "/preventivo");
@@ -18,6 +20,9 @@ export interface RigaOfferta {
 
 export interface Offerta {
   intestatario: string;
+  /* Cosa chiedere a questa impresa: lo decide chi prepara l'offerta, non una
+     lista uguale per tutti. Assente sulle offerte create prima. */
+  documenti?: DocumentoRichiesto[];
   referente: string | null;
   bando_slug?: string | null;
   righe: RigaOfferta[];
