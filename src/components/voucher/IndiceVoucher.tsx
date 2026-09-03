@@ -23,14 +23,18 @@ export default function IndiceVoucher({ bandi }: { bandi: Bando[] }) {
   /* Le offerte mandate ai clienti prima che esistessero le pagine per camera
      puntano tutte qui. Il token vale ancora: si chiede all'API di quale bando
      e' e si porta la persona sulla sua pagina, col token appresso. Senza
-     questo passaggio ogni link gia' in giro finirebbe su un elenco. */
+     questo passaggio ogni link gia' in giro finirebbe su un elenco.
+     Il bando lo dice l'offerta e basta: con due bandi online, ripiegare sul
+     primo pubblicato mostrerebbe i numeri della camera sbagliata. Un'offerta
+     che non lo dichiara (non dovrebbe esistere: l'API le ha sanate tutte)
+     lascia la persona sull'elenco invece di indovinare. */
   useEffect(() => {
     const token = new URLSearchParams(window.location.search).get("o");
     if (!token || !OFFERTA_ENDPOINT) return;
     fetch(`${OFFERTA_ENDPOINT}/${encodeURIComponent(token)}`)
       .then(res => (res.ok ? res.json() : null))
       .then(offerta => {
-        const slug = offerta?.bando_slug ?? bandi[0]?.slug;
+        const slug = offerta?.bando_slug;
         if (slug) window.location.replace(`/voucher-digitale/${slug}?o=${encodeURIComponent(token)}`);
       })
       .catch(() => {});
