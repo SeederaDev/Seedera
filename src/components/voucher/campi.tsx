@@ -14,7 +14,8 @@ export const BORDO_CAMPO = "#c9c9c9";
 
 export const MAX_FILE = 20 * 1024 * 1024;
 /* Il bando ammette solo PDF e scansioni. */
-export const ACCEPT = "application/pdf,image/jpeg,image/png";
+// Il .p7m e' la busta della firma digitale: il giro del firmato passa da qui.
+export const ACCEPT = "application/pdf,image/jpeg,image/png,.p7m,application/pkcs7-mime";
 
 /* Il resto del sito impagina in due colonne (etichetta a sinistra, testo a
    destra con `.request-col`): va bene per una pagina che si legge, non per un
