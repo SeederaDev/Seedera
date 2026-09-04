@@ -49,7 +49,9 @@ export interface VoceDaScaricare {
   id: string;
   nome: string;
   descrizione: string | null;
-  documento_id: string;
+  /* Piu' file sulla stessa voce ("Preventivi" ne puo' avere diversi):
+     ognuno ha il suo pulsante. */
+  documenti: string[];
 }
 
 export interface Pratica {

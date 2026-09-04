@@ -169,13 +169,18 @@ export default function PaginaPratica() {
                                   </span>
                                 )}
                               </span>
-                              <a
-                                href={`${PRATICA_ENDPOINT}/${encodeURIComponent(token ?? "")}/documento/${v.documento_id}`}
-                                className="font-medium tracking-wide uppercase transition-all duration-300 hover:bg-[var(--color-yellow)]"
-                                style={{ ...stilePulsante, padding: "8px 14px", display: "inline-block" }}
-                              >
-                                Scarica
-                              </a>
+                              <span className="flex flex-wrap" style={{ gap: "8px" }}>
+                                {v.documenti.map((docId, i) => (
+                                  <a
+                                    key={docId}
+                                    href={`${PRATICA_ENDPOINT}/${encodeURIComponent(token ?? "")}/documento/${docId}`}
+                                    className="font-medium tracking-wide uppercase transition-all duration-300 hover:bg-[var(--color-yellow)]"
+                                    style={{ ...stilePulsante, padding: "8px 14px", display: "inline-block" }}
+                                  >
+                                    {v.documenti.length > 1 ? `Scarica ${i + 1}` : "Scarica"}
+                                  </a>
+                                ))}
+                              </span>
                             </div>
                           </li>
                         ))}
