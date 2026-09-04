@@ -139,6 +139,50 @@ export default function PaginaPratica() {
                     {pratica.prossimo_passo}
                   </p>
 
+                  {/* Documenti gia' suoi, senza gesto richiesto: il preventivo
+                      firmato da noi, una scheda tecnica. Niente pulsanti di
+                      caricamento qui: si scarica e basta. */}
+                  {(pratica.da_scaricare ?? []).length > 0 && (
+                    <div style={{ marginTop: "48px" }}>
+                      <div style={{ marginBottom: "20px" }}><Etichetta>Da scaricare</Etichetta></div>
+                      <p className="leading-relaxed" style={{ color: "var(--color-black)", marginBottom: "16px" }}>
+                        Documenti che abbiamo preparato per te: scaricali e conservali.
+                      </p>
+                      <ul className="flex flex-col" style={{ gap: "12px" }}>
+                        {(pratica.da_scaricare ?? []).map(v => (
+                          <li
+                            key={v.id}
+                            style={{
+                              border: "1px solid rgba(0,0,0,.18)",
+                              borderRadius: "8px",
+                              padding: "14px 16px",
+                              color: "var(--color-black)",
+                              backgroundColor: "#fff",
+                            }}
+                          >
+                            <div className="flex flex-wrap items-center justify-between" style={{ gap: "10px" }}>
+                              <span>
+                                <span className="font-medium">{v.nome}</span>
+                                {v.descrizione && (
+                                  <span className="block leading-relaxed" style={{ color: GRIGIO_TESTO, fontSize: "14px", marginTop: "2px" }}>
+                                    {v.descrizione}
+                                  </span>
+                                )}
+                              </span>
+                              <a
+                                href={`${PRATICA_ENDPOINT}/${encodeURIComponent(token ?? "")}/documento/${v.documento_id}`}
+                                className="font-medium tracking-wide uppercase transition-all duration-300 hover:bg-[var(--color-yellow)]"
+                                style={{ ...stilePulsante, padding: "8px 14px", display: "inline-block" }}
+                              >
+                                Scarica
+                              </a>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
                   {/* Prima di tutto il resto: sono documenti gia' pronti, che
                       aspettano solo la sua firma. Metterli sotto "quello che
                       serve a te" li confonderebbe con le carte da procurarsi,

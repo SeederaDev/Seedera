@@ -42,6 +42,16 @@ export function segnoVoce(stato: VocePratica["stato"], si_carica: boolean) {
   return { etichetta: si_carica ? "Da mandare" : "Da confermare", tono: "aperto" as const };
 }
 
+/* Un documento che abbiamo preparato e che e' suo da tenere, senza giro di
+   firma: il preventivo firmato da noi, una scheda tecnica. Arriva solo se un
+   file c'e' davvero: nessun pulsante sul vuoto. */
+export interface VoceDaScaricare {
+  id: string;
+  nome: string;
+  descrizione: string | null;
+  documento_id: string;
+}
+
 export interface Pratica {
   impresa: string | null;
   camera: string | null;
@@ -52,6 +62,9 @@ export interface Pratica {
   prossimo_passo: string;
   serve_a_te: VocePratica[];
   da_firmare: VoceDaFirmare[];
+  /* Facoltativo: un'API piu' vecchia non lo manda, e la pagina non deve
+     rompersi per questo. */
+  da_scaricare?: VoceDaScaricare[];
   stiamo_facendo: string[];
   fatte: number;
 }
