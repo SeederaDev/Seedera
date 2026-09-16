@@ -10,29 +10,31 @@ gsap.registerPlugin(ScrollTrigger);
 interface Principio {
   title: string;
   description: string;
-  /* Le immagini non sono ancora state fornite: nel Figma i riquadri sono
-     placeholder grigi. Quando arrivano si riempie questo campo. */
-  image?: string;
+  image: string;
 }
 
 const PRINCIPI: Principio[] = [
   {
     title: "La domanda prima della risposta",
+    image: "/images/principi/domanda.png",
     description:
       "Una soluzione sbagliata quasi sempre risponde benissimo a una domanda sbagliata. Per questo si comincia da lì.",
   },
   {
     title: "Sistemi che restano",
+    image: "/images/principi/sistemi.png",
     description:
       "Quello che consegniamo deve funzionare anche il giorno dopo che siamo usciti, senza di noi.",
   },
   {
     title: "Operatori, non consulenti",
+    image: "/images/principi/operatori.png",
     description:
       "Stiamo dentro i processi e rispondiamo agli stessi numeri delle persone che ci lavorano.",
   },
   {
     title: "Franchezza operativa",
+    image: "/images/principi/franchezza.png",
     description:
       "Se stai chiedendo la cosa sbagliata te lo diciamo subito. Costa una conversazione scomoda e fa risparmiare mesi.",
   },
@@ -84,14 +86,14 @@ export default function Principi() {
                 className="w-full rounded-[5px] overflow-hidden bg-[#F2F2F2]"
                 style={{ aspectRatio: "1 / 1" }}
               >
-                {p.image ? (
-                  <img
-                    src={p.image}
-                    alt=""
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                ) : null}
+                {/* Icone a sfondo trasparente, 225px: nel design occupano
+                    circa meta' del riquadro grigio, non lo riempiono. */}
+                <img
+                  src={p.image}
+                  alt=""
+                  className="w-full h-full object-contain p-[24%]"
+                  loading="lazy"
+                />
               </div>
 
               {/* 20px, non leading-normal (24): nel design il titolo e' alto
