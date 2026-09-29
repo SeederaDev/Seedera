@@ -373,18 +373,6 @@ body {
   opacity: 0.6;
 }
 
-/* ---- Griglia delle persone ----
-   Nel design (frame "Chi siamo") le schede non riempiono la griglia: stanno
-   su tre colonne lasciando delle celle vuote, e la scacchiera e' voluta.
-   Riga e colonna arrivano dal dato della persona; sotto md la griglia
-   torna una colonna sola e il posizionamento non deve valere piu'. */
-@media (min-width: 768px) {
-  .persone-griglia .persona-card {
-    grid-column: var(--col);
-    grid-row: var(--riga);
-  }
-}
-
 /* ---- Caricamento documenti (voucher) ----
    Il pulsante nativo del campo file arriva col grigio di sistema, che qui
    stona e su alcuni browser resta poco leggibile. Lo si porta al bordo e al
@@ -466,3 +454,14 @@ body {
 /* Le tabelle non devono spingere la pagina in orizzontale. */
 .corpo-articolo table { width: 100%; border-collapse: collapse; margin: 0 0 1.35em; font-size: 16px; }
 .corpo-articolo th, .corpo-articolo td { text-align: left; padding: 0.5em 0.7em; border-bottom: 1px solid #e4e4e4; }
+
+/* Pagina /persone: la bio chiusa e' ritagliata a zero dal lato della foto, e
+   aprendosi si srotola verso la casella libera. Il lato cambia fra la griglia
+   a 2 e quella a 4 colonne, per questo sta in due variabili; aperta, il
+   ritaglio lo sovrascrive lo stile in linea. */
+@media (min-width: 768px) {
+  .persona-bio { clip-path: var(--chiuso2); }
+}
+@media (min-width: 1280px) {
+  .persona-bio { clip-path: var(--chiuso4); }
+}

@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import type { PersonaPubblica as Persona } from "@/lib/contenuti";
+import { posizione } from "@/lib/persone-griglia";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -37,24 +38,44 @@ function Freccia() {
   );
 }
 
-function SchedaPersona({
-  persona,
-  aperta,
-  onToggle,
-}: {
-  persona: Persona;
+/* Le coordinate si passano come variabili CSS e le leggono le classi dei due
+   punti di rottura: sotto i 768px la griglia torna una colonna sola e la bio
+   segue la foto nel flusso. */
+function coordinate(i: number) {
+  const due = posizione(i, 2);
+  const quattro = posizione(i, 4);
+  return {
+    due,
+    quattro,
+    stile: {
+      "--r2": due.riga, "--c2": due.colonna, "--b2": due.bio,
+      "--r4": quattro.riga, "--c4": quattro.colonna, "--b4": quattro.bio,
+    } as React.CSSProperties,
+  };
+}
+
+interface Comandi {
   aperta: boolean;
   onToggle: () => void;
-}) {
+  onEntra: () => void;
+  onEsce: () => void;
+}
+
+function SchedaPersona({
+  persona,
+  indice,
+  aperta,
+  onToggle,
+  onEntra,
+  onEsce,
+}: { persona: Persona; indice: number } & Comandi) {
+  const { stile } = coordinate(indice);
   return (
     <article
-      className="persona-card"
-      style={
-        {
-          "--col": persona.colonna,
-          "--riga": persona.riga,
-        } as React.CSSProperties
-      }
+      className="persona-card md:[grid-row:var(--r2)] md:[grid-column:var(--c2)] xl:[grid-row:var(--r4)] xl:[grid-column:var(--c4)]"
+      style={stile}
+      onPointerEnter={(e) => e.pointerType === "mouse" && onEntra()}
+      onPointerLeave={(e) => e.pointerType === "mouse" && onEsce()}
     >
       {/* Bottone e non div: la bio si apre col passaggio del mouse, ma da
           telefono il mouse non c'e' e senza un comando vero la scheda
@@ -63,68 +84,139 @@ function SchedaPersona({
         type="button"
         onClick={onToggle}
         aria-expanded={aperta}
-        className="persona-trigger group block w-full text-left cursor-pointer"
+        aria-controls={`bio-${persona.slug}`}
+        className="group block w-full text-left cursor-pointer"
       >
         <div
           className="relative overflow-hidden rounded-[5px] bg-[#D9D9D9]"
           style={{ aspectRatio: "432 / 539" }}
         >
-          {/* Nel design la foto e' in bianco e nero e prende colore solo
-              quando la scheda si apre. Le foto non sono ancora arrivate:
-              finche' manca, resta il riquadro grigio del Figma. */}
+          {/* Finche' la foto manca resta il riquadro grigio del Figma. */}
           {persona.foto ? (
             <img
               src={persona.foto}
               alt={persona.nome}
               loading="lazy"
-              className="absolute inset-0 w-full h-full object-cover grayscale transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+              className="absolute inset-0 w-full h-full object-cover grayscale transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
             />
           ) : null}
-
-          {/* Pannello giallo: nome, ruolo e bio sopra la foto. */}
+          {/* Aperta, la foto si tinge del giallo del marchio: nel Figma e' un
+              rettangolo in multiply sopra lo scatto in bianco e nero. */}
           <div
-            className={`absolute inset-0 bg-primary flex flex-col transition-opacity duration-400 ease-out group-hover:opacity-100 ${
+            aria-hidden="true"
+            className={`absolute inset-0 bg-primary mix-blend-multiply transition-opacity duration-400 ease-out motion-reduce:transition-none ${
               aperta ? "opacity-100" : "opacity-0"
             }`}
-            style={{ padding: "24px" }}
-          >
-            <h3 className="text-black font-normal text-[25px] leading-[32px]">
-              {persona.nome}
-            </h3>
-            <p className="text-black text-[16px] leading-[22px] mt-[4px]">
-              {persona.ruolo}
-            </p>
-            <p className="text-black text-[16px] leading-[22px] mt-[4px] max-w-[385px]">
-              {persona.bio}
-            </p>
-          </div>
+          />
         </div>
 
-        {/* Sotto la foto nome e ruolo, che spariscono quando il pannello e'
-            aperto: li' il nome c'e' gia', ripeterlo sarebbe un errore. */}
-        <div
-          className={`transition-opacity duration-300 ease-out group-hover:opacity-0 ${
-            aperta ? "opacity-0" : "opacity-100"
+        <h3 className="text-black font-normal text-[25px] leading-[32px] mt-[12px]">
+          {persona.nome}
+        </h3>
+        <p className="text-middle-grey text-[16px] leading-[22px] mt-[4px]">
+          {persona.ruolo}
+        </p>
+        {/* Aperta, la freccia si gira: e' il comando per richiudere. */}
+        <span
+          className={`inline-flex mt-[12px] transition-transform duration-400 ease-out motion-reduce:transition-none ${
+            aperta ? "rotate-180" : ""
           }`}
         >
-          <h3 className="text-black font-normal text-[25px] leading-[32px] mt-[12px]">
-            {persona.nome}
-          </h3>
-          <p className="text-middle-grey text-[16px] leading-[22px] mt-[4px]">
-            {persona.ruolo}
-          </p>
-          <span className="inline-flex mt-[12px]">
-            <Freccia />
-          </span>
-        </div>
+          <Freccia />
+        </span>
       </button>
     </article>
+  );
+}
+
+/* La bio sta nella casella libera accanto alla foto ed entra dal lato della
+   foto, come un foglio che scorre fuori da sotto lo scatto. Resta nel DOM
+   anche chiusa, per animare l'uscita, ma fuori dal fuoco e dalla lettura.
+   L'altezza della foto e' un minimo, non un tetto: una bio lunga allunga il
+   pannello invece di finire tagliata. */
+function PannelloBio({
+  persona,
+  indice,
+  aperta,
+  onToggle,
+  onEntra,
+  onEsce,
+}: { persona: Persona; indice: number } & Comandi) {
+  const { due, quattro, stile } = coordinate(indice);
+  const chiuso = (lato: "destra" | "sinistra") =>
+    lato === "destra" ? "inset(0 100% 0 0 round 5px)" : "inset(0 0 0 100% round 5px)";
+  return (
+    <div
+      id={`bio-${persona.slug}`}
+      role="region"
+      aria-label={`Chi e' ${persona.nome}`}
+      inert={!aperta}
+      className={`persona-bio relative bg-primary rounded-[5px] p-[20px] flex flex-col self-start transition-[clip-path,opacity] duration-400 ease-out motion-reduce:transition-none md:aspect-[432/539] md:[grid-row:var(--r2)] md:[grid-column:var(--b2)] xl:[grid-row:var(--r4)] xl:[grid-column:var(--b4)] ${
+        aperta ? "opacity-100" : "max-md:hidden opacity-0"
+      }`}
+      style={
+        {
+          ...stile,
+          "--chiuso2": chiuso(due.lato),
+          "--chiuso4": chiuso(quattro.lato),
+          clipPath: aperta ? "inset(0 0 0 0 round 5px)" : undefined,
+        } as React.CSSProperties
+      }
+      onPointerEnter={(e) => e.pointerType === "mouse" && onEntra()}
+      onPointerLeave={(e) => e.pointerType === "mouse" && onEsce()}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <h3 className="text-black font-normal text-[20px] leading-[30px]">
+          {persona.nome}
+        </h3>
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label={`Chiudi la scheda di ${persona.nome}`}
+          className="shrink-0 -mr-[4px] -mt-[2px] p-[4px] cursor-pointer text-black"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M2 2l20 20M22 2L2 22" stroke="currentColor" strokeWidth="1.5" />
+          </svg>
+        </button>
+      </div>
+      <p className="text-black text-[15px] leading-[22px] mt-[14px]">
+        {persona.bio}
+      </p>
+    </div>
   );
 }
 
 export default function PaginaPersone({ persone }: { persone: Persona[] }) {
   const mainRef = useRef<HTMLElement>(null);
   const [aperta, setAperta] = useState<string | null>(null);
+
+  /* Dalla foto al pannello il mouse attraversa lo spazio fra le due caselle:
+     chiudere subito all'uscita farebbe sparire la bio proprio mentre ci si
+     sta andando. Si aspetta un attimo, e rientrare annulla la chiusura. */
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const annulla = () => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
+  };
+  const comandi = (slug: string): Comandi => ({
+    aperta: aperta === slug,
+    onToggle: () => {
+      annulla();
+      setAperta((cur) => (cur === slug ? null : slug));
+    },
+    onEntra: () => {
+      annulla();
+      setAperta(slug);
+    },
+    onEsce: () => {
+      annulla();
+      timer.current = setTimeout(
+        () => setAperta((cur) => (cur === slug ? null : cur)),
+        180,
+      );
+    },
+  });
 
   useGSAP(
     () => {
@@ -226,21 +318,14 @@ export default function PaginaPersone({ persone }: { persone: Persona[] }) {
             </div>
           </div>
 
-          {/* ── Griglia: tre colonne con le celle vuote del design ── */}
+          {/* ── Griglia: scacchiera, ogni foto con la sua casella libera ── */}
           <div className="container-content pb-24 md:pb-40">
-            {/* gap-y 25 e non 70: nel design il passo fra due righe della
-                stessa colonna e' 679 (880 → 1559) e dentro ci sta anche la
-                freccia. Con 70 la griglia scendeva di 50px a riga. */}
-            <div className="persone-griglia grid grid-cols-1 md:grid-cols-3 gap-x-[24px] gap-y-[32px] md:gap-y-[25px]">
-              {persone.map((p) => (
-                <SchedaPersona
-                  key={p.slug}
-                  persona={p}
-                  aperta={aperta === p.slug}
-                  onToggle={() =>
-                    setAperta((cur) => (cur === p.slug ? null : p.slug))
-                  }
-                />
+            <div className="persone-griglia grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-[24px] gap-y-[32px] md:gap-y-[25px]">
+              {persone.map((p, i) => (
+                <Fragment key={p.slug}>
+                  <SchedaPersona persona={p} indice={i} {...comandi(p.slug)} />
+                  <PannelloBio persona={p} indice={i} {...comandi(p.slug)} />
+                </Fragment>
               ))}
             </div>
           </div>
