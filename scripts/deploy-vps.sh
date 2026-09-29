@@ -45,15 +45,29 @@ echo "==> riavvio"
 # dell'SSH: terminarlo lo fa ripartire da solo col codice nuovo. Riavviarlo per
 # davvero vorrebbe root, che qui non c'e'.
 #
-# Si cerca "next-server" e non "next start": dopo l'avvio il processo si
-# rinomina, e il pattern sbagliato non trova niente, lo script dichiara il
-# riavvio riuscito e resta online il codice vecchio. `-u` limita ai propri
-# processi: sulla VPS ci sono altri Next di altri domini.
-PID=$(pgrep -u "$(id -u)" -f "next-server" | head -1)
-[ -n "$PID" ] && kill "$PID"
-for _ in $(seq 1 12); do
+# Il processo si cerca per la **porta**, non per nome. Col nome si sbagliava
+# due volte: dopo l'avvio `next start` si rinomina `next-server`, e lo stesso
+# utente fa girare anche i Next di altri domini (Riardo, Quinte), tutti
+# `next-server`. Il 29/09/2026 `pgrep ... | head -1` ha terminato uno di quelli,
+# il sito e' rimasto sulla build vecchia con i file JavaScript della nuova, e
+# ogni pagina dava "Application error".
+pid_sulla_porta() {
+  ss -ltnpH "sport = :$PORTA" 2>/dev/null | grep -o 'pid=[0-9]*' | head -1 | cut -d= -f2
+}
+PID=$(pid_sulla_porta)
+if [ -z "$PID" ]; then
+  echo "   nessun processo sulla $PORTA: il servizio e' gia' fermo?"
+else
+  kill "$PID"
+fi
+# Ripartito vuol dire: sulla porta c'e' un processo **diverso** e risponde.
+# Controllare solo che risponda non basta, il vecchio risponde finche' muore.
+for _ in $(seq 1 15); do
   sleep 2
-  if curl -fsS -o /dev/null "http://127.0.0.1:$PORTA/"; then echo "   sito ripartito"; exit 0; fi
+  NUOVO=$(pid_sulla_porta)
+  if [ -n "$NUOVO" ] && [ "$NUOVO" != "$PID" ] && curl -fsS -o /dev/null "http://127.0.0.1:$PORTA/"; then
+    echo "   sito ripartito (pid $PID -> $NUOVO)"; exit 0
+  fi
 done
 echo "   il sito non risponde sulla $PORTA dopo il riavvio: systemctl status seedera-sito"
 exit 1
