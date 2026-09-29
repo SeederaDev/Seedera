@@ -51,8 +51,11 @@ echo "==> riavvio"
 # `next-server`. Il 29/09/2026 `pgrep ... | head -1` ha terminato uno di quelli,
 # il sito e' rimasto sulla build vecchia con i file JavaScript della nuova, e
 # ogni pagina dava "Application error".
+# `|| true`: nell'attimo fra la morte del vecchio e l'avvio del nuovo sulla
+# porta non c'e' nessuno, grep non trova niente e con `pipefail` lo script
+# moriva in silenzio, senza dire ne' "ripartito" ne' "non risponde".
 pid_sulla_porta() {
-  ss -ltnpH "sport = :$PORTA" 2>/dev/null | grep -o 'pid=[0-9]*' | head -1 | cut -d= -f2
+  { ss -ltnpH "sport = :$PORTA" 2>/dev/null | grep -o 'pid=[0-9]*' | head -1 | cut -d= -f2; } || true
 }
 PID=$(pid_sulla_porta)
 if [ -z "$PID" ]; then
