@@ -172,7 +172,7 @@ function PannelloBio({
           </svg>
         </button>
       </div>
-      <p className="text-black text-[15px] leading-[22px] mt-[14px]">
+      <p className="text-black text-[15px] leading-[22px] xl:text-[14px] xl:leading-[20px] mt-[14px]">
         {persona.bio}
       </p>
     </div>
