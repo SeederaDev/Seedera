@@ -97,17 +97,9 @@ function SchedaPersona({
               src={persona.foto}
               alt={persona.nome}
               loading="lazy"
-              className="absolute inset-0 w-full h-full object-cover grayscale transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
             />
           ) : null}
-          {/* Aperta, la foto si tinge del giallo del marchio: nel Figma e' un
-              rettangolo in multiply sopra lo scatto in bianco e nero. */}
-          <div
-            aria-hidden="true"
-            className={`absolute inset-0 bg-primary mix-blend-multiply transition-opacity duration-400 ease-out motion-reduce:transition-none ${
-              aperta ? "opacity-100" : "opacity-0"
-            }`}
-          />
         </div>
 
         <h3 className="text-black font-normal text-[25px] leading-[32px] mt-[12px]">

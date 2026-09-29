@@ -11,9 +11,11 @@ describe("posizione in scacchiera", () => {
     ]);
   });
 
-  it("la bio va nella casella libera a destra, e a sinistra solo sull'ultima colonna", () => {
-    expect([0, 1, 2, 3].map(i => posizione(i, 4).bio)).toEqual([2, 4, 3, 3]);
-    expect([0, 1, 2, 3].map(i => posizione(i, 4).lato)).toEqual(["destra", "destra", "destra", "sinistra"]);
+  it("su 4 colonne la bio si apre a destra sulle righe dispari e a sinistra sulle pari", () => {
+    expect([0, 1, 2, 3, 4, 5].map(i => posizione(i, 4).bio)).toEqual([2, 4, 1, 3, 2, 4]);
+    expect([0, 1, 2, 3, 4, 5].map(i => posizione(i, 4).lato)).toEqual([
+      "destra", "destra", "sinistra", "sinistra", "destra", "destra",
+    ]);
   });
 
   it("la casella della bio e' sempre libera: mai sopra un'altra foto della stessa riga", () => {
