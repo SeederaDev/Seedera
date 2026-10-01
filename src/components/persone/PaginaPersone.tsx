@@ -72,7 +72,7 @@ function SchedaPersona({
   const { stile } = coordinate(indice);
   return (
     <article
-      className="persona-card md:[grid-row:var(--r2)] md:[grid-column:var(--c2)] xl:[grid-row:var(--r4)] xl:[grid-column:var(--c4)]"
+      className="persona-card md:[grid-row:var(--r2)] md:[grid-column:var(--c2)] min-[90rem]:[grid-row:var(--r4)] min-[90rem]:[grid-column:var(--c4)]"
       style={stile}
       onPointerEnter={(e) => e.pointerType === "mouse" && onEntra()}
       onPointerLeave={(e) => e.pointerType === "mouse" && onEsce()}
@@ -124,8 +124,12 @@ function SchedaPersona({
 /* La bio sta nella casella libera accanto alla foto ed entra dal lato della
    foto, come un foglio che scorre fuori da sotto lo scatto. Resta nel DOM
    anche chiusa, per animare l'uscita, ma fuori dal fuoco e dalla lettura.
-   L'altezza della foto e' un minimo, non un tetto: una bio lunga allunga il
-   pannello invece di finire tagliata. */
+
+   La casella nella griglia e' alta quanto la foto e non cresce: il pannello ci
+   sta dentro in posizione assoluta, e se la bio e' piu' lunga della foto scende
+   in primo piano sopra lo spazio sotto. Prima allungava la riga, e aprire una
+   bio lunga spostava tutta la pagina. Sotto i 768px la bio sta nel flusso,
+   sotto la foto. */
 function PannelloBio({
   persona,
   indice,
@@ -139,42 +143,48 @@ function PannelloBio({
     lato === "destra" ? "inset(0 100% 0 0 round 5px)" : "inset(0 0 0 100% round 5px)";
   return (
     <div
-      id={`bio-${persona.slug}`}
-      role="region"
-      aria-label={`Chi e' ${persona.nome}`}
-      inert={!aperta}
-      className={`persona-bio relative bg-primary rounded-[5px] p-[20px] flex flex-col self-start transition-[clip-path,opacity] duration-400 ease-out motion-reduce:transition-none md:aspect-[432/539] md:[grid-row:var(--r2)] md:[grid-column:var(--b2)] xl:[grid-row:var(--r4)] xl:[grid-column:var(--b4)] ${
-        aperta ? "opacity-100" : "max-md:hidden opacity-0"
+      className={`relative self-start md:aspect-[432/539] md:[grid-row:var(--r2)] md:[grid-column:var(--b2)] min-[90rem]:[grid-row:var(--r4)] min-[90rem]:[grid-column:var(--b4)] ${
+        aperta ? "z-10" : "max-md:hidden"
       }`}
-      style={
-        {
-          ...stile,
-          "--chiuso2": chiuso(due.lato),
-          "--chiuso4": chiuso(quattro.lato),
-          clipPath: aperta ? "inset(0 0 0 0 round 5px)" : undefined,
-        } as React.CSSProperties
-      }
-      onPointerEnter={(e) => e.pointerType === "mouse" && onEntra()}
-      onPointerLeave={(e) => e.pointerType === "mouse" && onEsce()}
+      style={stile}
     >
-      <div className="flex items-start justify-between gap-4">
-        <h3 className="text-black font-normal text-[20px] leading-[30px]">
-          {persona.nome}
-        </h3>
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-label={`Chiudi la scheda di ${persona.nome}`}
-          className="shrink-0 -mr-[4px] -mt-[2px] p-[4px] cursor-pointer text-black"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M2 2l20 20M22 2L2 22" stroke="currentColor" strokeWidth="1.5" />
-          </svg>
-        </button>
+      <div
+        id={`bio-${persona.slug}`}
+        role="region"
+        aria-label={`Chi e' ${persona.nome}`}
+        inert={!aperta}
+        className={`persona-bio bg-primary rounded-[5px] p-[20px] flex flex-col transition-[clip-path,opacity] duration-400 ease-out motion-reduce:transition-none md:absolute md:inset-x-0 md:top-0 md:min-h-full ${
+          aperta ? "opacity-100" : "opacity-0"
+        }`}
+        style={
+          {
+            "--chiuso2": chiuso(due.lato),
+            "--chiuso4": chiuso(quattro.lato),
+            clipPath: aperta ? "inset(0 0 0 0 round 5px)" : undefined,
+          } as React.CSSProperties
+        }
+        onPointerEnter={(e) => e.pointerType === "mouse" && onEntra()}
+        onPointerLeave={(e) => e.pointerType === "mouse" && onEsce()}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <h3 className="text-black font-normal text-[20px] leading-[30px]">
+            {persona.nome}
+          </h3>
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label={`Chiudi la scheda di ${persona.nome}`}
+            className="shrink-0 -mr-[4px] -mt-[2px] p-[4px] cursor-pointer text-black"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M2 2l20 20M22 2L2 22" stroke="currentColor" strokeWidth="1.5" />
+            </svg>
+          </button>
+        </div>
+        <p className="text-black text-[15px] leading-[22px] min-[90rem]:text-[14px] min-[90rem]:leading-[20px] mt-[14px]">
+          {persona.bio}
+        </p>
       </div>
-      <p className="text-black text-[15px] leading-[22px] xl:text-[14px] xl:leading-[20px] mt-[14px]">
-        {persona.bio}
-      </p>
     </div>
   );
 }
@@ -312,7 +322,7 @@ export default function PaginaPersone({ persone }: { persone: Persona[] }) {
 
           {/* ── Griglia: scacchiera, ogni foto con la sua casella libera ── */}
           <div className="container-content pb-24 md:pb-40">
-            <div className="persone-griglia grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-[24px] gap-y-[32px] md:gap-y-[25px]">
+            <div className="persone-griglia grid grid-cols-1 md:grid-cols-2 min-[90rem]:grid-cols-4 gap-x-[24px] gap-y-[32px] md:gap-y-[25px]">
               {persone.map((p, i) => (
                 <Fragment key={p.slug}>
                   <SchedaPersona persona={p} indice={i} {...comandi(p.slug)} />
