@@ -1,11 +1,12 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import type { Progetto } from "@/lib/contenuti";
+import GrigliaProgetti, { CursoreProgetti } from "@/components/portfolio/GrigliaProgetti";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,209 +22,23 @@ const IN_HOME = [
   "replase",
   "quinte-parallele",
   "il-trust-in-italia",
+  "piano-city-napoli",
+  "brassicolo",
 ];
+
+/* Sei: due file piene sulle tre colonne. Quando quinte-parallele entra, scala
+   fuori l'ultimo dell'elenco, non si rompe la fila. */
+const QUANTI_IN_HOME = 6;
 
 /** La vetrina: gli slug scelti, nell'ordine scelto, saltando quelli che in
  *  banca dati non ci sono (ancora). */
 const vetrina = (progetti: Progetto[]) =>
-  IN_HOME.map((slug) => progetti.find((p) => p.slug === slug)).filter(
-    (p) => p !== undefined,
-  );
+  IN_HOME.map((slug) => progetti.find((p) => p.slug === slug))
+    .filter((p) => p !== undefined)
+    .slice(0, QUANTI_IN_HOME);
 
 const INTRO_TEXT =
   "Di ogni progetto qui sotto si vede il risultato. La parte che conta però viene prima: il problema che c'era, e come ci siamo accorti di qual era davvero.";
-
-/* ── Rolling text effect on hover (CSS translateY approach) ── */
-function RollingText({ text }: { text: string }) {
-  const letters = text.split("");
-
-  return (
-    <span className="rolling-text-wrap cursor-pointer font-medium">
-      <span className="rolling-text-row" aria-hidden="true">
-        {letters.map((char, i) => (
-          <span
-            key={i}
-            className="rolling-text-char"
-            style={{ transitionDelay: `${i * 15}ms` }}
-          >
-            {char === " " ? "\u00A0" : char}
-          </span>
-        ))}
-      </span>
-      <span className="rolling-text-row">
-        {letters.map((char, i) => (
-          <span
-            key={i}
-            className="rolling-text-char"
-            style={{ transitionDelay: `${i * 15}ms` }}
-          >
-            {char === " " ? "\u00A0" : char}
-          </span>
-        ))}
-      </span>
-    </span>
-  );
-}
-
-/* ── Custom cursor component ── */
-function CustomCursor() {
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const mousePos = useRef({ x: 0, y: 0 });
-  const isVisible = useRef(false);
-
-  useEffect(() => {
-    const cursor = cursorRef.current;
-    if (!cursor) return;
-
-    // Start hidden
-    gsap.set(cursor, { opacity: 0, scale: 0.5, xPercent: -50, yPercent: -50 });
-
-    const onMouseMove = (e: MouseEvent) => {
-      mousePos.current = { x: e.clientX, y: e.clientY };
-      // Only move smoothly while visible; otherwise let gsap.set in onShow handle position
-      if (isVisible.current) {
-        gsap.to(cursor, {
-          left: e.clientX,
-          top: e.clientY,
-          duration: 0.15,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
-      }
-    };
-
-    const onShow = () => {
-      isVisible.current = true;
-      // Snap position instantly, start from scale 0, then grow
-      gsap.set(cursor, {
-        left: mousePos.current.x,
-        top: mousePos.current.y,
-        scale: 0,
-        opacity: 0,
-      });
-      gsap.to(cursor, {
-        opacity: 1,
-        scale: 1,
-        duration: 0.35,
-        ease: "back.out(1.4)",
-        overwrite: true,
-      });
-    };
-
-    const onHide = () => {
-      isVisible.current = false;
-      gsap.to(cursor, {
-        opacity: 0,
-        scale: 0,
-        duration: 0.25,
-        ease: "power2.in",
-        overwrite: true,
-      });
-    };
-
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("project-cursor-show", onShow);
-    window.addEventListener("project-cursor-hide", onHide);
-
-    return () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("project-cursor-show", onShow);
-      window.removeEventListener("project-cursor-hide", onHide);
-    };
-  }, []);
-
-  return (
-    <div
-      ref={cursorRef}
-      className="fixed pointer-events-none z-50"
-      style={{ top: 0, left: 0, opacity: 0 }}
-    >
-      <div
-        className="flex items-center justify-center rounded-full text-black font-bold text-center leading-tight uppercase"
-        style={{
-          width: "125px",
-          height: "125px",
-          fontSize: "14px",
-          backgroundColor: "#CDFD51",
-        }}
-      >
-        Scopri
-        <br />
-        di più
-      </div>
-    </div>
-  );
-}
-
-/* ── Single project card ── */
-function ProjectCard({ project, index }: { project: Progetto; index: number }) {
-  const cardRef = useRef<HTMLElement>(null);
-
-  const handleImageEnter = () => {
-    window.dispatchEvent(new CustomEvent("project-cursor-show"));
-  };
-
-  const handleImageLeave = () => {
-    window.dispatchEvent(new CustomEvent("project-cursor-hide"));
-  };
-
-  return (
-    <Link href={`/portfolio/${project.slug}`} className="block">
-      <article
-        ref={cardRef}
-        className={`project-card ${index % 2 === 1 ? "md:mt-16 lg:mt-24" : ""}`}
-      >
-        {/* Image wrapper with overflow hidden for parallax + zoom */}
-        <div
-          className="relative overflow-hidden rounded-[10px] cursor-none group [transform:translateZ(0)]"
-          style={{ aspectRatio: "4 / 3" }}
-          onMouseEnter={handleImageEnter}
-          onMouseLeave={handleImageLeave}
-        >
-          <div className="absolute inset-0 w-full h-full transition-transform duration-700 ease-out scale-[1.1] group-hover:scale-100 will-change-transform">
-            <img
-              src={project.copertina}
-              alt={project.cliente}
-              className="project-img absolute inset-[-10%] w-[120%] h-[120%] object-cover max-w-none"
-            />
-          </div>
-        </div>
-
-        {/* Tags */}
-        <div className="mt-[15px] flex flex-wrap gap-x-2">
-          {project.tag.map((tag, i) => (
-            <span
-              key={i}
-              className="uppercase tracking-wide"
-              style={{
-                fontSize: "var(--font-p)",
-                color: "var(--color-middle-grey)",
-              }}
-            >
-              {tag}
-              {i < project.tag.length - 1 && (
-                <span
-                  className="ml-2"
-                  style={{ color: "var(--color-middle-grey)" }}
-                >
-                  ·
-                </span>
-              )}
-            </span>
-          ))}
-        </div>
-
-        {/* Client name with rolling text effect */}
-        <h3
-          className="uppercase tracking-wide"
-          style={{ fontSize: "var(--font-h4)", color: "var(--color-black)" }}
-        >
-          <RollingText text={project.cliente} />
-        </h3>
-      </article>
-    </Link>
-  );
-}
 
 /* ── Main Projects section ── */
 export default function Projects({ progetti }: { progetti: Progetto[] }) {
@@ -261,25 +76,6 @@ export default function Projects({ progetti }: { progetti: Progetto[] }) {
         });
       }
 
-      // Parallax on project images
-      const images = section.querySelectorAll<HTMLElement>(".project-img");
-      images.forEach((img) => {
-        gsap.fromTo(
-          img,
-          { yPercent: -5 },
-          {
-            yPercent: 5,
-            ease: "none",
-            scrollTrigger: {
-              trigger: img.parentElement,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: true,
-            },
-          },
-        );
-      });
-
       // Staggered card reveal
       const cards = section.querySelectorAll<HTMLElement>(".project-card");
       cards.forEach((card) => {
@@ -306,7 +102,7 @@ export default function Projects({ progetti }: { progetti: Progetto[] }) {
       className="relative bg-white z-10"
       aria-label="Portfolio"
     >
-      <CustomCursor />
+      <CursoreProgetti />
 
       {/* Intro area */}
       {/* pt ridotto da mobile: sopra chiude la fascia gialla scorrevole e i 96px
@@ -363,13 +159,9 @@ export default function Projects({ progetti }: { progetti: Progetto[] }) {
         </div>
       </div>
 
-      {/* Projects grid – staggered 2 columns */}
+      {/* Progetti – tre colonne a gradini */}
       <div className="container-content pb-24 md:pb-40">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[25px] ">
-          {HOMEPAGE_PROJECTS.map((project, i) => (
-            <ProjectCard key={i} project={project} index={i} />
-          ))}
-        </div>
+        <GrigliaProgetti progetti={HOMEPAGE_PROJECTS} />
 
         {progetti.length > HOMEPAGE_PROJECTS.length ? (
           <div className="mt-12 md:mt-16 flex justify-center">

@@ -14,3 +14,13 @@ export function isVideo(src: string): boolean {
 export function categorie(progetti: { categoria: string }[]): string[] {
   return ["Tutti", ...Array.from(new Set(progetti.map((p) => p.categoria).filter(Boolean)))];
 }
+
+/** La griglia a gradini e' fatta di colonne, non di righe: ogni colonna parte
+ *  piu' in basso della precedente. I progetti si distribuiscono in ordine di
+ *  lettura (1, 2, 3 sulla prima fila, poi di nuovo dalla prima colonna), cosi'
+ *  l'ordine scelto nel pannello resta quello che si legge. */
+export function inColonne<T>(elementi: T[], colonne: number): T[][] {
+  const out: T[][] = Array.from({ length: colonne }, () => []);
+  elementi.forEach((e, i) => out[i % colonne].push(e));
+  return out;
+}
