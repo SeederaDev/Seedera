@@ -12,7 +12,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 const FOOTER_LINKS = [
-  { label: "Metodo", href: "/#about" },
+  { label: "Metodo", href: "/#principi" },
   { label: "Capacità", href: "/#services" },
   { label: "Portfolio", href: "/portfolio" },
   /* pagina persone nascosta: la voce torna qui quando si rimette online */

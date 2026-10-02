@@ -8,7 +8,7 @@ import { useLenis } from "lenis/react";
 import gsap from "gsap";
 
 const NAV_ITEMS = [
-  { label: "Metodo", href: "/#about" },
+  { label: "Metodo", href: "/#principi" },
   { label: "Capacità", href: "/#services" },
   { label: "Portfolio", href: "/#portfolio" },
   { label: "Progetti", href: "/#studio" },
