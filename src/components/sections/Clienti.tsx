@@ -8,26 +8,31 @@ interface Cliente {
      quasi quadrato, alla stessa altezza, pesano in modo diversissimo. La
      scala corregge a occhio, partendo da 1 = riquadro pieno. */
   scala?: number;
-  /* Il marchio esiste solo in bianco (pensato per fondi scuri): si inverte. */
-  inverti?: boolean;
-  /* Colore troppo chiaro per il fondo bianco anche in grigio: nero pieno. */
-  nero?: boolean;
+  /* Tinta di marca troppo chiara per il fondo bianco: la si scurisce
+     restando nello stesso colore. */
+  scurisci?: boolean;
 }
+
+/* I loghi stanno nei loro colori, sempre: niente grigi (deciso da Ercole il
+   03/10/2026). I marchi che esistono solo in bianco sono stati ricolorati nel
+   file, toccando solo il bianco: nero o colore di marca (Allianz #003781,
+   Evertreen #1B8F3D, Orthomax #2454A2, Quinte Parallele #0C0C0C), e le parti
+   colorate restano com'erano. */
 
 /* Nell'ordine dato da Ercole il 02/10/2026. Fonti dei file: siti ufficiali o
    i repo dei progetti che abbiamo fatto noi. */
 const CLIENTI: Cliente[] = [
   { nome: "Assoholding", file: "assoholding.svg" },
-  { nome: "G2R", file: "g2r.svg", inverti: true, scala: 0.7 },
+  { nome: "G2R", file: "g2r.svg", scala: 0.7 },
   { nome: "Aleph01", file: "aleph01.png", scala: 0.85 },
   { nome: "Il Trust in Italia", file: "il-trust-in-italia.png" },
-  { nome: "Quinte Parallele", file: "quinte-parallele.svg", inverti: true, scala: 1.2 },
+  { nome: "Quinte Parallele", file: "quinte-parallele.svg", scala: 1.2 },
   { nome: "Alberto Napolitano Pianoforti", file: "alberto-napolitano-pianoforti.png", scala: 1.2 },
   { nome: "Piano City Napoli", file: "piano-city-napoli.png", scala: 1.25 },
-  { nome: "Astralex", file: "astralex.png", inverti: true, scala: 0.95 },
+  { nome: "Astralex", file: "astralex.png", scala: 0.95 },
   { nome: "Keyone Consulting", file: "keyone-consulting.png" },
   { nome: "Kyma", file: "kyma.svg", scala: 0.9 },
-  { nome: "Evertreen", file: "evertreen.svg", inverti: true, scala: 0.95 },
+  { nome: "Evertreen", file: "evertreen.svg", scala: 0.95 },
   { nome: "Replase", file: "replase.png" },
   { nome: "Suoni Oltre Confine", file: "suoni-oltre-confine.png" },
   { nome: "Riding Safari Club", file: "riding-safari-club.svg", scala: 1.3 },
@@ -35,17 +40,17 @@ const CLIENTI: Cliente[] = [
   { nome: "Comune di Riardo", file: "comune-riardo.png", scala: 1.3 },
   { nome: "Comune di Roccamonfina", file: "comune-roccamonfina.png", scala: 1.3 },
   /* Aggiunti il 03/10/2026. */
-  { nome: "Allianz Sant'Agostino", file: "allianz-sant-agostino.png", inverti: true, scala: 1.2 },
+  { nome: "Allianz Sant'Agostino", file: "allianz-sant-agostino.png", scala: 1.2 },
   { nome: "Future Champions Academy", file: "future-champions-academy.png" },
-  { nome: "Qualitalia", file: "qualitalia.png", inverti: true, scala: 1.3 },
-  { nome: "Moody Production", file: "moody-production.png", inverti: true, scala: 1.2 },
-  { nome: "Riviera di Ulisse Festival", file: "festival-riviera-di-ulisse.png", nero: true, scala: 0.75 },
+  { nome: "Qualitalia", file: "qualitalia.png", scala: 1.3 },
+  { nome: "Moody Production", file: "moody-production.png", scala: 1.2 },
+  { nome: "Riviera di Ulisse Festival", file: "festival-riviera-di-ulisse.png", scurisci: true, scala: 0.75 },
   { nome: "Vino Sapiens", file: "vino-sapiens.svg" },
   { nome: "Perle dell'Elba", file: "perle-dell-elba.png" },
-  { nome: "DOC Marketing", file: "doc-marketing.png", inverti: true, scala: 1.3 },
-  { nome: "Tecnotravel", file: "tecnotravel.png", inverti: true, scala: 0.9 },
+  { nome: "DOC Marketing", file: "doc-marketing.png", scala: 1.3 },
+  { nome: "Tecnotravel", file: "tecnotravel.png", scala: 0.9 },
   { nome: "Palmieri & Treglia", file: "palmieri-treglia.png" },
-  { nome: "Orthomax", file: "orthomax.svg", inverti: true },
+  { nome: "Orthomax", file: "orthomax.svg" },
 ];
 
 export default function Clienti() {
@@ -74,14 +79,14 @@ export default function Clienti() {
 
         {/* Griglia a filo: 28 loghi e la casella per il prossimo, larga due
             celle, fanno 30 posti, che si chiudono pieni a 2, 3 e 6 colonne.
-            Se cambia il numero dei loghi, va rifatto questo conto. Bordi sopra e a sinistra
-            sul contenitore, a destra e sotto sulle caselle: nessuna linea
-            doppia. */}
+            Se cambia il numero dei loghi, va rifatto questo conto.
+            Bordi sopra e a sinistra sul contenitore, a destra e sotto sulle
+            caselle: nessuna linea doppia. */}
         <ul className="mt-12 md:mt-[99px] grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 border-t border-l border-black/15">
           {CLIENTI.map((c) => (
             <li
               key={c.nome}
-              className="group relative aspect-[3/2] border-r border-b border-black/15 flex items-center justify-center"
+              className="relative aspect-[3/2] border-r border-b border-black/15 flex items-center justify-center"
             >
               <div
                 className="relative h-[46%] w-[66%]"
@@ -95,15 +100,10 @@ export default function Clienti() {
                   /* File gia' ridotti a mano: la conversione di next/image sporcava
                      la trasparenza (velo grigio dietro Il Trust in Italia). */
                   unoptimized
-                  /* A riposo tutti in scala di grigi, a colori al passaggio.
-                     multiply fa sparire il fondo bianco degli stemmi che non
-                     hanno trasparenza. */
-                  className={`object-contain mix-blend-multiply opacity-70 transition-[filter,opacity] duration-300 ease-out group-hover:opacity-100 motion-reduce:transition-none ${
-                    c.nero
-                      ? "brightness-0"
-                      : c.inverti
-                        ? "invert grayscale"
-                        : "grayscale group-hover:grayscale-0"
+                  /* multiply fa sparire il fondo bianco dei file che non
+                     hanno trasparenza (stemmi, Future Champions). */
+                  className={`object-contain mix-blend-multiply ${
+                    c.scurisci ? "brightness-[.62] saturate-150" : ""
                   }`}
                 />
               </div>
