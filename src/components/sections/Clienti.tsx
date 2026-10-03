@@ -10,6 +10,8 @@ interface Cliente {
   scala?: number;
   /* Il marchio esiste solo in bianco (pensato per fondi scuri): si inverte. */
   inverti?: boolean;
+  /* Colore troppo chiaro per il fondo bianco anche in grigio: nero pieno. */
+  nero?: boolean;
 }
 
 /* Nell'ordine dato da Ercole il 02/10/2026. Fonti dei file: siti ufficiali o
@@ -32,6 +34,18 @@ const CLIENTI: Cliente[] = [
   { nome: "Red Group", file: "red-group.svg" },
   { nome: "Comune di Riardo", file: "comune-riardo.png", scala: 1.3 },
   { nome: "Comune di Roccamonfina", file: "comune-roccamonfina.png", scala: 1.3 },
+  /* Aggiunti il 03/10/2026. */
+  { nome: "Allianz Sant'Agostino", file: "allianz-sant-agostino.png", inverti: true, scala: 1.2 },
+  { nome: "Future Champions Academy", file: "future-champions-academy.png" },
+  { nome: "Qualitalia", file: "qualitalia.png", inverti: true, scala: 1.3 },
+  { nome: "Moody Production", file: "moody-production.png", inverti: true, scala: 1.2 },
+  { nome: "Riviera di Ulisse Festival", file: "festival-riviera-di-ulisse.png", nero: true, scala: 0.75 },
+  { nome: "Vino Sapiens", file: "vino-sapiens.svg" },
+  { nome: "Perle dell'Elba", file: "perle-dell-elba.png" },
+  { nome: "DOC Marketing", file: "doc-marketing.png", inverti: true, scala: 1.3 },
+  { nome: "Tecnotravel", file: "tecnotravel.png", inverti: true, scala: 0.9 },
+  { nome: "Palmieri & Treglia", file: "palmieri-treglia.png" },
+  { nome: "Orthomax", file: "orthomax.svg", inverti: true },
 ];
 
 export default function Clienti() {
@@ -58,8 +72,9 @@ export default function Clienti() {
           </h2>
         </div>
 
-        {/* Griglia a filo: 17 loghi e una casella per il prossimo fanno 18,
-            che si chiude piena a 2, 3 e 6 colonne. Bordi sopra e a sinistra
+        {/* Griglia a filo: 28 loghi e la casella per il prossimo, larga due
+            celle, fanno 30 posti, che si chiudono pieni a 2, 3 e 6 colonne.
+            Se cambia il numero dei loghi, va rifatto questo conto. Bordi sopra e a sinistra
             sul contenitore, a destra e sotto sulle caselle: nessuna linea
             doppia. */}
         <ul className="mt-12 md:mt-[99px] grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 border-t border-l border-black/15">
@@ -84,13 +99,17 @@ export default function Clienti() {
                      multiply fa sparire il fondo bianco degli stemmi che non
                      hanno trasparenza. */
                   className={`object-contain mix-blend-multiply opacity-70 transition-[filter,opacity] duration-300 ease-out group-hover:opacity-100 motion-reduce:transition-none ${
-                    c.inverti ? "invert" : "grayscale group-hover:grayscale-0"
+                    c.nero
+                      ? "brightness-0"
+                      : c.inverti
+                        ? "invert grayscale"
+                        : "grayscale group-hover:grayscale-0"
                   }`}
                 />
               </div>
             </li>
           ))}
-          <li className="aspect-[3/2] border-r border-b border-black/15">
+          <li className="col-span-2 aspect-[3/1] border-r border-b border-black/15">
             <Link
               href="/parliamo"
               className="group flex h-full w-full flex-col justify-between bg-primary p-4 md:p-5 text-black transition-colors duration-300 hover:bg-black hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-black"
