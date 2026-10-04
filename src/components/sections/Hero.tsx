@@ -5,6 +5,7 @@ import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import HeroGraph from "./HeroGraph";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -190,6 +191,10 @@ export default function Hero() {
       className="relative w-full flex flex-col justify-end overflow-hidden bg-primary min-h-[100svh]"
       aria-label="Hero"
     >
+      {/* Il grafo del second brain occupa lo spazio vuoto a destra: nasce
+          quando il titolo ha finito di salire. */}
+      <HeroGraph ritardo={1300} />
+
       {/* Bottom-anchored content */}
       <div className="container-content relative z-10 pb-16 md:pb-[66px]">
         <div id="hero-block" className="md:max-w-[1002px] flex flex-col items-start gap-5">
