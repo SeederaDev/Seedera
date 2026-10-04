@@ -39,8 +39,10 @@ function Freccia() {
 }
 
 /* Le coordinate si passano come variabili CSS e le leggono le classi dei due
-   punti di rottura: sotto i 768px la griglia torna una colonna sola e la bio
-   segue la foto nel flusso. */
+   punti di rottura. Sotto i 768px la griglia ha due colonne a scorrimento
+   libero (04/10/2026, prima era una sola): la bio aperta prende la riga
+   intera sotto la sua foto, e il riempimento denso fa salire la scheda dopo
+   nella casella rimasta libera accanto. */
 function coordinate(i: number) {
   const due = posizione(i, 2);
   const quattro = posizione(i, 4);
@@ -102,10 +104,10 @@ function SchedaPersona({
           ) : null}
         </div>
 
-        <h3 className="text-black font-normal text-[25px] leading-[32px] mt-[12px]">
+        <h3 className="text-black font-normal text-[19px] leading-[24px] md:text-[25px] md:leading-[32px] mt-[10px] md:mt-[12px]">
           {persona.nome}
         </h3>
-        <p className="text-middle-grey text-[16px] leading-[22px] mt-[4px]">
+        <p className="text-middle-grey text-[14px] leading-[19px] md:text-[16px] md:leading-[22px] mt-[4px]">
           {persona.ruolo}
         </p>
         {/* Aperta, la freccia si gira: e' il comando per richiudere. */}
@@ -143,7 +145,7 @@ function PannelloBio({
     lato === "destra" ? "inset(0 100% 0 0 round 5px)" : "inset(0 0 0 100% round 5px)";
   return (
     <div
-      className={`relative self-start md:aspect-[432/539] md:[grid-row:var(--r2)] md:[grid-column:var(--b2)] min-[90rem]:[grid-row:var(--r4)] min-[90rem]:[grid-column:var(--b4)] ${
+      className={`relative self-start max-md:col-span-2 md:aspect-[432/539] md:[grid-row:var(--r2)] md:[grid-column:var(--b2)] min-[90rem]:[grid-row:var(--r4)] min-[90rem]:[grid-column:var(--b4)] ${
         aperta ? "z-10" : "max-md:hidden"
       }`}
       style={stile}
@@ -181,9 +183,18 @@ function PannelloBio({
             </svg>
           </button>
         </div>
-        <p className="text-black text-[15px] leading-[22px] min-[90rem]:text-[14px] min-[90rem]:leading-[20px] mt-[14px]">
-          {persona.bio}
-        </p>
+        {/* Un paragrafo per ogni blocco separato da una riga vuota: in un solo
+            <p> gli a capo scritti nel pannello sparivano. */}
+        <div className="mt-[14px] flex flex-col gap-[10px]">
+          {(persona.bio ?? "").split(/\n\s*\n/).map((paragrafo, i) => (
+            <p
+              key={i}
+              className="text-black text-[15px] leading-[22px] min-[90rem]:text-[14px] min-[90rem]:leading-[20px] whitespace-pre-line"
+            >
+              {paragrafo.trim()}
+            </p>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -322,7 +333,7 @@ export default function PaginaPersone({ persone }: { persone: Persona[] }) {
 
           {/* ── Griglia: scacchiera, ogni foto con la sua casella libera ── */}
           <div className="container-content pb-24 md:pb-40">
-            <div className="persone-griglia grid grid-cols-1 md:grid-cols-2 min-[90rem]:grid-cols-4 gap-x-[24px] gap-y-[32px] md:gap-y-[25px]">
+            <div className="persone-griglia grid grid-cols-2 max-md:grid-flow-row-dense min-[90rem]:grid-cols-4 gap-x-[12px] md:gap-x-[24px] gap-y-[28px] md:gap-y-[25px]">
               {persone.map((p, i) => (
                 <Fragment key={p.slug}>
                   <SchedaPersona persona={p} indice={i} {...comandi(p.slug)} />
