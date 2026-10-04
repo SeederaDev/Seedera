@@ -13,44 +13,49 @@ interface Cliente {
   scurisci?: boolean;
 }
 
-/* I loghi stanno nei loro colori, sempre: niente grigi (deciso da Ercole il
-   03/10/2026). I marchi che esistono solo in bianco sono stati ricolorati nel
-   file, toccando solo il bianco: nero o colore di marca (Allianz #003781,
-   Evertreen #1B8F3D, Orthomax #2454A2, Quinte Parallele #0C0C0C), e le parti
-   colorate restano com'erano. */
+/* A riposo i loghi sono monocromatici e prendono i loro colori al passaggio
+   del mouse (deciso da Ercole il 04/10/2026; prima erano sempre a colori).
+   Il grigio vale solo dove l'hover esiste: da telefono restano a colori.
+   I marchi che esistono solo in bianco sono stati ricolorati nel file,
+   toccando solo il bianco: nero o colore di marca (Allianz #003781,
+   Evertreen #1B8F3D, Orthomax #2454A2, Quinte Parallele #0C0C0C). */
 
-/* Nell'ordine dato da Ercole il 02/10/2026. Fonti dei file: siti ufficiali o
-   i repo dei progetti che abbiamo fatto noi. */
+/* Ordine per peso del marchio e dell'impresa (04/10/2026): prima i marchi
+   riconoscibili e le istituzioni, poi le aziende strutturate, poi i progetti
+   e le realta' piu' piccole. Fonti dei file: siti ufficiali o i repo dei
+   progetti che abbiamo fatto noi. */
 const CLIENTI: Cliente[] = [
-  { nome: "Assoholding", file: "assoholding.svg" },
-  { nome: "G2R", file: "g2r.svg", scala: 0.7 },
-  { nome: "Aleph01", file: "aleph01.png", scala: 0.85 },
-  { nome: "Il Trust in Italia", file: "il-trust-in-italia.png" },
-  { nome: "Quinte Parallele", file: "quinte-parallele.svg", scala: 1.2 },
-  { nome: "Alberto Napolitano Pianoforti", file: "alberto-napolitano-pianoforti.png", scala: 1.2 },
+  { nome: "Allianz Sant'Agostino", file: "allianz-sant-agostino.png", scala: 1.2 },
   { nome: "Piano City Napoli", file: "piano-city-napoli.png", scala: 1.25 },
-  { nome: "Astralex", file: "astralex.png", scala: 0.95 },
-  { nome: "Keyone Consulting", file: "keyone-consulting.png" },
-  { nome: "Kyma", file: "kyma.svg", scala: 0.9 },
   { nome: "Evertreen", file: "evertreen.svg", scala: 0.95 },
-  { nome: "Replase", file: "replase.png" },
-  { nome: "Suoni Oltre Confine", file: "suoni-oltre-confine.png" },
-  { nome: "Riding Safari Club", file: "riding-safari-club.svg", scala: 1.3 },
+  { nome: "Assoholding", file: "assoholding.svg" },
   { nome: "Red Group", file: "red-group.svg" },
+  { nome: "Tecnotravel", file: "tecnotravel.png", scala: 0.9 },
+  { nome: "Replase", file: "replase.png" },
   { nome: "Comune di Riardo", file: "comune-riardo.png", scala: 1.3 },
   { nome: "Comune di Roccamonfina", file: "comune-roccamonfina.png", scala: 1.3 },
-  /* Aggiunti il 03/10/2026. */
-  { nome: "Allianz Sant'Agostino", file: "allianz-sant-agostino.png", scala: 1.2 },
-  { nome: "Future Champions Academy", file: "future-champions-academy.png" },
+  { nome: "Kyma", file: "kyma.svg", scala: 0.9 },
   { nome: "Qualitalia", file: "qualitalia.png", scala: 1.3 },
-  { nome: "Moody Production", file: "moody-production.png", scala: 1.2 },
+  { nome: "Alberto Napolitano Pianoforti", file: "alberto-napolitano-pianoforti.png", scala: 1.2 },
+  { nome: "Orthomax", file: "orthomax.svg" },
+  { nome: "Palmieri & Treglia", file: "palmieri-treglia.png" },
+  /* Aggiunto il 04/10/2026. Dal sito ufficiale: esiste solo raster 226x115
+     su fondo bianco, che il multiply toglie. */
+  { nome: "Planus Group", file: "planus-group.png", scala: 1.15 },
+  { nome: "Keyone Consulting", file: "keyone-consulting.png" },
+  { nome: "G2R", file: "g2r.svg", scala: 0.7 },
+  { nome: "Il Trust in Italia", file: "il-trust-in-italia.png" },
+  { nome: "Aleph01", file: "aleph01.png", scala: 0.85 },
+  { nome: "Astralex", file: "astralex.png", scala: 0.95 },
+  { nome: "Quinte Parallele", file: "quinte-parallele.svg", scala: 1.2 },
   { nome: "Riviera di Ulisse Festival", file: "festival-riviera-di-ulisse.png", scurisci: true, scala: 0.75 },
+  { nome: "Future Champions Academy", file: "future-champions-academy.png" },
+  { nome: "Moody Production", file: "moody-production.png", scala: 1.2 },
+  { nome: "DOC Marketing", file: "doc-marketing.png", scala: 1.3 },
   { nome: "Vino Sapiens", file: "vino-sapiens.svg" },
   { nome: "Perle dell'Elba", file: "perle-dell-elba.png" },
-  { nome: "DOC Marketing", file: "doc-marketing.png", scala: 1.3 },
-  { nome: "Tecnotravel", file: "tecnotravel.png", scala: 0.9 },
-  { nome: "Palmieri & Treglia", file: "palmieri-treglia.png" },
-  { nome: "Orthomax", file: "orthomax.svg" },
+  { nome: "Suoni Oltre Confine", file: "suoni-oltre-confine.png" },
+  { nome: "Riding Safari Club", file: "riding-safari-club.svg", scala: 1.3 },
 ];
 
 export default function Clienti() {
@@ -77,8 +82,8 @@ export default function Clienti() {
           </h2>
         </div>
 
-        {/* Griglia a filo: 28 loghi e la casella per il prossimo, larga due
-            celle, fanno 30 posti, che si chiudono pieni a 2, 3 e 6 colonne.
+        {/* Griglia a filo: 29 loghi e la casella per il prossimo, larga una
+            cella, fanno 30 posti, che si chiudono pieni a 2, 3 e 6 colonne.
             Se cambia il numero dei loghi, va rifatto questo conto.
             Bordi sopra e a sinistra sul contenitore, a destra e sotto sulle
             caselle: nessuna linea doppia. */}
@@ -86,7 +91,7 @@ export default function Clienti() {
           {CLIENTI.map((c) => (
             <li
               key={c.nome}
-              className="relative aspect-[3/2] border-r border-b border-black/15 flex items-center justify-center"
+              className="group relative aspect-[3/2] border-r border-b border-black/15 flex items-center justify-center"
             >
               <div
                 className="relative h-[46%] w-[66%]"
@@ -102,14 +107,14 @@ export default function Clienti() {
                   unoptimized
                   /* multiply fa sparire il fondo bianco dei file che non
                      hanno trasparenza (stemmi, Future Champions). */
-                  className={`object-contain mix-blend-multiply ${
+                  className={`object-contain mix-blend-multiply transition-[filter,opacity] duration-300 ease-out [@media(hover:hover)]:grayscale [@media(hover:hover)]:opacity-[.72] group-hover:grayscale-0 group-hover:opacity-100 ${
                     c.scurisci ? "brightness-[.62] saturate-150" : ""
                   }`}
                 />
               </div>
             </li>
           ))}
-          <li className="col-span-2 aspect-[3/1] border-r border-b border-black/15">
+          <li className="aspect-[3/2] border-r border-b border-black/15">
             <Link
               href="/parliamo"
               className="group flex h-full w-full flex-col justify-between bg-primary p-4 md:p-5 text-black transition-colors duration-300 hover:bg-black hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-black"
