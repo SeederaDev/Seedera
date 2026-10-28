@@ -202,7 +202,7 @@ function SimilarCarousel({ altri }: { altri: Progetto[] }) {
           className="text-h3 font-medium"
           style={{ color: "var(--color-black)" }}
         >
-          Qui titolo sui lavori simili
+          Altri progetti
         </h2>
       </div>
 
