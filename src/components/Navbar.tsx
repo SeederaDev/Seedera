@@ -13,7 +13,7 @@ const NAV_ITEMS = [
   { label: "Portfolio", href: "/#portfolio" },
   { label: "Progetti", href: "/#studio" },
   { label: "Partnership", href: "/#partnership" },
-  /* pagina persone nascosta: la voce torna qui quando si rimette online */
+  { label: "Persone", href: "/persone" },
   { label: "Parliamo", href: "/parliamo" },
 ];
 
@@ -21,7 +21,7 @@ const MENU_PAGES = [
   { label: "Home", href: "/" },
   { label: "Portfolio", href: "/portfolio" },
   { label: "Blog", href: "/blog" },
-  /* pagina persone nascosta: qui stava "Chi siamo" → /persone */
+  { label: "Chi siamo", href: "/persone" },
   { label: "Apri una conversazione", href: "/parliamo" },
 ];
 
