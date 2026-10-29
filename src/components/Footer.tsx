@@ -6,17 +6,19 @@ import { AZIENDA } from "@/lib/seo";
 import { useLenis } from "lenis/react";
 import { useCallback, useRef, useState, useEffect } from "react";
 import gsap from "gsap";
+import { scrollaASezione } from "@/lib/scrollaSezione";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+/* Come la barra: prima le sezioni della home nell'ordine della pagina, poi le pagine. */
 const FOOTER_LINKS = [
-  { label: "Metodo", href: "/#principi" },
   { label: "Capacità", href: "/#services" },
-  { label: "Portfolio", href: "/portfolio" },
+  { label: "Metodo", href: "/#principi" },
   { label: "Studio", href: "/#studio" },
   { label: "Partnership", href: "/#partnership" },
+  { label: "Portfolio", href: "/portfolio" },
   { label: "Chi siamo", href: "/persone" },
 ];
 
@@ -164,12 +166,7 @@ export default function Footer() {
       if (!target) return;
 
       e.preventDefault();
-      if (lenis) {
-        lenis.scrollTo(target as HTMLElement, {
-          duration: 1.4,
-          easing: (t: number) => 1 - Math.pow(1 - t, 4),
-        });
-      }
+      if (lenis) scrollaASezione(lenis, target as HTMLElement);
     },
     [lenis],
   );
