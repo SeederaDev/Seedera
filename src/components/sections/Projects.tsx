@@ -87,7 +87,8 @@ export default function Projects({ progetti }: { progetti: Progetto[] }) {
           scrollTrigger: {
             trigger: card,
             start: "top 90%",
-            toggleActions: "play none none reverse",
+            /* Una volta sola: con "reverse" le schede sparivano risalendo. */
+            once: true,
           },
         });
       });

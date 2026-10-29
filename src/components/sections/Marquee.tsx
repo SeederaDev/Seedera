@@ -24,28 +24,30 @@ export default function Marquee() {
 
   useGSAP(
     () => {
+      const scroll = {
+        trigger: sectionRef.current,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 0.5,
+        invalidateOnRefresh: true,
+      };
+      /* Corsa in proporzione allo schermo, non alla riga: con xPercent -50 la
+         riga (8400px) correva 3,5px per ogni pixel di scroll. Cosi' resta
+         sotto mezzo pixel, e la frase si fa leggere. */
       gsap.to(grandeRef.current, {
-        xPercent: -50,
+        x: () => -window.innerWidth * 0.35,
         ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 0.5,
-        },
+        scrollTrigger: { ...scroll },
       });
 
-      /* Direzione opposta: le due fasce si muovono l'una contro l'altra. */
-      gsap.to(giallaRef.current, {
-        xPercent: 0,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 0.5,
-        },
-      });
+      /* Direzione opposta: le due fasce si muovono l'una contro l'altra. Prima
+         era un to(xPercent: 0) partendo da un translateX(-50%) scritto nello
+         style: GSAP lo legge come x in pixel, quindi la fascia stava ferma. */
+      gsap.fromTo(
+        giallaRef.current,
+        { x: () => -window.innerWidth * 0.5 },
+        { x: () => -window.innerWidth * 0.25, ease: "none", scrollTrigger: { ...scroll } },
+      );
     },
     { scope: sectionRef },
   );
@@ -77,11 +79,7 @@ export default function Marquee() {
 
       {/* Fascia gialla */}
       <div className="bg-primary py-[19px] overflow-hidden">
-        <div
-          ref={giallaRef}
-          className="marquee-track"
-          style={{ transform: "translateX(-50%)" }}
-        >
+        <div ref={giallaRef} className="marquee-track">
           <span className="text-black whitespace-nowrap text-[16px] leading-[22px]">
             {gialla}
           </span>
