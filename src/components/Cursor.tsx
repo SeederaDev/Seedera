@@ -3,6 +3,25 @@
 import { useEffect, useRef, useCallback } from "react";
 import "./Cursor.css";
 
+/* Il primo sfondo pieno sotto il puntatore e' scuro? Si risale dall'elemento
+   sotto il mouse fino al primo con un colore di fondo quasi opaco; le velature
+   (bg-black/5 sulle card) si saltano. Calcolato una volta per elemento. */
+const scuri = new WeakMap<Element, boolean>();
+function fondoScuro(el: Element | null): boolean {
+  const partenza = el;
+  for (let n = el; n && n !== document.documentElement; n = n.parentElement) {
+    const noto = scuri.get(n);
+    if (noto !== undefined) return noto;
+    const m = getComputedStyle(n).backgroundColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/);
+    if (m && (m[4] === undefined || Number(m[4]) > 0.5)) {
+      const scuro = 0.2126 * Number(m[1]) + 0.7152 * Number(m[2]) + 0.0722 * Number(m[3]) < 110;
+      if (partenza) scuri.set(partenza, scuro);
+      return scuro;
+    }
+  }
+  return false;
+}
+
 export default function Cursor() {
   const shadowRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
@@ -60,6 +79,8 @@ export default function Cursor() {
 
       shadow.classList.toggle("active", !!isLink);
       dot.classList.toggle("active", !!isLink);
+      // Il cerchio e' nero: sul fondo nero (menu, Partnership) spariva.
+      shadow.classList.toggle("su-scuro", fondoScuro(target));
     };
 
     const handleLeave = () => {

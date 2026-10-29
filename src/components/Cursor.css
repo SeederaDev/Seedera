@@ -57,6 +57,16 @@
   background-color: rgba(0, 0, 0, 0.05);
 }
 
+/* Sopra un fondo scuro il cerchio si fa chiaro (vedi fondoScuro in Cursor.tsx). */
+.cursor-shadow.su-scuro {
+  border-color: #fff;
+}
+
+.cursor-shadow.su-scuro.active {
+  border-color: rgba(255, 255, 255, 0.45);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 .cursor-dot.active {
   --size: 0;
 }
