@@ -67,7 +67,7 @@ export function CursoreProgetti() {
     const onShow = () => {
       isVisible.current = true;
       gsap.set(cursor, { left: mousePos.current.x, top: mousePos.current.y, scale: 0, opacity: 0 });
-      gsap.to(cursor, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.4)", overwrite: true });
+      gsap.to(cursor, { opacity: 1, scale: 1, duration: 0.45, ease: "power3.out", overwrite: true });
     };
     const onHide = () => {
       isVisible.current = false;
@@ -116,8 +116,11 @@ function SchedaProgetto({ project }: { project: Progetto }) {
   return (
     <Link href={`/portfolio/${project.slug}`} className="group block">
       <article className="project-card">
+        {/* Tailwind 4 alza la scheda con la proprieta' `translate`, non con
+            `transform`: la transizione elencava solo transform, e il salto
+            avveniva di scatto mentre l'ombra sfumava. */}
         <div
-          className="overflow-hidden rounded-[10px] cursor-none bg-black/5 transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1.5 group-hover:shadow-[0_18px_40px_-18px_rgba(0,0,0,0.35)] motion-reduce:transition-none motion-reduce:group-hover:translate-y-0"
+          className="overflow-hidden rounded-[10px] cursor-none bg-black/5 transition-[translate,box-shadow] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:-translate-y-1.5 group-hover:shadow-[0_18px_40px_-18px_rgba(0,0,0,0.35)] motion-reduce:transition-none motion-reduce:group-hover:translate-y-0"
           onMouseEnter={() => window.dispatchEvent(new CustomEvent("project-cursor-show"))}
           onMouseLeave={() => window.dispatchEvent(new CustomEvent("project-cursor-hide"))}
         >

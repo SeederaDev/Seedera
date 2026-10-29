@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -46,50 +46,8 @@ const PRODOTTI: Prodotto[] = [
 const INTRO =
   "Una parte del nostro lavoro non ha committente: sono idee nostre, che portiamo dal prototipo fino alla società che le gestisce. È dove il metodo lo proviamo addosso a noi, prima che a qualcun altro.";
 
-/* Pill che segue il cursore sopra il carosello: nel design e' un cerchio
-   giallo con la scritta < DRAG >. */
-function DragPill({ visible }: { visible: boolean }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useGSAP(() => {
-    const el = ref.current;
-    if (!el) return;
-    const move = (e: MouseEvent) =>
-      gsap.to(el, {
-        left: e.clientX,
-        top: e.clientY,
-        duration: 0.18,
-        ease: "power2.out",
-        overwrite: "auto",
-      });
-    window.addEventListener("mousemove", move);
-    return () => window.removeEventListener("mousemove", move);
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      aria-hidden="true"
-      className="pointer-events-none fixed z-50 hidden md:flex items-center justify-center rounded-full bg-primary text-black font-medium transition-opacity duration-300"
-      style={{
-        width: 96,
-        height: 96,
-        transform: "translate(-50%, -50%)",
-        opacity: visible ? 1 : 0,
-        fontSize: "var(--font-btn)",
-      }}
-    >
-      &lt; DRAG &gt;
-    </div>
-  );
-}
-
 export default function StartupStudio() {
   const sectionRef = useRef<HTMLElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [dragging, setDragging] = useState(false);
-  const [hovering, setHovering] = useState(false);
-  const drag = useRef({ startX: 0, scrollLeft: 0 });
 
   useGSAP(
     () => {
@@ -113,22 +71,6 @@ export default function StartupStudio() {
     { scope: sectionRef },
   );
 
-  const onPointerDown = (e: React.PointerEvent) => {
-    const track = trackRef.current;
-    if (!track) return;
-    setDragging(true);
-    drag.current = { startX: e.clientX, scrollLeft: track.scrollLeft };
-    track.setPointerCapture(e.pointerId);
-  };
-
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (!dragging || !trackRef.current) return;
-    trackRef.current.scrollLeft =
-      drag.current.scrollLeft - (e.clientX - drag.current.startX);
-  };
-
-  const onPointerUp = () => setDragging(false);
-
   return (
     <section
       ref={sectionRef}
@@ -136,8 +78,6 @@ export default function StartupStudio() {
       className="relative bg-white z-10 py-24 md:py-40"
       aria-label="Start-up studio"
     >
-      <DragPill visible={hovering && !dragging} />
-
       {/* ── Intro ── */}
       <div className="container-content">
         {/* 464 + 896 su 1360: nel design il testo parte a x=504 dell'artboard. */}
@@ -178,26 +118,18 @@ export default function StartupStudio() {
         </div>
       </div>
 
-      {/* ── Carosello trascinabile ── */}
+      {/* ── I tre prodotti ── */}
+      {/* Da computer stanno affiancati: con tre schede il carosello "< DRAG >"
+          del design non aveva niente da far scorrere (a 1920px zero, a 1440
+          368px), e il cerchio finiva sotto quello del cursore. Sotto lg si
+          scorrono col dito, con lo scroll nativo.
+          Lo sbordo a destra deve coincidere col padding del container (24px
+          mobile, 40px da md, vedi .container-content): con -mr-12 la traccia
+          usciva di 8px dal viewport e la pagina scorreva. */}
       <div className="container-content mt-14 md:mt-20">
         <div
-          ref={trackRef}
-          /* Lo sbordo a destra deve coincidere col padding del container
-             (24px mobile, 40px da md, vedi .container-content): con -mr-12
-             la traccia usciva di 8px dal viewport e la pagina scorreva. */
-          className={`flex gap-6 overflow-x-auto scrollbar-hide select-none -mr-6 pr-6 md:-mr-10 md:pr-10 md:cursor-none ${
-            dragging ? "cursor-grabbing" : "cursor-grab"
-          }`}
+          className="flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mr-6 pr-6 md:-mr-10 md:pr-10 lg:grid lg:grid-cols-3 lg:overflow-visible lg:mr-0 lg:pr-0"
           style={{ scrollbarWidth: "none" }}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
-          onMouseEnter={() => setHovering(true)}
-          onMouseLeave={() => {
-            setHovering(false);
-            setDragging(false);
-          }}
         >
           {PRODOTTI.map((p) => {
             /* Un prodotto con sito proprio esce dal sito; una scheda di
@@ -211,8 +143,7 @@ export default function StartupStudio() {
             return (
             <article
               key={p.nome}
-              className="shrink-0"
-              style={{ width: "clamp(280px, 42vw, 560px)" }}
+              className="shrink-0 snap-start w-[clamp(280px,42vw,560px)] lg:w-auto"
             >
               <div
                 className="relative overflow-hidden rounded-[10px] group"
@@ -262,7 +193,6 @@ export default function StartupStudio() {
                     href={p.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onPointerDown={(e) => e.stopPropagation()}
                     className={classiNome}
                   >
                     {p.nome}
@@ -270,7 +200,6 @@ export default function StartupStudio() {
                 ) : (
                   <Link
                     href={p.href}
-                    onPointerDown={(e) => e.stopPropagation()}
                     className={classiNome}
                   >
                     {p.nome}
