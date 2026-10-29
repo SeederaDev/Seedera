@@ -6,33 +6,48 @@ import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useLenis } from "lenis/react";
 import gsap from "gsap";
+import { scrollaASezione } from "@/lib/scrollaSezione";
 
-/* Un nome per ogni destinazione, uguale in barra, menu e footer: "Studio" come
-   la sezione ("Start-up studio"), "Chi siamo" come il titolo della pagina, e
-   Portfolio porta sempre alla pagina, non alla sezione della home. */
-const NAV_ITEMS = [
-  { label: "Metodo", href: "/#principi" },
-  { label: "Capacità", href: "/#services" },
+/* La barra porta alle pagine, il menu contiene tutto. In barra solo pagine
+   vere (le sezioni della home mescolate alle pagine si confondevano), e
+   "Parliamo" pieno come invito. Le sezioni della home stanno nel menu. */
+const VOCI_BARRA = [
   { label: "Portfolio", href: "/portfolio" },
-  { label: "Studio", href: "/#studio" },
-  { label: "Partnership", href: "/#partnership" },
   { label: "Chi siamo", href: "/persone" },
-  { label: "Parliamo", href: "/parliamo" },
 ];
 
-/* Il menu e' l'unica navigazione sotto i 1024px (a 768 la barra non ci stava):
-   contiene tutte le voci della barra, piu' Home e Blog. */
-const MENU_PAGES = [
-  { label: "Home", href: "/" },
-  { label: "Metodo", href: "/#principi" },
+const PARLIAMO = { label: "Parliamo", href: "/parliamo" };
+
+/* Il menu e' la mappa completa del sito, uguale da computer e da telefono: le
+   pagine in grande, sotto le sezioni della home, piu' piccole e con il loro
+   titolo (sembrano link uguali ma una scorre e l'altra cambia pagina:
+   separate non si confondono). Le sezioni seguono l'ordine della home. */
+const SEZIONI_HOME = [
   { label: "Capacità", href: "/#services" },
-  { label: "Portfolio", href: "/portfolio" },
+  { label: "Metodo", href: "/#principi" },
   { label: "Studio", href: "/#studio" },
   { label: "Partnership", href: "/#partnership" },
+];
+
+const MENU_PAGES = [
+  { label: "Home", href: "/" },
+  { label: "Portfolio", href: "/portfolio" },
   { label: "Chi siamo", href: "/persone" },
   { label: "Blog", href: "/blog" },
   { label: "Apri una conversazione", href: "/parliamo" },
 ];
+
+const PILLOLA =
+  "text-black rounded-[5px] border border-black hover:bg-black hover:text-white transition-all duration-300";
+/* 14/20 come ogni altro badge del design. Con 20px ogni voce era larga ~22px
+   in piu' e l'errore si accumulava: l'ultima finiva 169px oltre la sua x
+   (misura_testi.mjs). */
+const STILE_PILLOLA: React.CSSProperties = {
+  padding: "5px 10px",
+  fontSize: "14px",
+  lineHeight: "20px",
+  fontWeight: 400,
+};
 
 /* ── Magnetic pill: subtly follows cursor on hover ── */
 function MagneticPill({
@@ -162,10 +177,7 @@ export default function Navbar() {
         if (target && lenis) {
           // Col menu aperto Lenis e' fermo: senza ripartire ignorerebbe lo scroll.
           lenis.start();
-          lenis.scrollTo(target as HTMLElement, {
-            duration: 1.4,
-            easing: (t: number) => 1 - Math.pow(1 - t, 4),
-          });
+          scrollaASezione(lenis, target as HTMLElement);
         }
       } else if (hash) {
         // On another page: navigate to home with hash
@@ -194,12 +206,7 @@ export default function Navbar() {
     if (!hash) return;
     const t = window.setTimeout(() => {
       const target = document.querySelector(hash);
-      if (target) {
-        lenis.scrollTo(target as HTMLElement, {
-          duration: 1.2,
-          easing: (x: number) => 1 - Math.pow(1 - x, 4),
-        });
-      }
+      if (target) scrollaASezione(lenis, target as HTMLElement);
     }, 400);
     return () => window.clearTimeout(t);
   }, [pathname, lenis]);
@@ -236,33 +243,39 @@ export default function Navbar() {
             {/* Passo fra le pillole: nel design il testo di una voce finisce a
                 218,03 e il successivo inizia a 248,14 → 30,11 di stacco, di cui
                 22 sono padding e bordo delle due pillole. Restano 8, non 10. */}
+            {/* Col menu aperto la barra sparisce: le pillole nere sul fondo nero
+                restavano cliccabili alla cieca, e "Parliamo" restava a galla. */}
             <nav
-              className="hidden lg:flex items-center gap-[8px]"
+              className={`hidden lg:flex items-center gap-[8px] transition-opacity duration-300 ${
+                isOpen ? "opacity-0 pointer-events-none" : ""
+              }`}
+              aria-hidden={isOpen || undefined}
               aria-label="Navigazione principale"
             >
-              {NAV_ITEMS.map((item) => (
+              {VOCI_BARRA.map((item) => (
                 <MagneticPill
                   key={item.href}
                   href={item.href}
                   onClick={(e) => handleNavClick(e, item.href)}
-                  className="text-black rounded-[5px] border border-black hover:bg-black hover:text-white transition-all duration-300"
-                  /* 14/20 come ogni altro badge del design. Con 20px ogni voce
-                     era larga ~22px in piu' e l'errore si accumulava: l'ultima
-                     finiva 169px oltre la sua x (misura_testi.mjs). */
-                  style={{
-                    padding: "5px 10px",
-                    fontSize: "14px",
-                    lineHeight: "20px",
-                    fontWeight: 400,
-                  }}
+                  className={PILLOLA}
+                  style={STILE_PILLOLA}
                 >
                   {item.label}
                 </MagneticPill>
               ))}
+              <MagneticPill
+                href={PARLIAMO.href}
+                onClick={(e) => handleNavClick(e, PARLIAMO.href)}
+                className="text-white bg-black rounded-[5px] border border-black hover:bg-white hover:text-black transition-all duration-300"
+                style={STILE_PILLOLA}
+              >
+                {PARLIAMO.label}
+              </MagneticPill>
             </nav>
           </div>
 
-          {/* Right: Hamburger - always visible */}
+          <div className="flex items-center">
+          {/* Hamburger - always visible: il menu e' la mappa completa */}
           <button
             ref={hamburgerRef}
             onClick={() => {
@@ -307,6 +320,7 @@ export default function Navbar() {
               style={{ width: "33px", height: "1px" }}
             />
           </button>
+          </div>
         </div>
       </header>
 
@@ -360,6 +374,28 @@ export default function Navbar() {
                 </span>
               </Link>
             ))}
+
+            {/* Le sezioni della home: un gruppo a parte, piu' piccolo, con il
+                suo titolo, come le pillole della barra da computer. */}
+            <div
+              className="mobile-menu-link pt-6"
+              style={{ transitionDelay: isOpen ? `${0.3 + MENU_PAGES.length * 0.06}s` : "0s" }}
+            >
+              <p className="text-white/40 text-xs uppercase tracking-[0.18em] mb-3">Nella home</p>
+              <div className="flex flex-wrap gap-2">
+                {SEZIONI_HOME.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={(e) => handleNavClick(e, item.href, true)}
+                    className="text-white rounded-[5px] border border-white/60 hover:bg-white hover:text-black transition-colors duration-300"
+                    style={{ padding: "6px 12px", fontSize: "15px", lineHeight: "20px" }}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
         </nav>
 
