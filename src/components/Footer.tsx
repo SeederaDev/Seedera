@@ -15,9 +15,9 @@ const FOOTER_LINKS = [
   { label: "Metodo", href: "/#principi" },
   { label: "Capacità", href: "/#services" },
   { label: "Portfolio", href: "/portfolio" },
-  { label: "Persone", href: "/persone" },
   { label: "Studio", href: "/#studio" },
   { label: "Partnership", href: "/#partnership" },
+  { label: "Chi siamo", href: "/persone" },
 ];
 
 const SOCIALS = [
