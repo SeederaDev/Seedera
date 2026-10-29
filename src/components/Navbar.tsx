@@ -7,21 +7,30 @@ import Image from "next/image";
 import { useLenis } from "lenis/react";
 import gsap from "gsap";
 
+/* Un nome per ogni destinazione, uguale in barra, menu e footer: "Studio" come
+   la sezione ("Start-up studio"), "Chi siamo" come il titolo della pagina, e
+   Portfolio porta sempre alla pagina, non alla sezione della home. */
 const NAV_ITEMS = [
   { label: "Metodo", href: "/#principi" },
   { label: "Capacità", href: "/#services" },
-  { label: "Portfolio", href: "/#portfolio" },
-  { label: "Progetti", href: "/#studio" },
+  { label: "Portfolio", href: "/portfolio" },
+  { label: "Studio", href: "/#studio" },
   { label: "Partnership", href: "/#partnership" },
-  { label: "Persone", href: "/persone" },
+  { label: "Chi siamo", href: "/persone" },
   { label: "Parliamo", href: "/parliamo" },
 ];
 
+/* Il menu e' l'unica navigazione sotto i 1024px (a 768 la barra non ci stava):
+   contiene tutte le voci della barra, piu' Home e Blog. */
 const MENU_PAGES = [
   { label: "Home", href: "/" },
+  { label: "Metodo", href: "/#principi" },
+  { label: "Capacità", href: "/#services" },
   { label: "Portfolio", href: "/portfolio" },
-  { label: "Blog", href: "/blog" },
+  { label: "Studio", href: "/#studio" },
+  { label: "Partnership", href: "/#partnership" },
   { label: "Chi siamo", href: "/persone" },
+  { label: "Blog", href: "/blog" },
   { label: "Apri una conversazione", href: "/parliamo" },
 ];
 
@@ -129,6 +138,14 @@ export default function Navbar() {
     return () => window.removeEventListener("resize", sync);
   }, []);
 
+  /* Stessa chiusura del pulsante: senza riportare la X a tre linee nere, dopo
+     una voce del menu l'icona restava una X bianca sulla pagina chiara. */
+  const chiudiMenu = useCallback(() => {
+    setShowX(false);
+    setIsOpen(false);
+    setTimeout(() => setLinesWhite(false), 700);
+  }, []);
+
   const handleNavClick = useCallback(
     (
       e: React.MouseEvent<HTMLAnchorElement>,
@@ -140,9 +157,11 @@ export default function Navbar() {
       if (pathname === "/" && hash) {
         // On home page: smooth scroll to the section
         e.preventDefault();
-        if (closeMenu) setIsOpen(false);
+        if (closeMenu) chiudiMenu();
         const target = document.querySelector(hash);
         if (target && lenis) {
+          // Col menu aperto Lenis e' fermo: senza ripartire ignorerebbe lo scroll.
+          lenis.start();
           lenis.scrollTo(target as HTMLElement, {
             duration: 1.4,
             easing: (t: number) => 1 - Math.pow(1 - t, 4),
@@ -151,11 +170,13 @@ export default function Navbar() {
       } else if (hash) {
         // On another page: navigate to home with hash
         e.preventDefault();
-        if (closeMenu) setIsOpen(false);
+        if (closeMenu) chiudiMenu();
         router.push(href);
+      } else if (closeMenu) {
+        chiudiMenu();
       }
     },
-    [lenis, pathname, router],
+    [chiudiMenu, lenis, pathname, router],
   );
 
   useEffect(() => {
@@ -163,6 +184,25 @@ export default function Navbar() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  /* Arrivati sulla home con una sezione nell'indirizzo (/#services da un'altra
+     pagina: barra, menu, footer) la pagina restava in cima. Si scorre qui,
+     dopo un attimo: le sezioni con GSAP devono aver preso le loro misure. */
+  useEffect(() => {
+    if (pathname !== "/" || !lenis) return;
+    const hash = window.location.hash;
+    if (!hash) return;
+    const t = window.setTimeout(() => {
+      const target = document.querySelector(hash);
+      if (target) {
+        lenis.scrollTo(target as HTMLElement, {
+          duration: 1.2,
+          easing: (x: number) => 1 - Math.pow(1 - x, 4),
+        });
+      }
+    }, 400);
+    return () => window.clearTimeout(t);
+  }, [pathname, lenis]);
 
   // Lock scroll when mobile menu is open
   useEffect(() => {
@@ -197,7 +237,7 @@ export default function Navbar() {
                 218,03 e il successivo inizia a 248,14 → 30,11 di stacco, di cui
                 22 sono padding e bordo delle due pillole. Restano 8, non 10. */}
             <nav
-              className="hidden md:flex items-center gap-[8px]"
+              className="hidden lg:flex items-center gap-[8px]"
               aria-label="Navigazione principale"
             >
               {NAV_ITEMS.map((item) => (
@@ -292,7 +332,7 @@ export default function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setIsOpen(false)}
+                onClick={(e) => handleNavClick(e, item.href, true)}
                 className="mobile-menu-link text-white font-bold tracking-tight hover:text-primary transition-colors duration-300 border-b border-white/10 flex"
                 style={{
                   transitionDelay: isOpen ? `${0.3 + i * 0.06}s` : "0s",

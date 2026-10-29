@@ -58,7 +58,7 @@ pubblicare una pagina con dati vecchi.
 ### Come si mette online
 
 ```bash
-ssh seedera-plesk 'bash /var/www/vhosts/seedera.it/httpdocs/app/scripts/deploy-vps.sh'
+ssh seedera-plesk 'bash /var/www/vhosts/seedera.it/sito/scripts/deploy-vps.sh'
 ```
 
 **Il ramo `deploy` non esiste piu'.** Fino al 29/08/2026 GitHub Actions
