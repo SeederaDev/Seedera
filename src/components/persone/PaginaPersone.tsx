@@ -74,7 +74,7 @@ function SchedaPersona({
   const { stile } = coordinate(indice);
   return (
     <article
-      className="persona-card md:[grid-row:var(--r2)] md:[grid-column:var(--c2)] min-[90rem]:[grid-row:var(--r4)] min-[90rem]:[grid-column:var(--c4)]"
+      className="persona-card max-md:flex max-md:flex-col md:[grid-row:var(--r2)] md:[grid-column:var(--c2)] min-[90rem]:[grid-row:var(--r4)] min-[90rem]:[grid-column:var(--c4)]"
       style={stile}
       onPointerEnter={(e) => e.pointerType === "mouse" && onEntra()}
       onPointerLeave={(e) => e.pointerType === "mouse" && onEsce()}
@@ -87,7 +87,7 @@ function SchedaPersona({
         onClick={onToggle}
         aria-expanded={aperta}
         aria-controls={`bio-${persona.slug}`}
-        className="group block w-full text-left cursor-pointer"
+        className="group block w-full text-left cursor-pointer max-md:flex max-md:flex-1 max-md:flex-col"
       >
         <div
           className="relative overflow-hidden rounded-[5px] bg-[#D9D9D9]"
@@ -110,9 +110,11 @@ function SchedaPersona({
         <p className="text-middle-grey text-[14px] leading-[19px] md:text-[16px] md:leading-[22px] mt-[4px]">
           {persona.ruolo}
         </p>
-        {/* Aperta, la freccia si gira: e' il comando per richiudere. */}
+        {/* Aperta, la freccia si gira: e' il comando per richiudere. Da
+            telefono sta in fondo alla scheda: con un nome o un ruolo su due
+            righe le frecce della stessa fila non erano piu' allineate. */}
         <span
-          className={`inline-flex mt-[12px] transition-transform duration-400 ease-out motion-reduce:transition-none ${
+          className={`inline-flex self-start mt-[12px] max-md:mt-auto max-md:pt-[12px] transition-transform duration-400 ease-out motion-reduce:transition-none ${
             aperta ? "rotate-180" : ""
           }`}
         >

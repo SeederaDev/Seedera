@@ -147,6 +147,20 @@ export default function Services() {
            sullo scalino cumulativo nel blocco desktop. */
         const STACK_OFFSET = 14;
 
+        /* Da telefono le card hanno altezze diverse e si fermano a 14px l'una
+           dall'altra: sotto l'ultima, piu' corta, spuntava il fondo di quella
+           prima ("…accelerati" sotto la 03, 28/10/2026). Tutte alte come la
+           piu' alta, ognuna copre per intero quella che ha sotto. Si rimisura
+           a ogni refresh, cioe' anche quando il telefono si gira. */
+        const riquadri = cards.map((c) => c.firstElementChild as HTMLElement);
+        const pareggia = () => {
+          riquadri.forEach((r) => (r.style.minHeight = ""));
+          const alta = Math.max(...riquadri.map((r) => r.offsetHeight));
+          riquadri.forEach((r) => (r.style.minHeight = `${alta}px`));
+        };
+        pareggia();
+        ScrollTrigger.addEventListener("refreshInit", pareggia);
+
         cards.forEach((card, i) => {
           ScrollTrigger.create({
             trigger: card,
@@ -166,6 +180,11 @@ export default function Services() {
             id: `service-pin-${i}`,
           });
         });
+
+        return () => {
+          ScrollTrigger.removeEventListener("refreshInit", pareggia);
+          riquadri.forEach((r) => (r.style.minHeight = ""));
+        };
       });
 
       // Desktop
@@ -251,7 +270,11 @@ export default function Services() {
     <section
       ref={sectionRef}
       id="services"
-      className="relative z-0 bg-white"
+      /* Da telefono lo spazio sopra la prima card sta qui e non nella card:
+         dentro l'elemento agganciato la fermava 96px piu' in basso delle
+         altre, e il suo fondo spuntava sotto la pila. Da computer resta nella
+         card, perche' lo scalino della pila lo misura (vedi fermate()). */
+      className="relative z-0 bg-white pt-24 md:pt-0"
       aria-label="Servizi"
     >
       {/* Service cards */}
@@ -259,7 +282,7 @@ export default function Services() {
         <div
           key={i}
           id={i === 0 ? "servizi-inner" : undefined}
-          className={`service-card w-full container-content ${i > 0 ? "mt-4 md:mt-[150px]" : "pt-24 md:pt-32"}`}
+          className={`service-card w-full container-content ${i > 0 ? "mt-4 md:mt-[150px]" : "md:pt-32"}`}
         >
           {/* Card del design (nodo 464:340): 1360x316, raggio 5, padding 40.
               Tre colonne — badge / titolo+intro / elenco — larghe 420, 521 e
@@ -270,7 +293,9 @@ export default function Services() {
                nel design sconfina oltre la propria colonna) impone la sua
                misura come minimo e il browser ridistribuisce gli fr in
                401/555/324. L'elenco finiva a x=1036 invece di 1021. */
-            className="rounded-[5px] px-[40px] pt-[41px] pb-[43px] grid grid-cols-1 gap-y-8 md:grid-cols-[minmax(0,420fr)_minmax(0,521fr)_minmax(0,339fr)] md:gap-y-0"
+            /* Da telefono il riquadro ha 24px come il margine del sito: con 40
+               il testo stava a 64px dal bordo e la colonna restava di 262. */
+            className="rounded-[5px] px-6 pt-8 pb-8 md:px-[40px] md:pt-[41px] md:pb-[43px] grid grid-cols-1 gap-y-8 md:grid-cols-[minmax(0,420fr)_minmax(0,521fr)_minmax(0,339fr)] md:gap-y-0"
             style={{ backgroundColor: service.color }}
           >
             {/* ── Colonna 1: i due badge ── */}
